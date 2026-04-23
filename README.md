@@ -2,7 +2,7 @@
 
 > **Educación + Rama**: Una herramienta digital para el seguimiento del crecimiento y la progresión personal en el Movimiento Scout.
 
-![Logo de Educarama](Logo1)
+![Logo de Educarama](Logo1.jpg)
 
 ## 📖 Sobre el Proyecto
 Educarama nace como un proyecto universitario para la carrera de **Desarrollo de Software**. [cite_start]Su objetivo es solucionar la fragmentación de la información en los grupos scouts, donde actualmente se depende de métodos manuales o planillas de Excel genéricas que dificultan el seguimiento pedagógico[cite: 10, 11, 12].
