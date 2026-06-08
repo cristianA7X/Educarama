@@ -2,7 +2,7 @@
 
 > **Educación + Rama**: Una herramienta digital para el seguimiento del crecimiento y la progresión personal en el Movimiento Scout.
 
-![Logo de Educarama](Logo1.jpg)
+![Logo de Educarama](assets/images/Logo1.png)
 
 ## 📖 Sobre el Proyecto
 Educarama nace como un proyecto universitario para la carrera de **Desarrollo de Software**. Su objetivo es solucionar la fragmentación de la información en los grupos scouts, donde actualmente se depende de métodos manuales o planillas de Excel genéricas que dificultan el seguimiento pedagógico.
@@ -26,7 +26,13 @@ En esta primera etapa, el sistema se centra en los requerimientos operativos cla
 * **Base de Datos:** MySQL.
 * **Frontend:** HTML5, CSS3, JavaScript.
 * **Framework CSS:** Bootstrap 5.
-* **Entorno de Desarrollo:** XAMPP (Localhost).
+* **Entorno de Desarrollo:** XAMPP (Localhost durante el desarrollo).
+
+# 🛠️ Equipo de Trabajo
+* **Elias Zarate**
+* **Camila Cardozo**
+* **Cristian Lopez**
+* **Valentina Loza**
 
 ### Estructura de Directorios
 ```text
@@ -36,3 +42,5 @@ En esta primera etapa, el sistema se centra en los requerimientos operativos cla
 /pages      # Vistas principales de la aplicación
 /public     # Recursos estáticos (imágenes, CSS, JS)
 database.sql # Script para la creación de la base de datos
+---
+
