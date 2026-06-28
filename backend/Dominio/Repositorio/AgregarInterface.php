@@ -2,7 +2,7 @@
 
 interface AgregarInterface
 {
-    public function agregar($entidad): void;
+    public function agregar($entidad): int;
 }
 
 
