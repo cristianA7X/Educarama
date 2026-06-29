@@ -17,7 +17,7 @@
 
 
 <?php
-$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
+$rama_page = ""; // puede ser "manada", "unidad", "caminante", "rover"
 ?>
 
 <body class="rama-<?php echo $rama_page; ?>">
@@ -44,10 +44,11 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
                 <div class="col-md-12 mb-3 mb-md-0">
                     <div class="tarjeta-blanca-borde p-3 h-100">
                         <hr class="border-white opacity-25">
-                        <form>
+
+                        <form id="loginForm">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" placeholder="nombre@ejemplo.com">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
@@ -55,34 +56,14 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
                             </div>
                             <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
                         </form>
+
                     </div>
                 </div>
         
             </div>
 
-            <!-- SECCIÓN DE PROGRESIÓN 
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <h2 class="h4 texto-violeta fw-bold">Progresión Personal</h2>
-                </div>
-
             
-
-
-            </div>
-
-            <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-pencil-square me-2"></i>Registrar Actividad</button>
-                </div>
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-clock-history me-2"></i>Ver Historial</button>
-                </div>
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-person-gear me-2"></i>Editar Perfil</button>
-                </div>
-            </div>
-             -->
+            
             
         </div>
     </div>
@@ -91,5 +72,41 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const contrasenia = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost/Educarama/backend/Infraestructura/Controladores/AuthController.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, contrasenia })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);
+                    // Redirigir a otra página si es necesario
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ocurrió un error al intentar iniciar sesión.');
+            }
+        });
+
+        // Redirigir al home después de 1.5 segundos
+            setTimeout(() => {
+            
+                window.location.href = 'home.php'; 
+            }, 1500);
+
 </body>
 </html>

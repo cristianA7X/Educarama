@@ -14,12 +14,15 @@ require_once __DIR__ . '/../../Aplicacion/Servicios/LoginService.php';
 // Leemos el JSON que manda el frontend
 $data = json_decode(file_get_contents("php://input"));
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data->email) && isset($data->contrasenia)) {
-    try {
-        $repo = new UsuarioRepository();
-        $servicio = new LoginService($repo);
-        
-        $usuario = $servicio->ejecutar($data->email, $data->contrasenia);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? null;
+    $contrasenia = $_POST['contrasenia'] ?? null;
+ 
+    if ($email && $contrasenia) {
+        try {
+            $repo = new UsuarioRepository();
+            $servicio = new LoginService($repo);
+            $servicio->ejecutar($email, $contrasenia);
         
         // Respuesta exitosa para el frontend
         http_response_code(200);
@@ -37,9 +40,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data->email) && isset($data-
             "message" => $e->getMessage()
         ]);
     }
-} else {
+    }
+     else {
     // Faltan datos
     http_response_code(400);
     echo json_encode(["status" => "error", "message" => "Faltan datos de login."]);
+    }
+}
+else {
+    // Método no permitido
+    http_response_code(405);
+    echo json_encode(["status" => "error", "message" => "Método no permitido."]);
 }
 ?>

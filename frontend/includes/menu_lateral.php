@@ -9,7 +9,7 @@
 <div class="sidebar">
     <nav class="nav flex-column">
         
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="home.php">
             <span class="icon">
                 <i class="bi bi-grid"></i>
             </span>
@@ -26,7 +26,7 @@
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver protagonistas</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="alta_protagonista.php">
                 <span class="icon"><i class="bi bi-person-plus"></i></span>
                 <span class="description">Agregar protagonista</span>
             </a>

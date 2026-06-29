@@ -16,7 +16,11 @@
 </head>
 
 
-<body>
+<?php
+$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
+?>
+
+<body class="rama-<?php echo $rama_page; ?>">
     <?php 
     // Componentes fijos de la interfaz
     include '../includes/barra_superior.php'; 
@@ -24,8 +28,9 @@
 
     <!-- CONTENEDOR MAESTRO -->
     <div class="main-content-wrapper without-sidebar">
-
-        <div class="container contenedor-principal my-4 p-4">
+        
+        <div class="container contenedor-principal without-sidebar my-4 p-4">
+            
             
             <!-- ENCABEZADO DEL PERFIL -->
             <div class="row mb-3 align-items-center barra-superior-inst mx-0">
