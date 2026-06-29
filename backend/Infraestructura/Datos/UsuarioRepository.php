@@ -38,9 +38,10 @@ class UsuarioRepository implements MostrarTodoInterface, MostrarPorIdInterface, 
         return new Usuario((int)$row['id'], $row['nombre'], $row['email'], $row['contrasenia']);
     }
 
-    public function agregar($usuario): void {
+    public function agregar($usuario): int {
         $stmt = $this->db->prepare("INSERT INTO usuario (nombre, email, contrasenia) VALUES (?, ?, ?)");
         $stmt->execute([$usuario->nombre, $usuario->email, $usuario->contrasenia]);
+        return (int)$this->db->lastInsertId();
     }
 
     public function actualizar($usuario): void {

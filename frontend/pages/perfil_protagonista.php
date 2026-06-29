@@ -15,8 +15,11 @@
     <link rel="stylesheet" href="../assets/css/styles.css?v=1.5">
 </head>
 
+<?php
+$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
+?>
 
-<body>
+<body class="rama-<?php echo $rama_page; ?>">
     <?php 
     // Componentes fijos de la interfaz
     include '../includes/barra_superior.php'; 
@@ -35,7 +38,7 @@
                 </div>
                 <div class="col-4 d-flex justify-content-end">
                     <div class="circulo-logo">
-                        <img src="../assets/images/RamaLogoLyL.png" alt="Logo rama">
+                        <img class="img-fluid, rounded-circle" src="../assets/images/RamaLogoLyL.png" alt="Logo rama">
                     </div>
                 </div>
             </div>
@@ -61,7 +64,7 @@
 
                 <div class="col-md-6">
                     <div class="  h-100 d-flex flex-column align-items-center justify-content-center">
-                        <div class="pieza-insignia  h50 d-flex flex-wrap ">
+                        <div class="pieza-insignia  h50 d-flex flex-wrap "> 
                             <div class="d-grid h50" style="grid-template-columns: repeat(2, 1fr);">
                             <img class="img-fluid" src="../assets/images/insignias/Progresion 1 Rama Lobatos y Lobeznas_Lobo Pata Tierna.png" alt="Insignia 1">
                             <img class="img-fluid" src="../assets/images/insignias/Progresion 2 Rama Lobatos y Lobeznas_Lobo Saltador.png" alt="Insignia 2">

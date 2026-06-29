@@ -26,7 +26,7 @@
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver protagonistas</span>
             </a>
-            <a class="nav-link" href="agregar_protagonista.php">
+            <a class="nav-link" href="alta_protagonista.php">
                 <span class="icon"><i class="bi bi-person-plus"></i></span>
                 <span class="description">Agregar protagonista</span>
             </a>
