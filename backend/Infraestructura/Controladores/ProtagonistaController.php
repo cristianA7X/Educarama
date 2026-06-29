@@ -2,18 +2,19 @@
 // backend/Infraestructura/Controladores/ProtagonistaController.php
 
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Content-Type: text/html; charset=UTF-8"); 
 
 require_once __DIR__ . '/../Datos/ProtagonistaRepository.php';
 require_once __DIR__ . '/../Datos/PersonaRepository.php';
 require_once __DIR__ . '/../../Aplicacion/Servicios/ProtagonistaService.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true); // true para que sea array asociativo
 
-// Instanciamos repositorios y el servicio
+// Captura de métodos PUT y DELETE desde formularios estándar
+if ($metodo === 'POST' && isset($_POST['_method'])) {
+    $metodo = strtoupper($_POST['_method']);
+}
+
 $protaRepo = new ProtagonistaRepository();
 $personaRepo = new PersonaRepository();
 $servicio = new ProtagonistaService($protaRepo, $personaRepo);
@@ -26,33 +27,44 @@ try {
             } else {
                 $resultado = $servicio->listarTodos();
             }
-            http_response_code(200);
-            echo json_encode(["status" => "success", "data" => $resultado]);
+            echo "<h1>Búsqueda procesada con éxito</h1>";
+            // Aquí puedes volcar o renderizar el $resultado
             break;
 
         case 'POST':
-            // Verificamos si es una acción especial (asignar rama) o una creación normal
-            if (isset($_GET['accion']) && $_GET['accion'] === 'asignar_rama') {
-                if (isset($data['id_protagonista']) && isset($data['id_rama'])) {
-                    $servicio->asignarRama((int)$data['id_protagonista'], (int)$data['id_rama']);
-                    http_response_code(200);
-                    echo json_encode(["status" => "success", "message" => "Protagonista asignado a la nueva rama con éxito."]);
+            if (isset($_POST['accion']) && $_POST['accion'] === 'asignar_rama') {
+                if (isset($_POST['id_protagonista']) && isset($_POST['id_rama'])) {
+                    $servicio->asignarRama((int)$_POST['id_protagonista'], (int)$_POST['id_rama']);
+                    header("Location: ../../../index.html?status=success&msg=RamaAsignada");
+                    exit();
                 } else {
                     throw new Exception("Faltan id_protagonista o id_rama.");
                 }
             } else {
-                // Creación normal
-                $servicio->crear($data);
-                http_response_code(201);
-                echo json_encode(["status" => "success", "message" => "Protagonista creado con éxito."]);
+                $servicio->crear($_POST);
+                header("Location: ../../../index.html?status=success&msg=ProtagonistaCreado");
+                exit();
+            }
+            break;
+
+        case 'PUT':
+            // Se asume que $servicio->actualizar() procesa los datos modificados
+            if (isset($_POST['id'])) {
+                // Aquí ejecutas el método de tu servicio para actualizar, por ejemplo:
+                // $servicio->actualizar($_POST);
+                header("Location: ../../../index.html?status=success&msg=ProtagonistaActualizado");
+                exit();
+            } else {
+                throw new Exception("Falta el ID para actualizar.");
             }
             break;
 
         case 'DELETE':
-            if (isset($_GET['id'])) {
-                $servicio->eliminar((int)$_GET['id']);
-                http_response_code(200);
-                echo json_encode(["status" => "success", "message" => "Protagonista eliminado."]);
+            $id = $_POST['id'] ?? $_GET['id'] ?? null;
+            if ($id !== null) {
+                $servicio->eliminar((int)$id);
+                header("Location: ../../../index.html?status=success&msg=ProtagonistaEliminado");
+                exit();
             } else {
                 throw new Exception("Falta el ID para eliminar.");
             }
@@ -61,9 +73,8 @@ try {
         default:
             throw new Exception("Método no soportado.");
     }
-
 } catch (Exception $e) {
     http_response_code(400);
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    echo "<h1>Error</h1><p>" . htmlspecialchars($e->getMessage()) . "</p>";
 }
 ?>

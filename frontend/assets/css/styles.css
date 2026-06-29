@@ -331,3 +331,175 @@ body {
         border-radius: 18px;
     }
 }
+
+/* ===== HOME DASHBOARD ===== */
+
+.home-container {
+    max-width: 1060px;
+    margin: 0 auto;
+}
+
+.home-welcome {
+    background: linear-gradient(90deg, #ffd21f, #fff4b8);
+    border-radius: 22px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 22px rgba(88, 0, 168, 0.12);
+}
+
+.home-welcome h2 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    color: #22003f;
+}
+
+.home-welcome p {
+    margin: 0;
+    font-weight: 600;
+    color: #2b1746;
+}
+
+.home-section-title {
+    color: #4b00a8;
+    font-size: 24px;
+    margin: 24px 0 14px;
+}
+
+.home-alerts,
+.home-card,
+.home-stat-card {
+    background: #ffffff;
+    border: 1px solid #dfc9ff;
+    border-radius: 18px;
+    box-shadow: 0 8px 18px rgba(88, 0, 168, 0.10);
+}
+
+.home-alerts {
+    padding: 24px;
+}
+
+.home-alerts ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.home-alerts li {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.home-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.home-stat-card {
+    padding: 22px;
+    text-align: center;
+}
+
+.home-stat-card .icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.home-stat-card h3 {
+    margin: 0;
+    font-size: 30px;
+    color: #4b00a8;
+}
+
+.home-stat-card p {
+    margin: 6px 0 0;
+    font-weight: bold;
+    color: #2b1746;
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 22px;
+}
+
+.home-card {
+    padding: 24px;
+}
+
+.home-card h3 {
+    margin-top: 0;
+    color: #4b00a8;
+    font-size: 22px;
+}
+
+.home-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.home-table th,
+.home-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eadcff;
+}
+
+.home-table th {
+    color: #4b00a8;
+}
+
+.birthday-list,
+.movements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.birthday-list li,
+.movements-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #eadcff;
+    font-weight: 600;
+}
+
+.home-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.home-action-btn {
+    background: #5800a8;
+    color: white;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.home-action-btn:hover {
+    background: #3f007a;
+    color: white;
+}
+
+@media (max-width: 900px) {
+    .home-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .home-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .home-welcome {
+        padding: 24px;
+    }
+}
