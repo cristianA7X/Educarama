@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EDUCARAMA - ESTILO GENERAL MEJORADO
+   EDUCARAMA - ESTILO GENERAL  
    ========================================================================== */
 :root {
     /* Paleta institucional */
@@ -8,7 +8,6 @@
     --violeta-oscuro: #320071;
     --orquidea-bordes: #6110ad;
     --lila-cards: #B85BEE;
-    --amarillo-scout: #FDD617;
     --beige-fondo: #E0DFB6;
 
     /* Neutros */
@@ -19,11 +18,70 @@
     --sombra-suave: 0 10px 30px rgba(50, 0, 113, 0.12);
     --sombra-card: 0 8px 20px rgba(50, 0, 113, 0.10);
 
+    /* Colores Primarios (Los que ya tenías) */
+    --scout-amarillo: #FDD617;
+    --scout-verde: #00A651;
+    --scout-celeste: #00AAF2;
+    --scout-rojo: #E30613;
+
+    /* Colores Secundarios (Más claros / pasteles para fondos o detalles) */
+    --scout-amarillo-claro: #FEF4B8; /* Un amarillo suave */
+    --scout-verde-claro: #B3E8CB;    /* Un verde agua/pastel */
+    --scout-celeste-claro: #B3E6FA;  /* Un celeste muy clarito */
+    --scout-rojo-claro: #F9B2B6;     /* Un rojo claro/salmón suave */
+
+    /* Variables de Interfaz Dinámicas (Por defecto cargamos los de tu institución) */
+    --rama-primario: var(--violeta-primario);
+    --rama-secundario: var(--beige-fondo);
+
+    
+
     /* Medidas */
     --sidebar-width: 220px;
     --sidebar-mobile-width: 68px;
     --navbar-height: 72px;
     --footer-height: 50px;
+}
+/* MANADA (Amarillo) */
+body.rama-manada {
+    --rama-primario: var(--scout-amarillo);
+    --rama-secundario: var(--scout-amarillo-claro);
+}
+
+/* UNIDAD (Verde) */
+body.rama-unidad {
+    --rama-primario: var(--scout-verde);
+    --rama-secundario: var(--scout-verde-claro);
+}
+
+/* CAMINANTES (Celeste) */
+body.rama-caminantes {
+    --rama-primario: var(--scout-celeste);
+    --rama-secundario: var(--scout-celeste-claro);
+}
+
+/* ROVER (Rojo) */
+body.rama-rover {
+    --rama-primario: var(--scout-rojo);
+    --rama-secundario: var(--scout-rojo-claro);
+}
+/* ==========================================================================
+   AJUSTES CONDICIONALES PARA PAGINAS SIN SIDEBAR/FOOTER
+   ========================================================================== */
+
+/* Si el body tiene la clase no-sidebar, eliminamos el margen izquierdo del contenido */
+body.no-sidebar .main-content-wrapper {
+    margin-left: 0;
+}
+
+/* Si el body tiene la clase no-footer, ajustamos el padding inferior */
+body.no-footer .main-content-wrapper {
+    padding-bottom: 40px; /* O el valor que desees sin sumar el footer */
+}
+
+/* Opcional: Si quieres que el main ocupe todo el ancho si no hay sidebar */
+body.no-sidebar .main-content-wrapper {
+    width: 100%;
 }
 
 * {
@@ -161,7 +219,7 @@ body {
 
 .sidebar .nav-link.active,
 .sidebar .nav-link:active {
-    background-color: var(--amarillo-scout);
+    background-color: var(--scout-amarillo);
     color: var(--violeta-oscuro);
 }
 
@@ -183,10 +241,16 @@ body {
    CONTENIDO PRINCIPAL
    ========================================================================== */
 .main-content-wrapper {
-    margin-left: var(--sidebar-width);
     padding: calc(var(--navbar-height) + 24px) 24px calc(var(--footer-height) + 40px);
     min-height: 100vh;
     transition: margin-left 0.3s ease;
+    margin-left: var(--sidebar-width); /* Margen por defecto */
+}
+.main-content-wrapper.with-sidebar {
+    margin-left: var(--sidebar-width);
+}
+.main-content-wrapper.without-sidebar {
+    margin-left: 0;
 }
 
 .contenedor-principal {
@@ -201,7 +265,7 @@ body {
    PERFIL / COMPONENTES
    ========================================================================== */
 .barra-superior-inst {
-    background: linear-gradient(180deg, var(--amarillo-scout),  var(--blanco));
+    background: linear-gradient(180deg, var(--rama-primario),  var(--blanco));
     padding: 18px;
     border-radius: 20px;
     box-shadow: var(--borde-suave);
@@ -233,7 +297,7 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 6px 14px rgba(50, 0, 113, 0.16);
-    border: 2px solid rgba(253, 214, 23, 0.85);
+    border: 2px solid var(--rama-primario);
     overflow: hidden;
 }
 
@@ -249,8 +313,8 @@ body {
 
 .insignia-pequena img,
 .circulo-logo img {
-    width: 82%;
-    height: 82%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 
@@ -264,12 +328,13 @@ body {
 
 .progreso-actual {
     height: 100%;
-    background: linear-gradient(90deg, var(--amarillo-scout), #ffb703);
+    background: linear-gradient(90deg, var(--rama-primario), var(--rama-secundario));
     border-radius: 999px;
 }
 
 .pieza-insignia {
     box-shadow: 0px 10px 25px 10px rgba(50, 0, 113, 0.14);
+    max-width: 200px;
 }
 
 
