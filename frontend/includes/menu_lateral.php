@@ -37,11 +37,11 @@
             <span class="description">Ramas <i class="bi bi-caret-down-fill"></i></span>
         </a>
         <div class="sub-menu collapse" id="submenu-ramas">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="ramas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver ramas</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="agregar_rama.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar rama</span>
             </a>
@@ -52,11 +52,11 @@
             <span class="description">Patrullas <i class="bi bi-caret-down-fill"></i></span>
         </a>
         <div class="sub-menu collapse" id="submenu-patrullas">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="patrullas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver patrullas</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="agregar_patrulla.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar patrulla</span>
             </a>

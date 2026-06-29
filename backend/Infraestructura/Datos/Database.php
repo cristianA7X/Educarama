@@ -38,4 +38,6 @@ class Database {
         return self::$conexion;
     }
 }
+
+
 ?>

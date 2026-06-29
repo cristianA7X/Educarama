@@ -2,61 +2,64 @@
 // backend/Infraestructura/Controladores/RamaController.php
 
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+// Cambiamos el tipo de contenido porque ahora respondemos HTML o redireccionamos
+header("Content-Type: text/html; charset=UTF-8"); 
 
 require_once __DIR__ . '/../Datos/RamaRepository.php';
 require_once __DIR__ . '/../../Aplicacion/Servicios/RamaService.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"));
 
-// Instanciamos nuestras capas
+// Truco para soportar PUT y DELETE desde formularios HTML estándar
+if ($metodo === 'POST' && isset($_POST['_method'])) {
+    $metodo = strtoupper($_POST['_method']);
+}
+
 $repo = new RamaRepository();
 $servicio = new RamaService($repo);
 
 try {
     switch ($metodo) {
         case 'GET':
-            // Si pasan un ID (?id=1), traemos una. Si no, traemos todas.
             if (isset($_GET['id'])) {
                 $resultado = $servicio->obtenerPorId((int)$_GET['id']);
             } else {
                 $resultado = $servicio->listarTodas();
             }
-            http_response_code(200);
-            echo json_encode(["status" => "success", "data" => $resultado]);
+            // Podés redirigir a una página o imprimir el resultado
+            echo "<h1>Listado procesado con éxito</h1>";
             break;
 
         case 'POST':
-            // Crear nueva rama
-            if (isset($data->nombre) && isset($data->id_grupo) && isset($data->id_rama)) {
-                $servicio->crear($data->nombre, (int)$data->id_grupo, (int)$data->id_rama);
-                http_response_code(201);
-                echo json_encode(["status" => "success", "message" => "Rama creada con éxito."]);
+            
+            if (isset($_POST['nombre']) && isset($_POST['id_grupo']) && isset($_POST['id_rama'])) {
+                $servicio->crear($_POST['nombre'], (int)$_POST['id_grupo'], (int)$_POST['id_rama']);
+                
+                header("Location: ../../../index.html?status=success&msg=Creado");
+                exit();
             } else {
                 throw new Exception("Faltan datos para crear la rama.");
             }
             break;
 
         case 'PUT':
-            // Actualizar rama existente
-            if (isset($data->id) && isset($data->nombre) && isset($data->id_grupo) && isset($data->id_rama)) {
-                $servicio->actualizar((int)$data->id, $data->nombre, (int)$data->id_grupo, (int)$data->id_rama);
-                http_response_code(200);
-                echo json_encode(["status" => "success", "message" => "Rama actualizada."]);
+            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['id_grupo']) && isset($_POST['id_rama'])) {
+                $servicio->actualizar((int)$_POST['id'], $_POST['nombre'], (int)$_POST['id_grupo'], (int)$_POST['id_rama']);
+                
+                header("Location: ../../../index.html?status=success&msg=Actualizado");
+                exit();
             } else {
                 throw new Exception("Faltan datos para actualizar la rama.");
             }
             break;
 
         case 'DELETE':
-            // Eliminar rama
-            if (isset($_GET['id'])) {
-                $servicio->eliminar((int)$_GET['id']);
-                http_response_code(200);
-                echo json_encode(["status" => "success", "message" => "Rama eliminada."]);
+            $id = $_POST['id'] ?? $_GET['id'] ?? null;
+            
+            if ($id !== null) {
+                $servicio->eliminar((int)$id);
+                header("Location: ../../../index.html?status=success&msg=Eliminado");
+                exit();
             } else {
                 throw new Exception("Falta el ID para eliminar.");
             }
@@ -67,7 +70,8 @@ try {
     }
 
 } catch (Exception $e) {
-    http_response_code(400); // 400 Bad Request
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    http_response_code(400);
+    echo "<h1>Error</h1>";
+    echo "<p>" . htmlspecialchars($e->getMessage()) . "</p>";
 }
 ?>
