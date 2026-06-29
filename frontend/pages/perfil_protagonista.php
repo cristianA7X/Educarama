@@ -15,8 +15,11 @@
     <link rel="stylesheet" href="../assets/css/styles.css?v=1.5">
 </head>
 
+<?php
+$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
+?>
 
-<body>
+<body class="rama-<?php echo $rama_page; ?>">
     <?php 
     // Componentes fijos de la interfaz
     include '../includes/barra_superior.php'; 

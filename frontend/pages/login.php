@@ -16,16 +16,20 @@
 </head>
 
 
-<body>
+<?php
+$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
+?>
+
+<body class="rama-<?php echo $rama_page; ?>">
     <?php 
     // Componentes fijos de la interfaz
     include '../includes/barra_superior.php'; 
     ?>
 
     <!-- CONTENEDOR MAESTRO -->
-    <div class="main-content-wrapper">
+    <div class="main-content-wrapper without-sidebar">
         
-        <div class="container contenedor-principal my-4 p-4">
+        <div class="container contenedor-principal without-sidebar my-4 p-4">
             
             <!-- ENCABEZADO DEL PERFIL -->
             <div class="row mb-3 align-items-center barra-superior-inst mx-0">
@@ -56,7 +60,7 @@
         
             </div>
 
-            <!-- SECCIÓN DE PROGRESIÓN -->
+            <!-- SECCIÓN DE PROGRESIÓN 
             <div class="row g-3 mb-4">
                 <div class="col-12">
                     <h2 class="h4 texto-violeta fw-bold">Progresión Personal</h2>
@@ -67,7 +71,6 @@
 
             </div>
 
-            <!-- BOTONES DE ACCIÓN -->
             <div class="row g-3">
                 <div class="col-12 col-md-4">
                     <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-pencil-square me-2"></i>Registrar Actividad</button>
@@ -79,6 +82,7 @@
                     <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-person-gear me-2"></i>Editar Perfil</button>
                 </div>
             </div>
+             -->
             
         </div>
     </div>

@@ -18,7 +18,7 @@
     --sombra-suave: 0 10px 30px rgba(50, 0, 113, 0.12);
     --sombra-card: 0 8px 20px rgba(50, 0, 113, 0.10);
 
-    /* Colores Primarios (Los que ya tenías) */
+    /* Colores Primarios  */
     --scout-amarillo: #FDD617;
     --scout-verde: #00A651;
     --scout-celeste: #00AAF2;
@@ -30,7 +30,7 @@
     --scout-celeste-claro: #B3E6FA;  /* Un celeste muy clarito */
     --scout-rojo-claro: #F9B2B6;     /* Un rojo claro/salmón suave */
 
-    /* Variables de Interfaz Dinámicas (Por defecto cargamos los de tu institución) */
+    /* Variables de Interfaz Dinámicas*/
     --rama-primario: var(--violeta-primario);
     --rama-secundario: var(--beige-fondo);
 
@@ -132,7 +132,7 @@ body {
     border-bottom: 1px solid rgba(97, 16, 173, 0.12);
     z-index: 1100;
 }
-
+ 
 .header-inst img {
     max-height: 50px;
 }
@@ -143,7 +143,7 @@ body {
     left: 0;
     width: 100%;
     height: var(--footer-height);
-        background: linear-gradient(135deg, var(--orquidea-bordes), var(--violeta-primario));
+    background: linear-gradient(135deg, var(--orquidea-bordes), var(--violeta-primario));
 
     display: flex;
     align-items: center;
@@ -246,9 +246,7 @@ body {
     transition: margin-left 0.3s ease;
     margin-left: var(--sidebar-width); /* Margen por defecto */
 }
-.main-content-wrapper.with-sidebar {
-    margin-left: var(--sidebar-width);
-}
+
 .main-content-wrapper.without-sidebar {
     margin-left: 0;
 }

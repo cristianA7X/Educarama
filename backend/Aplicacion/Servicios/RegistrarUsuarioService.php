@@ -19,6 +19,16 @@ class RegistrarUsuarioService {
             throw new Exception("El email y la contraseña son obligatorios.");
         }
 
+        //validar mail existente
+        if ($this->usuarioRepository instanceof UsuarioRepository) 
+        {
+            $usuarioExistente = $this->usuarioRepository->buscarPorEmail($email);
+            if ($usuarioExistente) 
+            {
+                throw new Exception("El email ya está registrado.");
+            }
+        }
+
         // 2. Encriptar la contraseña (Regla de negocio/seguridad)
         $contraseniaHash = password_hash($contraseniaPlana, PASSWORD_BCRYPT);
 
