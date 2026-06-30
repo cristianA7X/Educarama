@@ -1,21 +1,10 @@
-
 <?php
 $tituloPagina = "Inicio";
 
-require_once '../../backend/Infraestructura/Datos/Database.php';
+require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
 
-$conexion = Database::getConexion();
-
-$stmtAvisos = $conexion->prepare("
-    SELECT titulo, descripcion, fecha_inicio, fecha_fin, prioridad
-    FROM avisos
-    WHERE activo = 1
-    ORDER BY fecha_inicio DESC
-    LIMIT 5
-");
-
-$stmtAvisos->execute();
-$avisos = $stmtAvisos->fetchAll();
+$avisoControlador = new AvisoControlador();
+$avisos = $avisoControlador->listarAvisosHome();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -59,7 +48,7 @@ $avisos = $stmtAvisos->fetchAll();
             <li>No hay avisos importantes cargados.</li>
         <?php endif; ?>
     </ul>
-    </section>
+</section>
             <section class="home-stats">
                 <div class="home-stat-card">
                     <div class="icon">👦</div>

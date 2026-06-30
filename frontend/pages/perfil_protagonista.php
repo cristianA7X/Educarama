@@ -1,3 +1,23 @@
+<?php
+$tituloPagina = "Perfil de Protagonista";
+
+require_once '../../backend/Infraestructura/Controladores/ProtagonistaController.php';
+
+$controlador = new ProtagonistaController();
+$protagonista = $controlador->obtenerPerfilDesdeUrl();
+
+if (!$protagonista) {
+    header("Location: protagonistas.php");
+    exit;
+}
+
+$fechaNacimiento = new DateTime($protagonista['fecha_nacimiento']);
+$hoy = new DateTime();
+$edad = $hoy->diff($fechaNacimiento)->y;
+
+$rama_page = "unidad";
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,12 +35,8 @@
     <link rel="stylesheet" href="../assets/css/styles.css?v=1.5">
 </head>
 
-<?php
-$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
-?>
 
-<body class="rama-<?php echo $rama_page; ?>">
-    <?php 
+<body class="rama-<?php echo $rama_page; ?>">    <?php 
     // Componentes fijos de la interfaz
     include '../includes/barra_superior.php'; 
     include '../includes/menu_lateral.php'; 
@@ -32,29 +48,69 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
         <div class="container contenedor-principal my-4 p-4">
             
             <!-- ENCABEZADO DEL PERFIL -->
-            <div class="row mb-3 align-items-center barra-superior-inst mx-0">
-                <div class="col-8">
-                    <h1 class="h3 fw-bold mb-0">Cristian Lopez, 8 años</h1>
-                </div>
-                <div class="col-4 d-flex justify-content-end">
-                    <div class="circulo-logo">
-                        <img class="img-fluid, rounded-circle" src="../assets/images/RamaLogoLyL.png" alt="Logo rama">
-                    </div>
-                </div>
-            </div>
+<div class="row mb-3 align-items-center barra-superior-inst mx-0">
+    <div class="col-8">
+        <h1 class="h3 fw-bold mb-0">
+            <?= htmlspecialchars($protagonista['nombre']) ?>
+            <?= htmlspecialchars($protagonista['apellido']) ?>,
+            <?= $edad ?> años
+        </h1>
 
-            <!-- INFORMACIÓN BÁSICA -->
-            <div class="row mb-4 align-items-stretch">
-                <div class="col-md-12 mb-3 mb-md-0">
-                    <div class="tarjeta-blanca-borde p-3 h-100">
-                        <p class="m-0 fw-bold"><i class="bi bi-calendar-event me-2"></i>Fecha de Nacimiento: 12/12/2012</p>
-                        <p class="m-0 fw-bold"><i class="bi bi-house-heart me-2"></i>Información familiar</p>
-                        <hr class="border-white opacity-25">
-                        <p class="m-0 small">Notas adicionales: El beneficiario presenta gran interés en actividades al aire libre.</p>
-                    </div>
-                </div>
-        
-            </div>
+        <p class="mb-0 fw-bold">
+            <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama asignada') ?>
+        </p>
+    </div>
+
+    <div class="col-4 d-flex justify-content-end">
+        <div class="circulo-logo">
+            <img 
+                class="img-fluid rounded-circle" 
+                src="../assets/images/RamaLogoLyL.png" 
+                alt="Logo rama"
+            >
+        </div>
+    </div>
+</div>
+
+<!-- INFORMACIÓN BÁSICA -->
+<div class="row mb-4 align-items-stretch">
+    <div class="col-md-12 mb-3 mb-md-0">
+        <div class="tarjeta-blanca-borde p-3 h-100">
+            <p class="m-0 fw-bold">
+                <i class="bi bi-calendar-event me-2"></i>
+                Fecha de Nacimiento:
+                <?= date("d/m/Y", strtotime($protagonista['fecha_nacimiento'])) ?>
+            </p>
+
+            <p class="m-0 fw-bold">
+                <i class="bi bi-diagram-3 me-2"></i>
+                Rama: <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama') ?>
+            </p>
+
+            <p class="m-0 fw-bold">
+                <i class="bi bi-shield-shaded me-2"></i>
+                Patrulla: <?= htmlspecialchars($protagonista['patrulla'] ?? 'Sin patrulla') ?>
+            </p>
+
+            <p class="m-0 fw-bold">
+                <i class="bi bi-calendar-check me-2"></i>
+                Año de ingreso:
+                <?= htmlspecialchars($protagonista['anio_ingreso'] ?? 'Sin dato') ?>
+            </p>
+
+            <p class="m-0 fw-bold">
+                <i class="bi bi-house-heart me-2"></i>
+                Información familiar
+            </p>
+
+            <hr class="border-white opacity-25">
+
+            <p class="m-0 small">
+                Notas adicionales: El beneficiario presenta gran interés en actividades al aire libre.
+            </p>
+        </div>
+    </div>
+</div>
 
             <!-- SECCIÓN DE PROGRESIÓN -->
             <div class="row g-3 mb-4">

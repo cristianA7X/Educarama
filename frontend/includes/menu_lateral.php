@@ -22,7 +22,7 @@
         </a>
         
         <div class="sub-menu collapse" id="submenu-protagonistas">
-            <a class="nav-link" href="perfil_protagonista.php">
+            <a class="nav-link" href="protagonistas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver protagonistas</span>
             </a>
@@ -41,7 +41,7 @@
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver ramas</span>
             </a>
-            <a class="nav-link" href="agregar_rama.php">
+            <a class="nav-link" href="alta_rama.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar rama</span>
             </a>
@@ -56,11 +56,17 @@
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver patrullas</span>
             </a>
-            <a class="nav-link" href="agregar_patrulla.php">
+            <a class="nav-link" href="alta_patrulla.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar patrulla</span>
             </a>
         </div>
 
+        <a href="../pages/gestionar_avisos.php" class="nav-link">
+    <span class="icon"><i class="bi bi-megaphone"></i></span>
+    <span class="description">Avisos</span>
+</a>
     </nav>
+
+    
 </div>

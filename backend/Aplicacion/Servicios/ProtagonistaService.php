@@ -1,67 +1,85 @@
 <?php
-// backend/Aplicacion/Servicios/ProtagonistaService.php
+class ProtagonistaService
+{
+    private PDO $conexion;
+    private PersonaRepository $personaRepository;
+    private ProtagonistaRepository $protagonistaRepository;
 
-require_once __DIR__ . '/../../Infraestructura/Datos/ProtagonistaRepository.php';
-require_once __DIR__ . '/../../Infraestructura/Datos/PersonaRepository.php';
-require_once __DIR__ . '/../../Dominio/Model/Protagonista.php';
-require_once __DIR__ . '/../../Dominio/Model/Persona.php';
-
-class ProtagonistaService {
-    private ProtagonistaRepository $protagonistaRepo;
-    private PersonaRepository $personaRepo;
-
-    public function __construct(ProtagonistaRepository $protagonistaRepo, PersonaRepository $personaRepo) {
-        $this->protagonistaRepo = $protagonistaRepo;
-        $this->personaRepo = $personaRepo;
+    public function __construct(
+        PDO $conexion,
+        PersonaRepository $personaRepository,
+        ProtagonistaRepository $protagonistaRepository
+    ) {
+        $this->conexion = $conexion;
+        $this->personaRepository = $personaRepository;
+        $this->protagonistaRepository = $protagonistaRepository;
     }
 
-    public function listarTodos(): array {
-        return $this->protagonistaRepo->mostrarTodo();
-    }
+    public function registrarDesdeFormulario(array $post): void
+    {
+        $apellido = trim($post['apellido'] ?? '');
+        $nombre = trim($post['nombre'] ?? '');
+        $fechaNacimiento = $post['fecha_nacimiento'] ?? '';
+        $dni = trim($post['dni'] ?? '');
+        $anioIngreso = !empty($post['anio_ingreso']) ? $post['anio_ingreso'] : null;
+        $idRama = $post['id_rama'] ?? null;
+        $idPatrulla = !empty($post['id_patrulla']) ? $post['id_patrulla'] : null;
+        $promesa = isset($post['promesa']) ? 1 : 0;
 
-    public function obtenerPorId(int $id): ?Protagonista {
-        $protagonista = $this->protagonistaRepo->mostrarPorId($id);
-        if (!$protagonista) {
-            throw new Exception("El protagonista no existe.");
+        if ($apellido === '') {
+            throw new Exception("El apellido es obligatorio.");
         }
-        return $protagonista;
-    }
 
-    // El front manda los datos de la persona y del scout juntos
-    public function crear(array $datos): void {
-        if (empty($datos['dni']) || empty($datos['nombre']) || empty($datos['id_rama'])) {
-            throw new Exception("Faltan datos obligatorios (DNI, Nombre o Rama).");
+        if ($nombre === '') {
+            throw new Exception("El nombre es obligatorio.");
         }
-        
-        // 1. Creamos la Persona primero
-        $nuevaPersona = new Persona(0, (int)$datos['dni'], $datos['nombre'], $datos['apellido'], $datos['fecha_nacimiento']);
-        $idPersona = $this->personaRepo->agregar($nuevaPersona);
 
-        // 2. Creamos el Protagonista usando el ID de la persona que acabamos de crear
-        $promesa = isset($datos['promesa']) ? (bool)$datos['promesa'] : false;
-        $idPatrulla = isset($datos['id_patrulla']) ? (int)$datos['id_patrulla'] : null;
-        
-        $nuevoProtagonista = new Protagonista(0, $promesa, $idPersona, (int)$datos['id_rama'], $idPatrulla, null);
-        $this->protagonistaRepo->agregar($nuevoProtagonista);
+        if ($fechaNacimiento === '') {
+            throw new Exception("La fecha de nacimiento es obligatoria.");
+        }
+
+        if ($dni === '') {
+            throw new Exception("El DNI es obligatorio.");
+        }
+
+        if (empty($idRama)) {
+            throw new Exception("Debe seleccionar una rama.");
+        }
+
+        try {
+            $this->conexion->beginTransaction();
+
+            $idPersona = $this->personaRepository->crear([
+                'apellido' => $apellido,
+                'nombre' => $nombre,
+                'fecha_nacimiento' => $fechaNacimiento,
+                'dni' => $dni
+            ]);
+
+            $this->protagonistaRepository->crear([
+                'promesa' => $promesa,
+                'anio_ingreso' => $anioIngreso,
+                'id_persona' => $idPersona,
+                'id_rama' => $idRama,
+                'id_patrulla' => $idPatrulla
+            ]);
+
+            $this->conexion->commit();
+
+        } catch (Exception $e) {
+            $this->conexion->rollBack();
+            throw $e;
+        }
     }
 
-    // Método específico que pediste: Asignar a una rama
-    public function asignarRama(int $idProtagonista, int $idRama): void {
-        $protagonista = $this->obtenerPorId($idProtagonista); // Verifica que exista
-        
-        // Modificamos solo el id_rama
-        $protagonista->id_rama = $idRama;
-        
-        // Actualizamos en la base de datos
-        $this->protagonistaRepo->actualizar($protagonista);
+    public function listarCards(): array
+    {
+        return $this->protagonistaRepository->listarCards();
     }
 
-    public function eliminar(int $id): void {
-        $protagonista = $this->obtenerPorId($id);
-        
-        // Nota: Al borrar el protagonista, deberías decidir si también borrás a la Persona
-        // Por ahora, solo borramos el rol de protagonista.
-        $this->protagonistaRepo->eliminar($id);
+    public function obtenerPerfil(int $id): ?array
+    {
+        return $this->protagonistaRepository->obtenerPerfilPorId($id);
     }
 }
 ?>

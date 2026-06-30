@@ -566,3 +566,124 @@ body {
         padding: 24px;
     }
 }
+
+/* ===== PROTAGONISTAS / CARDS ===== */
+
+.protagonista-card {
+    background: #ffffff;
+    border: 1px solid var(--borde-suave);
+    border-radius: 22px;
+    padding: 22px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    text-decoration: none;
+    color: var(--texto-principal);
+    box-shadow: var(--sombra-card);
+    transition: all 0.25s ease;
+    height: 100%;
+}
+
+.protagonista-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(50, 0, 113, 0.20);
+    border-color: var(--orquidea-bordes);
+}
+
+.protagonista-foto {
+    width: 92px;
+    height: 92px;
+    min-width: 92px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--amarillo-scout), #fff3a6);
+    border: 3px solid var(--violeta-primario);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.protagonista-foto i {
+    font-size: 42px;
+    color: var(--violeta-primario);
+}
+
+.protagonista-info h3 {
+    margin: 0 0 10px;
+    color: var(--violeta-primario);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.protagonista-info p {
+    margin-bottom: 6px;
+    color: var(--texto-suave);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.ver-perfil {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--violeta-primario);
+    font-weight: 700;
+}
+
+/* ===== RAMAS Y PATRULLAS ===== */
+
+.rama-card,
+.patrulla-card {
+    background: #ffffff;
+    border: 1px solid var(--borde-suave);
+    border-radius: 22px;
+    padding: 22px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    color: var(--texto-principal);
+    box-shadow: var(--sombra-card);
+    transition: all 0.25s ease;
+    height: 100%;
+}
+
+.rama-card:hover,
+.patrulla-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(50, 0, 113, 0.20);
+    border-color: var(--orquidea-bordes);
+}
+
+.rama-icono,
+.patrulla-icono {
+    width: 82px;
+    height: 82px;
+    min-width: 82px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--amarillo-scout), #fff3a6);
+    border: 3px solid var(--violeta-primario);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rama-icono i,
+.patrulla-icono i {
+    font-size: 38px;
+    color: var(--violeta-primario);
+}
+
+.rama-card h3,
+.patrulla-card h3 {
+    margin: 0 0 10px;
+    color: var(--violeta-primario);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.rama-card p,
+.patrulla-card p {
+    margin-bottom: 6px;
+    color: var(--texto-suave);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
