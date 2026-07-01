@@ -13,7 +13,7 @@ class AvisoRepositorio
     {
         $stmt = $this->conexion->prepare("
             SELECT *
-            FROM avisos
+            FROM aviso
             WHERE id = :id
         ");
 
@@ -25,7 +25,7 @@ class AvisoRepositorio
 
     public function listar(string $filtro = 'todos'): array
     {
-        $sql = "SELECT * FROM avisos";
+        $sql = "SELECT * FROM aviso";
 
         if ($filtro === 'activos') {
             $sql .= " WHERE activo = 1";
@@ -44,7 +44,7 @@ class AvisoRepositorio
     public function crear(array $datos): void
     {
         $stmt = $this->conexion->prepare("
-            INSERT INTO avisos 
+            INSERT INTO aviso 
             (titulo, descripcion, fecha_inicio, fecha_fin, prioridad, activo)
             VALUES 
             (:titulo, :descripcion, :fecha_inicio, :fecha_fin, :prioridad, 1)
@@ -62,7 +62,7 @@ class AvisoRepositorio
     public function actualizar(int $id, array $datos): void
     {
         $stmt = $this->conexion->prepare("
-            UPDATE avisos
+            UPDATE aviso
             SET titulo = :titulo,
                 descripcion = :descripcion,
                 fecha_inicio = :fecha_inicio,
@@ -84,7 +84,7 @@ class AvisoRepositorio
     public function desactivar(int $id): void
     {
         $stmt = $this->conexion->prepare("
-            UPDATE avisos 
+            UPDATE aviso 
             SET activo = 0 
             WHERE id = :id
         ");
@@ -95,7 +95,7 @@ class AvisoRepositorio
     public function reactivar(int $id): void
     {
         $stmt = $this->conexion->prepare("
-            UPDATE avisos 
+            UPDATE aviso
             SET activo = 1 
             WHERE id = :id
         ");
@@ -107,7 +107,7 @@ class AvisoRepositorio
     {
         $stmt = $this->conexion->prepare("
             SELECT *
-            FROM avisos
+            FROM aviso
             WHERE activo = 1
               AND fecha_inicio <= CURDATE()
               AND (fecha_fin IS NULL OR fecha_fin >= CURDATE())

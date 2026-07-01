@@ -274,6 +274,22 @@ CREATE TABLE `usuario` (
   `contrasenia` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `aviso`
+--
+
+CREATE TABLE `aviso` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(200) COLLATE utf8_spanish_ci NOT NULL,
+  `descripcion` text COLLATE utf8_spanish_ci NOT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date DEFAULT NULL,
+  `prioridad` varchar(50) COLLATE utf8_spanish_ci NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 --
 -- Índices para tablas volcadas
 --

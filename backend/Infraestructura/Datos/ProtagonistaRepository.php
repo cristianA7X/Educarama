@@ -29,11 +29,11 @@ class ProtagonistaRepository
 
     public function listarCards(): array
     {
+        // Eliminamos p.anio_ingreso porque no existe en la tabla protagonista
         $stmt = $this->conexion->prepare("
             SELECT 
                 p.id,
                 p.promesa,
-                p.anio_ingreso,
                 per.nombre,
                 per.apellido,
                 per.fecha_nacimiento,
@@ -46,7 +46,6 @@ class ProtagonistaRepository
             ORDER BY per.apellido, per.nombre
         ");
         
-
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

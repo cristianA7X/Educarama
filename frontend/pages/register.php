@@ -110,7 +110,7 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
                                       <div>${data.message} Redirigiendo...</div>
                                    </div>`;
             
-            // Redirigir al dashboard después de 1.5 segundos
+            // Redirigir al login después de 1.5 segundos
             setTimeout(() => {
             
                 window.location.href = 'login.php'; 
