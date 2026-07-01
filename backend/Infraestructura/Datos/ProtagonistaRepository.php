@@ -1,6 +1,5 @@
 <?php
 
-
 class ProtagonistaRepository
 {
     private PDO $conexion;
@@ -46,6 +45,7 @@ class ProtagonistaRepository
             LEFT JOIN patrulla pa ON p.id_patrulla = pa.id
             ORDER BY per.apellido, per.nombre
         ");
+        
 
         $stmt->execute();
 
@@ -81,6 +81,24 @@ class ProtagonistaRepository
 
         return $protagonista ?: null;
     }
-}
 
-?>
+    public function actualizar(int $idProtagonista, array $datos): void
+{
+    $stmt = $this->conexion->prepare("
+        UPDATE protagonista
+        SET promesa = :promesa,
+            anio_ingreso = :anio_ingreso,
+            id_rama = :id_rama,
+            id_patrulla = :id_patrulla
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        ':promesa' => $datos['promesa'],
+        ':anio_ingreso' => $datos['anio_ingreso'],
+        ':id_rama' => $datos['id_rama'],
+        ':id_patrulla' => $datos['id_patrulla'],
+        ':id' => $idProtagonista
+    ]);
+}
+}

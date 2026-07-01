@@ -31,19 +31,16 @@ class ProtagonistaController
         );
     }
 
+   
+
     public function registrarSiEsPost(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->servicio->registrarDesdeFormulario($_POST);
-
-            header("Location: protagonistas.php");
-            exit;
-        }
+        $this->guardarSiEsPost();
     }
 
-    public function listarCards(): array
+    public function obtenerPerfilPorId(int $id): ?array
     {
-        return $this->servicio->listarCards();
+        return $this->servicio->obtenerPerfil($id);
     }
 
     public function obtenerPerfilDesdeUrl(): ?array
@@ -55,6 +52,11 @@ class ProtagonistaController
         return $this->servicio->obtenerPerfil((int) $_GET['id']);
     }
 
+    public function listarCards(): array
+    {
+        return $this->servicio->listarCards();
+    }
+
     public function listarRamas(): array
     {
         return $this->ramaRepository->listarTodo();
@@ -64,5 +66,25 @@ class ProtagonistaController
     {
         return $this->patrullaRepository->listarTodo();
     }
+
+    public function guardarSiEsPost(): void
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return;
+    }
+
+    if (!empty($_POST['id'])) {
+        $id = (int) $_POST['id'];
+
+        $this->servicio->actualizarDesdeFormulario($id, $_POST);
+
+        header("Location: perfil_protagonista.php?id=" . $id . "&actualizado=1");
+        exit;
+    }
+
+    $this->servicio->registrarDesdeFormulario($_POST);
+
+    header("Location: protagonistas.php");
+    exit;
 }
-?>
+}

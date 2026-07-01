@@ -27,14 +27,24 @@ class PersonaRepository
 
         return (int) $this->conexion->lastInsertId();
     }
+
+    public function actualizar(int $idPersona, array $datos): void
+    {
+        $stmt = $this->conexion->prepare("
+            UPDATE persona
+            SET apellido = :apellido,
+                nombre = :nombre,
+                fecha_nacimiento = :fecha_nacimiento,
+                dni = :dni
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':apellido' => $datos['apellido'],
+            ':nombre' => $datos['nombre'],
+            ':fecha_nacimiento' => $datos['fecha_nacimiento'],
+            ':dni' => $datos['dni'],
+            ':id' => $idPersona
+        ]);
+    }
 }
-require_once __DIR__ . '/../../Dominio/Repositorio/MostrarTodoInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/MostrarPorIdInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/AgregarInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/ActualizarInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/EliminarInterface.php';
-require_once __DIR__ . '/../../Dominio/Model/Persona.php';
-require_once 'Database.php';
-
-
-?>

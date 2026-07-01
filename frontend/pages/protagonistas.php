@@ -1,29 +1,13 @@
 <?php
 $tituloPagina = "Protagonistas";
 
-require_once '../../backend/Infraestructura/Datos/Database.php';
+require_once '../../backend/Infraestructura/Controladores/ProtagonistaController.php';
 
-$conexion = Database::getConexion();
+$controlador = new ProtagonistaController();
+$protagonistas = $controlador->listarCards();
 
-$stmt = $conexion->prepare("
-    SELECT 
-        p.id,
-        p.promesa,
-        p.id_persona,
-        p.id_rama,
-        p.id_patrulla,
-        per.nombre,
-        per.apellido,
-        per.fecha_nacimiento,
-        r.nombre AS rama
-    FROM protagonista p
-    INNER JOIN persona per ON p.id_persona = per.id
-    LEFT JOIN rama r ON p.id_rama = r.id
-    ORDER BY per.apellido, per.nombre
-");
 
-$stmt->execute();
-$protagonistas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -86,7 +70,11 @@ include '../includes/menu_lateral.php';
                                 </p>
                                 <p>
                                     <i class="bi bi-calendar-check me-1"></i>
-                                    Ingreso: <?= htmlspecialchars($protagonista['anio_ingreso'] ?? 'Sin dato') ?>
+                                    Ingreso: 
+                                    <?= !empty($protagonista['anio_ingreso']) 
+                                        ? htmlspecialchars($protagonista['anio_ingreso']) 
+                                        : 'Sin dato' 
+                                    ?>
                                 </p>
 
                                 <span class="ver-perfil">Ver perfil</span>

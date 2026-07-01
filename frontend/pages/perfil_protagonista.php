@@ -46,6 +46,19 @@ $rama_page = "unidad";
     <div class="main-content-wrapper">
         
         <div class="container contenedor-principal my-4 p-4">
+            <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        Los datos del protagonista se modificaron correctamente.
+
+        <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-dismiss="alert" 
+            aria-label="Cerrar">
+        </button>
+    </div>
+<?php endif; ?>
             
             <!-- ENCABEZADO DEL PERFIL -->
 <div class="row mb-3 align-items-center barra-superior-inst mx-0">
@@ -70,6 +83,8 @@ $rama_page = "unidad";
             >
         </div>
     </div>
+
+    
 </div>
 
 <!-- INFORMACIÓN BÁSICA -->
@@ -163,7 +178,11 @@ $rama_page = "unidad";
                     <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-clock-history me-2"></i>Ver Historial</button>
                 </div>
                 <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-person-gear me-2"></i>Editar Perfil</button>
+                    <a 
+                        href="alta_protagonista.php?id=<?= $protagonista['id'] ?>" 
+                        class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
+                        <i class="bi bi-person-gear me-2"></i>Editar Perfil
+                        </a>
                 </div>
             </div>
             
@@ -174,5 +193,18 @@ $rama_page = "unidad";
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    setTimeout(() => {
+        const alerta = document.querySelector('.alert-success');
+
+        if (alerta) {
+            const alertaBootstrap = bootstrap.Alert.getOrCreateInstance(alerta);
+            alertaBootstrap.close();
+        }
+    }, 3000);
+</script>
+
+</body>
 </body>
 </html>

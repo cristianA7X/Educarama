@@ -25,7 +25,7 @@ class Database {
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       
                     PDO::ATTR_EMULATE_PREPARES   => false,                  
                 ]);
-            } catch (PDOException $e) {
+            } catch (Throwable $e) {
                 // Si falla la conexión, frenamos la ejecución y mostramos el error
                 http_response_code(500);
                 die(json_encode([
@@ -39,5 +39,3 @@ class Database {
     }
 }
 
-
-?>
