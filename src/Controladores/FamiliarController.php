@@ -4,9 +4,9 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: text/html; charset=UTF-8"); 
 
-require_once __DIR__ . '/../Datos/FamiliarRepository.php';
-require_once __DIR__ . '/../Datos/PersonaRepository.php';
-require_once __DIR__ . '/../../Aplicacion/Servicios/FamiliarService.php';
+require_once __DIR__ . '/src/Datos/FamiliarRepository.php';
+require_once __DIR__ . '/src/Datos/PersonaRepository.php';
+require_once __DIR__ . '/src/Servicios/FamiliarService.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 

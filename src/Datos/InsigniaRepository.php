@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/Insignia.php';
+require_once __DIR__ . '/src/Model/Insignia.php';
 
 class InsigniaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

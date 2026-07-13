@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/Documento.php';
+require_once __DIR__ . '/src/Model/Documento.php';
 
 class DocumentoRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

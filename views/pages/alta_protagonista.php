@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Nuevo Protagonista";
 
-require_once '../../backend/Infraestructura/Controladores/ProtagonistaController.php';
+require_once '/src/Controladores/ProtagonistaController.php';
 
 $controlador = new ProtagonistaController();
 

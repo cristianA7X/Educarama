@@ -1,6 +1,6 @@
 <?php
 // (Mismos requires de interfaces y Database.php)
-require_once __DIR__ . '/../../Dominio/Model/Grupo.php';
+require_once __DIR__ . '/src/Dominio/Model/Grupo.php';
 
 class GrupoRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

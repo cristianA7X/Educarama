@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../../Infraestructura/Datos/CategoriaRamaRepository.php';
-require_once __DIR__ . '/../../Dominio/Model/CategoriaRama.php';
+require_once __DIR__ . '/src/Datos/CategoriaRamaRepository.php';
+require_once __DIR__ . '/src/Model/CategoriaRama.php';
 
 class CategoriaRamaService {
     private CategoriaRamaRepository $categoriaRepo;

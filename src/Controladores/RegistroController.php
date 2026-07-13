@@ -5,8 +5,8 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-require_once __DIR__ . '/../Datos/UsuarioRepository.php';
-require_once __DIR__ . '/../../Aplicacion/Servicios/RegistrarUsuarioService.php';
+require_once __DIR__ . '/src/Datos/UsuarioRepository.php';
+require_once __DIR__ . '/src/Servicios/RegistrarUsuarioService.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"));

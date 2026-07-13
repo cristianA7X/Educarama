@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/CategoriaRama.php';
+require_once __DIR__ . '/src/Model/CategoriaRama.php';
 
 class CategoriaRamaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

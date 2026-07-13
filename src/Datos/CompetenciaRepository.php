@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/Competencia.php';
+require_once __DIR__ . '/src/Model/Competencia.php';
 
 class CompetenciaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

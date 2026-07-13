@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Gestionar avisos";
 
-require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
+require_once '/src/Controladores/AvisoControlador.php';
 
 $controlador = new AvisoControlador();
 

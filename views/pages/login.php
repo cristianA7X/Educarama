@@ -12,7 +12,7 @@
     <!-- Google Fonts: Ubuntu -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.5">
+    <link rel="stylesheet" href="public/css/styles.css?v=1.5">
 </head>
 
 
@@ -23,7 +23,7 @@ $rama_page = ""; // puede ser "manada", "unidad", "caminante", "rover"
 <body class="rama-<?php echo $rama_page; ?>">
     <?php 
     // Componentes fijos de la interfaz
-    include '../includes/barra_superior.php'; 
+    include 'includes/barra_superior.php'; 
     ?>
 
     <!-- CONTENEDOR MAESTRO -->
@@ -68,7 +68,7 @@ $rama_page = ""; // puede ser "manada", "unidad", "caminante", "rover"
         </div>
     </div>
 
-    <?php include '../includes/barra_inferior.php'; ?>
+    <?php include 'includes/barra_inferior.php'; ?>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -80,7 +80,7 @@ $rama_page = ""; // puede ser "manada", "unidad", "caminante", "rover"
             const contrasenia = document.getElementById('password').value;
 
             try {
-                const response = await fetch('http://localhost/Educarama/backend/Infraestructura/Controladores/AuthController.php', {
+                const response = await fetch('http://localhost/Educarama/src/Controladores/AuthController.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

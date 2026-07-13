@@ -1,5 +1,4 @@
 <?php
-// backend/Infraestructura/Datos/Database.php
 
 class Database {
     // Variable estática para guardar la única instancia de la conexión (Patrón Singleton)

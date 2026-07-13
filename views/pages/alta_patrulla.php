@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Nueva Patrulla";
 
-require_once '../../backend/Infraestructura/Controladores/PatrullaController.php';
+require_once '/src/Controladores/PatrullaController.php';
 
 $controlador = new PatrullaController();
 

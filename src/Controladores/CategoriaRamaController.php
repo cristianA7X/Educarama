@@ -5,8 +5,8 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-require_once __DIR__ . '/../Datos/CategoriaRamaRepository.php';
-require_once __DIR__ . '/../../Aplicacion/Servicios/CategoriaRamaService.php';
+require_once __DIR__ . '/src/Datos/CategoriaRamaRepository.php';
+require_once __DIR__ . '/src/Servicios/CategoriaRamaService.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"));

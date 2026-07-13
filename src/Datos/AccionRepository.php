@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/Accion.php';
+require_once __DIR__ . '/src/Model/Accion.php';
 
 class AccionRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

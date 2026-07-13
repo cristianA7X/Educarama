@@ -1,5 +1,5 @@
 <?php
-// backend/Infraestructura/Controladores/AuthController.php
+// src/Controladores/AuthController.php
 
 // Permitir solicitudes desde el frontend (CORS)
 header("Access-Control-Allow-Origin: *");
@@ -8,8 +8,8 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-require_once __DIR__ . '/../Datos/UsuarioRepository.php';
-require_once __DIR__ . '/../../Aplicacion/Servicios/LoginService.php';
+require_once __DIR__ . '/src/Datos/UsuarioRepository.php';
+require_once __DIR__ . '/src/Aplicacion/Servicios/LoginService.php';
 
 // Leemos el JSON que manda el frontend
 $data = json_decode(file_get_contents("php://input"));

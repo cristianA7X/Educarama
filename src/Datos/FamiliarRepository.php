@@ -1,13 +1,13 @@
 <?php
 // Ruta: backend/Infraestructura/Datos/FamiliarRepository.php
 
-require_once __DIR__ . '/../../Dominio/Repositorio/MostrarTodoInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/MostrarPorIdInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/AgregarInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/ActualizarInterface.php';
-require_once __DIR__ . '/../../Dominio/Repositorio/EliminarInterface.php';
-require_once __DIR__ . '/../../Dominio/Model/Familiar.php';
-require_once 'Database.php';
+require_once __DIR__ . '/src/Repositorio/MostrarTodoInterface.php';
+require_once __DIR__ . '/src/Repositorio/MostrarPorIdInterface.php';
+require_once __DIR__ . '/src/Repositorio/AgregarInterface.php';
+require_once __DIR__ . '/src/Repositorio/ActualizarInterface.php';
+require_once __DIR__ . '/src/Repositorio/EliminarInterface.php';
+require_once __DIR__ . '/src/Model/Familiar.php';
+require_once __DIR__ . '/src/Datos/Database.php';
 
 /**
  * @implements MostrarTodoInterface<Familiar>

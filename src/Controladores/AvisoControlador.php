@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../Datos/Database.php';
-require_once __DIR__ . '/../Datos/AvisoRepositorio.php';
-require_once __DIR__ . '/../../Aplicacion/Servicios/AvisoServicio.php';
+require_once __DIR__ . '/src/Datos/Datos/Database.php';
+require_once __DIR__ . '/src/Datos/AvisoRepositorio.php';
+require_once __DIR__ . '/src/Servicios/AvisoServicio.php';
 
 class AvisoControlador
 {

@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Nueva Rama";
 
-require_once '../../backend/Infraestructura/Controladores/RamaController.php';
+require_once '/src/Controladores/RamaController.php';
 
 $controlador = new RamaController();
 

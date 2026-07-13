@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Dominio/Model/TipoAccion.php';
+require_once __DIR__ . '/src/Dominio/Model/TipoAccion.php';
 
 class TipoAccionRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;

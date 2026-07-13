@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../Dominio/Repositorio/MostrarPorIdInterface.php';
+require_once __DIR__ . '/src/Dominio/Repositorio/MostrarPorIdInterface.php';
 
 class ObtenerPerfilProtagonistaService {
     

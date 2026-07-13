@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../../Infraestructura/Datos/FamiliarRepository.php';
-require_once __DIR__ . '/../../Infraestructura/Datos/PersonaRepository.php';
-require_once __DIR__ . '/../../Dominio/Model/Familiar.php';
-require_once __DIR__ . '/../../Dominio/Model/Persona.php';
+require_once __DIR__ . '/src/Datos/FamiliarRepository.php';
+require_once __DIR__ . '/src/Datos/PersonaRepository.php';
+require_once __DIR__ . '/src/Model/Familiar.php';
+require_once __DIR__ . '/src/Model/Persona.php';
 
 class FamiliarService 
 {

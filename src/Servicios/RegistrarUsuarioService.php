@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../../Dominio/Model/Usuario.php';
+require_once __DIR__ . '/src/Dominio/Model/Usuario.php';
 // Requerimos la interfaz genérica de agregar y la de mostrar por ID (o podrías tener una de buscar por email)
-require_once __DIR__ . '/../../Dominio/Repositorio/AgregarInterface.php';
+require_once __DIR__ . '/src/Dominio/Repositorio/AgregarInterface.php';
 
 class RegistrarUsuarioService {
     

@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../Infraestructura/Datos/UsuarioRepository.php';
+require_once __DIR__ . '/src/Datos/UsuarioRepository.php';
 
 class LoginService {
     private UsuarioRepository $usuarioRepo;

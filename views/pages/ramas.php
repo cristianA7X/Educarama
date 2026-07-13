@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Ramas";
 
-require_once '../../backend/Infraestructura/Controladores/RamaController.php';
+require_once 'src/Controladores/RamaController.php';
 
 $controlador = new RamaController();
 $ramas = $controlador->listar();
@@ -16,13 +16,13 @@ $ramas = $controlador->listar();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.8">
+    <link rel="stylesheet" href="public/css/styles.css?v=1.8">
 </head>
 
 <body>
 <?php
-include '../includes/barra_superior.php';
-include '../includes/menu_lateral.php';
+include 'includes/barra_superior.php';
+include 'includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
@@ -72,7 +72,7 @@ include '../includes/menu_lateral.php';
     </div>
 </div>
 
-<?php include '../includes/barra_inferior.php'; ?>
+<?php include 'includes/barra_inferior.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
