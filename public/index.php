@@ -1,10 +1,9 @@
 <?php
+
+require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+
 $tituloPagina = "Inicio";
-
 require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
-
-$avisoControlador = new AvisoControlador();
-$avisos = $avisoControlador->listarAvisosHome();
 ?>
 <!DOCTYPE html>
 <html lang="es">
