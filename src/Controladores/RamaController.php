@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/src/Datos/Database.php';
-require_once __DIR__ . '/src/Datos/RamaRepository.php';
-require_once __DIR__ . '/src/Servicios/RamaService.php';
+require_once __DIR__ . '/../Datos/Database.php';
+require_once __DIR__ . '/../Datos/RamaRepository.php';
+require_once __DIR__ . '/../Servicios/RamaService.php';
 
 class RamaController
 {

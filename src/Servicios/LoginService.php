@@ -1,33 +1,58 @@
 <?php
 
-require_once __DIR__ . '/src/Datos/UsuarioRepository.php';
+class LoginService
+{
+    private UsuarioRepository $usuarioRepository;
 
-class LoginService {
-    private UsuarioRepository $usuarioRepo;
-
-    public function __construct(UsuarioRepository $usuarioRepo) {
-        $this->usuarioRepo = $usuarioRepo;
+    public function __construct(UsuarioRepository $usuarioRepository)
+    {
+        $this->usuarioRepository = $usuarioRepository;
     }
 
-    public function ejecutar(string $email, string $contrasenia): array {
-        $usuario = $this->usuarioRepo->buscarPorEmail($email);
+    public function login(array $datos): array
+    {
+        $email = trim($datos['email'] ?? '');
+        $password = trim($datos['password'] ?? '');
+
+        if ($email === '') {
+            return [
+                'status' => 'error',
+                'message' => 'El correo electrónico es obligatorio.'
+            ];
+        }
+
+        if ($password === '') {
+            return [
+                'status' => 'error',
+                'message' => 'La contraseña es obligatoria.'
+            ];
+        }
+
+        $usuario = $this->usuarioRepository->buscarPorEmail($email);
 
         if (!$usuario) {
-            throw new Exception("Credenciales inválidas.");
+            return [
+                'status' => 'error',
+                'message' => 'No existe un usuario registrado con ese correo.'
+            ];
         }
 
-        // Si guardaste las contraseñas sin encriptar (para probar), usá: if ($contrasenia !== $usuario->contrasenia)
-        // Si usaste password_hash(), usá password_verify():
-        if (!password_verify($contrasenia, $usuario->contrasenia)) {
-            throw new Exception("Credenciales inválidas.");
+        if (!password_verify($password, $usuario['contrasenia'])) {
+            return [
+                'status' => 'error',
+                'message' => 'La contraseña es incorrecta.'
+            ];
         }
 
-        // Retornamos los datos del usuario SIN la contraseña para que el front los use
+        session_start();
+
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['usuario_nombre'] = $usuario['nombre'];
+        $_SESSION['usuario_email'] = $usuario['email'];
+
         return [
-            'id' => $usuario->id,
-            'nombre' => $usuario->nombre,
-            'email' => $usuario->email
+            'status' => 'success',
+            'message' => 'Inicio de sesión correcto.'
         ];
     }
 }
-?>
