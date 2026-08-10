@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . '/src/Datos/Database.php';
-require_once __DIR__ . '/src/Datos/PersonaRepository.php';
-require_once __DIR__ . '/src/Datos/ProtagonistaRepository.php';
-require_once __DIR__ . '/src/Datos/RamaRepository.php';
-require_once __DIR__ . '/src/Datos/PatrullaRepository.php';
-require_once __DIR__ . '/src/Servicios/ProtagonistaService.php';
+require_once __DIR__ . '/../Datos/Database.php';
+require_once __DIR__ . '/../Datos/PersonaRepository.php';
+require_once __DIR__ . '/../Datos/ProtagonistaRepository.php';
+require_once __DIR__ . '/../Datos/RamaRepository.php';
+require_once __DIR__ . '/../Datos/PatrullaRepository.php';
+require_once __DIR__ . '/../Servicios/ProtagonistaService.php';
 
 class ProtagonistaController
 {

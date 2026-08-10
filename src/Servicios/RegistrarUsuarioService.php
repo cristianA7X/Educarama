@@ -1,42 +1,75 @@
 <?php
 
-require_once __DIR__ . '/src/Dominio/Model/Usuario.php';
-// Requerimos la interfaz genérica de agregar y la de mostrar por ID (o podrías tener una de buscar por email)
-require_once __DIR__ . '/src/Dominio/Repositorio/AgregarInterface.php';
+class RegistrarUsuarioService
+{
+    private UsuarioRepository $usuarioRepository;
 
-class RegistrarUsuarioService {
-    
-    // Inyectamos el repositorio usando la interfaz (¡así mantenemos el código desacoplado!)
-    private AgregarInterface $usuarioRepository;
-
-    public function __construct(AgregarInterface $usuarioRepository) {
+    public function __construct(UsuarioRepository $usuarioRepository)
+    {
         $this->usuarioRepository = $usuarioRepository;
     }
 
-    public function ejecutar(string $nombre, string $email, string $contraseniaPlana): void {
-        // 1. Validaciones de negocio simples
-        if (empty($email) || empty($contraseniaPlana)) {
-            throw new Exception("El email y la contraseña son obligatorios.");
+    public function registrar(array $datos): array
+    {
+        $nombre = trim($datos['nombre'] ?? '');
+        $email = trim($datos['email'] ?? '');
+        $password = trim($datos['password'] ?? '');
+
+        if ($nombre === '') {
+            return [
+                'status' => 'error',
+                'message' => 'El nombre es obligatorio.'
+            ];
         }
 
-        //validar mail existente
-        if ($this->usuarioRepository instanceof UsuarioRepository) 
-        {
-            $usuarioExistente = $this->usuarioRepository->buscarPorEmail($email);
-            if ($usuarioExistente) 
-            {
-                throw new Exception("El email ya está registrado.");
-            }
+        if ($email === '') {
+            return [
+                'status' => 'error',
+                'message' => 'El correo electrónico es obligatorio.'
+            ];
         }
 
-        // 2. Encriptar la contraseña (Regla de negocio/seguridad)
-        $contraseniaHash = password_hash($contraseniaPlana, PASSWORD_BCRYPT);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return [
+                'status' => 'error',
+                'message' => 'El correo electrónico no es válido.'
+            ];
+        }
 
-        // 3. Crear el objeto del Dominio
-        $nuevoUsuario = new Usuario(0, $nombre, $email, $contraseniaHash);
+        if ($password === '') {
+            return [
+                'status' => 'error',
+                'message' => 'La contraseña es obligatoria.'
+            ];
+        }
 
-        // 4. Mandarlo a guardar usando el repositorio
-        $this->usuarioRepository->agregar($nuevoUsuario);
+        if (strlen($password) < 6) {
+            return [
+                'status' => 'error',
+                'message' => 'La contraseña debe tener al menos 6 caracteres.'
+            ];
+        }
+
+        $usuarioExistente = $this->usuarioRepository->buscarPorEmail($email);
+
+        if ($usuarioExistente) {
+            return [
+                'status' => 'error',
+                'message' => 'Ya existe un usuario registrado con ese correo.'
+            ];
+        }
+
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        $this->usuarioRepository->crear([
+            'nombre' => $nombre,
+            'email' => $email,
+            'password' => $passwordHash
+        ]);
+
+        return [
+            'status' => 'success',
+            'message' => 'Usuario registrado correctamente.'
+        ];
     }
 }
-?>
