@@ -9,7 +9,7 @@
 <div class="sidebar">
     <nav class="nav flex-column">
         
-        <a class="nav-link" href="home.php">
+        <a class="nav-link" href="/Educarama/public/index.php">
             <span class="icon">
                 <i class="bi bi-grid"></i>
             </span>
@@ -22,11 +22,11 @@
         </a>
         
         <div class="sub-menu collapse" id="submenu-protagonistas">
-            <a class="nav-link" href="protagonistas.php">
+            <a class="nav-link" href="/Educarama/views/pages/protagonistas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver protagonistas</span>
             </a>
-            <a class="nav-link" href="alta_protagonista.php">
+            <a class="nav-link" href="/Educarama/views/pages/alta_protagonista.php">
                 <span class="icon"><i class="bi bi-person-plus"></i></span>
                 <span class="description">Agregar protagonista</span>
             </a>
@@ -37,11 +37,11 @@
             <span class="description">Ramas <i class="bi bi-caret-down-fill"></i></span>
         </a>
         <div class="sub-menu collapse" id="submenu-ramas">
-            <a class="nav-link" href="ramas.php">
+            <a class="nav-link" href="/Educarama/views/pages/ramas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver ramas</span>
             </a>
-            <a class="nav-link" href="alta_rama.php">
+            <a class="nav-link" href="/Educarama/views/pages/alta_rama.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar rama</span>
             </a>
@@ -52,17 +52,17 @@
             <span class="description">Patrullas <i class="bi bi-caret-down-fill"></i></span>
         </a>
         <div class="sub-menu collapse" id="submenu-patrullas">
-            <a class="nav-link" href="patrullas.php">
+            <a class="nav-link" href="/Educarama/views/pages/patrullas.php">
                 <span class="icon"><i class="bi bi-eye"></i></span>
                 <span class="description">Ver patrullas</span>
             </a>
-            <a class="nav-link" href="alta_patrulla.php">
+            <a class="nav-link" href="/Educarama/views/pages/alta_patrulla.php">
                 <span class="icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="description">Agregar patrulla</span>
             </a>
         </div>
 
-        <a href="../pages/gestionar_avisos.php" class="nav-link">
+        <a href="/Educarama/views/pages/gestionar_avisos.php" class="nav-link">
     <span class="icon"><i class="bi bi-megaphone"></i></span>
     <span class="description">Avisos</span>
 </a>

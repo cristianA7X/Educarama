@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Perfil de Protagonista";
 
-require_once '../../backend/Infraestructura/Controladores/ProtagonistaController.php';
+require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
 
 $controlador = new ProtagonistaController();
 $protagonista = $controlador->obtenerPerfilDesdeUrl();
@@ -32,14 +32,14 @@ $rama_page = "unidad";
     <!-- Google Fonts: Ubuntu -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="public/css/styles.css?v=1.5">
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
 
 <body class="rama-<?php echo $rama_page; ?>">    <?php 
     // Componentes fijos de la interfaz
-    include 'includes/barra_superior.php'; 
-    include 'includes/menu_lateral.php'; 
+    include __DIR__ . '/includes/barra_superior.php'; 
+    include __DIR__ . '/includes/menu_lateral.php'; 
     ?>
 
     <!-- CONTENEDOR MAESTRO -->
@@ -189,7 +189,7 @@ $rama_page = "unidad";
         </div>
     </div>
 
-    <?php include 'includes/barra_inferior.php'; ?>
+    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

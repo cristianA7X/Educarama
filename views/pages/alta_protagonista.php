@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Nuevo Protagonista";
 
-require_once '/src/Controladores/ProtagonistaController.php';
+require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
 
 $controlador = new ProtagonistaController();
 
@@ -49,13 +49,13 @@ $esEdicion = !empty($protagonista);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.7">
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
 <body class="rama-<?php echo $rama_page; ?>">
     <?php 
-    include '../includes/barra_superior.php'; 
-    include '../includes/menu_lateral.php'; 
+    include __DIR__ . '/includes/barra_superior.php'; 
+    include __DIR__ . '/includes/menu_lateral.php'; 
     ?>
 
     <div class="main-content-wrapper">
@@ -242,13 +242,13 @@ $esEdicion = !empty($protagonista);
 
                                 <?php if ($esEdicion): ?>
                                     <a 
-                                        href="perfil_protagonista.php?id=<?= $protagonista['id'] ?>" 
+                                        href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" 
                                         class="btn btn-secondary px-4 py-2"
                                     >
                                         Cancelar
                                     </a>
                                 <?php else: ?>
-                                    <a href="protagonistas.php" class="btn btn-secondary px-4 py-2">
+                                    <a href="/Educarama/views/pages/protagonistas.php" class="btn btn-secondary px-4 py-2">
                                         Cancelar
                                     </a>
                                 <?php endif; ?>
@@ -263,7 +263,7 @@ $esEdicion = !empty($protagonista);
         </div>
     </div>
 
-    <?php include '../includes/barra_inferior.php'; ?>
+    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

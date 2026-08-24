@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Nueva Rama";
 
-require_once '/src/Controladores/RamaController.php';
+require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
 $controlador = new RamaController();
 
@@ -26,13 +26,13 @@ $categorias = $controlador->listarCategorias();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.8">
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
 <body>
 <?php
-include '../includes/barra_superior.php';
-include '../includes/menu_lateral.php';
+include __DIR__ . '/includes/barra_superior.php';
+include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
@@ -91,7 +91,7 @@ include '../includes/menu_lateral.php';
                     <i class="bi bi-save me-2"></i>Guardar rama
                 </button>
 
-                <a href="ramas.php" class="btn btn-secondary px-4 py-2">
+                <a href="/Educarama/views/pages/ramas.php" class="btn btn-secondary px-4 py-2">
                     Cancelar
                 </a>
             </div>
@@ -101,7 +101,7 @@ include '../includes/menu_lateral.php';
     </div>
 </div>
 
-<?php include '../includes/barra_inferior.php'; ?>
+<?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

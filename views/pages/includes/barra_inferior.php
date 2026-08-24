@@ -5,5 +5,5 @@
  */
 ?>
 <div class="footer-inst">
-    <p class="m-0 texto-blanco small">© 2024 Plataforma Educarama - Scouts de Argentina</p>
+    <p class="m-0 texto-blanco small">© 2026 Plataforma Educarama - Scouts de Argentina</p>
 </div>
