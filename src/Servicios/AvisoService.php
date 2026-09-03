@@ -58,9 +58,9 @@ class AvisoServicio
             $this->repositorio->reactivar($id);
         }
     }
-
+    
     public function listarAvisosHome(): array
     {
-        return $this->repositorio->listarParaHome();
+        return $this->repositorio->listarAvisosHome();
     }
 }

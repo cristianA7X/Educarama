@@ -1,10 +1,21 @@
-<?php
 
+<?php
 require_once __DIR__ . '/../src/Controladores/AuthMiddleware.php';
 
 $tituloPagina = "Inicio";
 require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
+
+// 1. Instancias el controlador
+$avisoControlador = new AvisoControlador();
+
+// 2. Llamas al método y guardas el resultado en la variable que usa el HTML
+$avisos = $avisoControlador->listarAvisosHome();
 ?>
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,6 +43,10 @@ require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
                 <p>Panel principal para visualizar avisos, actividades y novedades del grupo scout.</p>
             </section>
 
+
+
+
+
             <h3 class="home-section-title">📢 Avisos importantes</h3>
 
             <section class="home-alerts">
@@ -48,6 +63,34 @@ require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
                     <?php endif; ?>
                 </ul>
             </section>
+
+
+
+
+
+
+
+         
+
+
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             <section class="home-stats">
                 <div class="home-stat-card">
@@ -118,20 +161,11 @@ require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
                 </div>
             </section>
 
-            <section class="home-card mt-4">
-                <h3>📝 Últimos movimientos</h3>
 
-                <ul class="movements-list">
-                    <li>Se registró un nuevo protagonista.</li>
-                    <li>Se actualizó la progresión de un integrante.</li>
-                    <li>Se creó una nueva patrulla.</li>
-                </ul>
-            </section>
 
             <section class="home-actions">
                 <a href="/Educarama/views/pages/protagonistas.php" class="home-action-btn">Ver protagonistas</a>
-                <a href="#" class="home-action-btn">Nueva actividad</a>
-                <a href="#" class="home-action-btn">Nueva patrulla</a>
+                <a href="/Educarama/views/pages/alta_patrulla.php" class="home-action-btn">Nueva patrulla</a>
             </section>
 
         </div>
