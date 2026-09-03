@@ -1,7 +1,7 @@
 <?php
 $tituloPagina = "Ramas";
 
-require_once 'src/Controladores/RamaController.php';
+require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
 $controlador = new RamaController();
 $ramas = $controlador->listar();
@@ -16,13 +16,13 @@ $ramas = $controlador->listar();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/styles.css?v=1.8">
-</head>
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
+v</head>
 
 <body>
 <?php
-include 'includes/barra_superior.php';
-include 'includes/menu_lateral.php';
+include __DIR__ . '/includes/barra_superior.php';
+include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
@@ -34,7 +34,7 @@ include 'includes/menu_lateral.php';
                 <p class="mb-0">Administrá las ramas del grupo scout.</p>
             </div>
 
-            <a href="alta_rama.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
+            <a href="/Educarama/views/pages/alta_rama.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
                 <i class="bi bi-plus-circle me-2"></i>Nueva rama
             </a>
         </div>

@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Gestionar avisos";
 
-require_once '/src/Controladores/AvisoControlador.php';
+require_once __DIR__ . '/../../src/Controladores/AvisoControlador.php';
 
 $controlador = new AvisoControlador();
 
@@ -34,13 +34,13 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.6">
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
 <body>
 <?php
-include '../includes/barra_superior.php';
-include '../includes/menu_lateral.php';
+include __DIR__ . '/includes/barra_superior.php';
+include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
@@ -115,7 +115,7 @@ include '../includes/menu_lateral.php';
             </button>
 
             <?php if ($avisoEditar): ?>
-                <a href="gestionar_avisos.php" class="btn btn-secondary ms-2">
+                <a href="/Educarama/views/pages/gestionar_avisos.php" class="btn btn-secondary ms-2">
                     Cancelar edición
                 </a>
             <?php endif; ?>
@@ -126,9 +126,9 @@ include '../includes/menu_lateral.php';
                 <h2 class="h4 texto-violeta fw-bold mb-0">Avisos cargados</h2>
 
                 <div class="btn-group">
-                    <a href="gestionar_avisos.php?filtro=todos" class="btn btn-outline-primary <?= $filtro === 'todos' ? 'active' : '' ?>">Todos</a>
-                    <a href="gestionar_avisos.php?filtro=activos" class="btn btn-outline-primary <?= $filtro === 'activos' ? 'active' : '' ?>">Activos</a>
-                    <a href="gestionar_avisos.php?filtro=inactivos" class="btn btn-outline-primary <?= $filtro === 'inactivos' ? 'active' : '' ?>">Inactivos</a>
+                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=todos" class="btn btn-outline-primary <?= $filtro === 'todos' ? 'active' : '' ?>">Todos</a>
+                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=activos" class="btn btn-outline-primary <?= $filtro === 'activos' ? 'active' : '' ?>">Activos</a>
+                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=inactivos" class="btn btn-outline-primary <?= $filtro === 'inactivos' ? 'active' : '' ?>">Inactivos</a>
                 </div>
             </div>
 
@@ -163,7 +163,7 @@ include '../includes/menu_lateral.php';
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end">
-                                        <a href="gestionar_avisos.php?editar=<?= $aviso['id'] ?>" class="btn btn-sm btn-warning">
+                                        <a href="/Educarama/views/pages/gestionar_avisos.php?editar=<?= $aviso['id'] ?>" class="btn btn-sm btn-warning">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
@@ -178,7 +178,7 @@ include '../includes/menu_lateral.php';
                                             </a>
                                         <?php else: ?>
                                             <a 
-                                                href="gestionar_avisos.php?accion=reactivar&id=<?= $aviso['id'] ?>" 
+                                                href="/Educarama/views/pages/gestionar_avisos.php?accion=reactivar&id=<?= $aviso['id'] ?>" 
                                                 class="btn btn-sm btn-success"
                                             >
                                                 <i class="bi bi-arrow-clockwise"></i>
@@ -198,7 +198,7 @@ include '../includes/menu_lateral.php';
     </div>
 </div>
 
-<?php include '../includes/barra_inferior.php'; ?>
+<?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

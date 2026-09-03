@@ -12,8 +12,8 @@
     <!-- Google Fonts: Ubuntu -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="public/css/styles.css?v=1.5">
-</head>
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
+</head>stylesheet
 
 
 <?php
@@ -49,29 +49,24 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
                 <hr class="border-white opacity-25">
                 
                 <div id="mensajeAlerta"></div>
-
-                <form id="registroForm">
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="contrasenia" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="contrasenia" name="contrasenia" placeholder="Ingrese su contraseña" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Registrarse</button>
-                </form>
+                    <form id="registroForm">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contrasenia" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="contrasenia" name="password" placeholder="Ingrese su contraseña" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Registrarse</button>
+                    </form>
+                 </div>
             </div>
-                </div>
-        
             </div>
-
-
-            
         </div>
     
     </div>
@@ -93,7 +88,7 @@ $rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
     btnSubmit.innerText = "Registrando...";
 
     // Hacemos la petición al backend
-    fetch('src/Controladores/RegistroController.php', {
+    fetch('/Educarama/src/Controladores/RegistroController.php', {
         method: 'POST',
         body: formData // FormData emula exactamente lo que haría un form tradicional enviando $_POST
     })

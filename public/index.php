@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+require_once __DIR__ . '/../src/Controladores/AuthMiddleware.php';
 
 $tituloPagina = "Inicio";
-require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
+require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -15,13 +15,13 @@ require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=1.5">
+    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
 <body>
     <?php
-    include '../includes/barra_superior.php';
-    include '../includes/menu_lateral.php';
+    include __DIR__ . '/../views/pages/includes/barra_superior.php';
+    include __DIR__ . '/../views/pages/includes/menu_lateral.php';
     ?>
 
     <div class="main-content-wrapper">
@@ -34,20 +34,21 @@ require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
 
             <h3 class="home-section-title">📢 Avisos importantes</h3>
 
-        <section class="home-alerts">
-    <ul>
-        <?php if (!empty($avisos)): ?>
-            <?php foreach ($avisos as $aviso): ?>
-                <li>
-                    <strong><?= htmlspecialchars($aviso['titulo']) ?>:</strong>
-                    <?= htmlspecialchars($aviso['descripcion']) ?>
-                </li>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <li>No hay avisos importantes cargados.</li>
-        <?php endif; ?>
-    </ul>
-</section>
+            <section class="home-alerts">
+                <ul>
+                    <?php if (!empty($avisos)): ?>
+                        <?php foreach ($avisos as $aviso): ?>
+                            <li>
+                                <strong><?= htmlspecialchars($aviso['titulo']) ?>:</strong>
+                                <?= htmlspecialchars($aviso['descripcion']) ?>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li>No hay avisos importantes cargados.</li>
+                    <?php endif; ?>
+                </ul>
+            </section>
+
             <section class="home-stats">
                 <div class="home-stat-card">
                     <div class="icon">👦</div>
@@ -128,7 +129,7 @@ require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
             </section>
 
             <section class="home-actions">
-                <a href="perfil_protagonista.php" class="home-action-btn">Ver protagonistas</a>
+                <a href="/Educarama/views/pages/protagonistas.php" class="home-action-btn">Ver protagonistas</a>
                 <a href="#" class="home-action-btn">Nueva actividad</a>
                 <a href="#" class="home-action-btn">Nueva patrulla</a>
             </section>
@@ -136,7 +137,7 @@ require_once '../../backend/Infraestructura/Controladores/AvisoControlador.php';
         </div>
     </div>
 
-    <?php include '../includes/barra_inferior.php'; ?>
+    <?php include __DIR__ . '/../views/pages/includes/barra_inferior.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
