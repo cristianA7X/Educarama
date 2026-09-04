@@ -41,10 +41,7 @@
                     <span class="icon"><i class="bi bi-eye"></i></span>
                     <span class="description">Ver ramas</span>
                 </a>
-                <a class="nav-link" href="/Educarama/views/pages/alta_rama.php">
-                    <span class="icon"><i class="bi bi-plus-circle"></i></span>
-                    <span class="description">Agregar rama</span>
-                </a>
+
             </div>
 
             <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#submenu-patrullas" aria-expanded="false" aria-controls="submenu-patrullas">
@@ -62,7 +59,7 @@
                 </a>
             </div>
 
-            <a href="/Educarama/views/pages/gestionar_avisos.php" class="nav-link">
+            <a href="/Educarama/views/pages/avisos.php" class="nav-link">
                 <span class="icon"><i class="bi bi-megaphone"></i></span>
                 <span class="description">Avisos</span>
             </a>

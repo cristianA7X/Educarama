@@ -53,9 +53,11 @@ include __DIR__ . '/includes/menu_lateral.php';
 
         <div class="barra-superior-inst mb-4">
             <h1 class="fw-bold mb-1">
-                <?= $avisoEditar ? 'Editar aviso' : 'Gestionar avisos' ?>
+                <?= $avisoEditar ? 'Editar aviso' : 'Crear aviso' ?>
             </h1>
-            <p class="mb-0">Administrá los avisos que se muestran en la pantalla de inicio.</p>
+            <p class="mb-0">
+                <?= $avisoEditar ? 'Modificá los datos del aviso seleccionado.' : 'Completá los datos para crear un nuevo aviso.' ?>
+            </p>
         </div>
 
         <form method="POST" class="tarjeta-blanca-borde p-4 mb-4">

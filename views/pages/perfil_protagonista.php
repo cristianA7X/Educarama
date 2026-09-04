@@ -113,16 +113,8 @@ $rama_page = "unidad";
                 <?= htmlspecialchars($protagonista['anio_ingreso'] ?? 'Sin dato') ?>
             </p>
 
-            <p class="m-0 fw-bold">
-                <i class="bi bi-house-heart me-2"></i>
-                Información familiar
-            </p>
+    
 
-            <hr class="border-white opacity-25">
-
-            <p class="m-0 small">
-                Notas adicionales: El beneficiario presenta gran interés en actividades al aire libre.
-            </p>
         </div>
     </div>
 </div>
@@ -171,12 +163,8 @@ $rama_page = "unidad";
 
             <!-- BOTONES DE ACCIÓN -->
             <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-pencil-square me-2"></i>Registrar Actividad</button>
-                </div>
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-clock-history me-2"></i>Ver Historial</button>
-                </div>
+
+          
                 <div class="col-12 col-md-4">
                     <a 
                         href="alta_protagonista.php?id=<?= $protagonista['id'] ?>" 

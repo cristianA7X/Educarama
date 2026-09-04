@@ -3,17 +3,14 @@
 require_once __DIR__ . '/../src/Controladores/AuthMiddleware.php';
 
 $tituloPagina = "Inicio";
-require_once __DIR__ . '/../src/Controladores/AvisoControlador.php';
+require_once __DIR__ . '/../src/Controladores/eventoControlador.php';
 
 // 1. Instancias el controlador
-$avisoControlador = new AvisoControlador();
+$eventoControlador = new eventoControlador();
 
 // 2. Llamas al método y guardas el resultado en la variable que usa el HTML
-$avisos = $avisoControlador->listarAvisosHome();
+$eventos = $eventoControlador->listareventosHome();
 ?>
-
-
-
 
 
 <!DOCTYPE html>
@@ -40,82 +37,45 @@ $avisos = $avisoControlador->listarAvisosHome();
 
             <section class="home-welcome">
                 <h2>Bienvenido a Educarama</h2>
-                <p>Panel principal para visualizar avisos, actividades y novedades del grupo scout.</p>
+                <p>Panel principal para visualizar eventos, actividades y novedades del grupo scout.</p>
             </section>
 
-
-
-
-
-            <h3 class="home-section-title">📢 Avisos importantes</h3>
+            <h3 class="home-section-title">📢 Eventos</h3>
 
             <section class="home-alerts">
                 <ul>
-                    <?php if (!empty($avisos)): ?>
-                        <?php foreach ($avisos as $aviso): ?>
+                    <?php if (!empty($eventos)): ?>
+                        <?php foreach ($eventos as $evento): ?>
                             <li>
-                                <strong><?= htmlspecialchars($aviso['titulo']) ?>:</strong>
-                                <?= htmlspecialchars($aviso['descripcion']) ?>
+                                <strong><?= htmlspecialchars($evento['titulo']) ?>:</strong>
+                                <?= htmlspecialchars($evento['descripcion']) ?>
                             </li>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <li>No hay avisos importantes cargados.</li>
+                        <li>No hay eventos importantes pronto.</li>
                     <?php endif; ?>
                 </ul>
             </section>
 
-
-
-
-
-
-
-         
-
-
-                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <section class="home-stats">
                 <div class="home-stat-card">
                     <div class="icon">👦</div>
-                    <h3>24</h3>
                     <p>Protagonistas</p>
                 </div>
 
                 <div class="home-stat-card">
-                    <div class="icon">👨‍🏫</div>
-                    <h3>8</h3>
-                    <p>Educadores</p>
+                    <div class="icon">👥</div>
+                    <p>Patrullas</p>
                 </div>
 
                 <div class="home-stat-card">
                     <div class="icon">🏕️</div>
-                    <h3>4</h3>
-                    <p>Ramas activas</p>
+                    <p>Ramas</p>
                 </div>
 
                 <div class="home-stat-card">
-                    <div class="icon">⭐</div>
-                    <h3>16</h3>
-                    <p>Insignias</p>
-                </div>
+                    <div class="icon">📅</div>
+                    <p>Actividades</p>                
             </section>
 
             <section class="home-grid">

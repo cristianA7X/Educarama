@@ -1,20 +1,20 @@
 <?php
 
-class AvisoServicio
+class EventoServicio
 {
-    private AvisoRepositorio $repositorio;
+    private EventoRepositorio $repositorio;
 
-    public function __construct(AvisoRepositorio $repositorio)
+    public function __construct(EventoRepositorio $repositorio)
     {
         $this->repositorio = $repositorio;
     }
 
-    public function listarAvisos(string $filtro): array
+    public function listarEventos(string $filtro): array
     {
         return $this->repositorio->listar($filtro);
     }
 
-    public function buscarAvisoParaEditar(?int $id): ?array
+    public function buscarEventoParaEditar(?int $id): ?array
     {
         if (!$id) {
             return null;
@@ -59,8 +59,8 @@ class AvisoServicio
         }
     }
     
-    public function listarAvisosHome(): array
+    public function listarEventosHome(): array
     {
-        return $this->repositorio->listarAvisosHome();
+        return $this->repositorio->listarEventosHome();
     }
 }

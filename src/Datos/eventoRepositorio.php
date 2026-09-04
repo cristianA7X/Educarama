@@ -1,6 +1,6 @@
 <?php
 
-class AvisoRepositorio
+class EventoRepositorio
 {
     private PDO $conexion;
 
@@ -18,9 +18,9 @@ class AvisoRepositorio
         ");
 
         $stmt->execute([':id' => $id]);
-        $aviso = $stmt->fetch(PDO::FETCH_ASSOC);
+        $evento = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $aviso ?: null;
+        return $evento ?: null;
     }
 
     public function listar(string $filtro = 'todos'): array
@@ -103,7 +103,7 @@ class AvisoRepositorio
         $stmt->execute([':id' => $id]);
     }
 
-   public function listarAvisosHome(): array
+   public function listarEventosHome(): array
 {
     $stmt = $this->conexion->prepare("
         SELECT *
