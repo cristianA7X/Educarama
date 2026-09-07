@@ -1,6 +1,5 @@
 <?php
 $tituloPagina = "Nueva Patrulla";
-
 require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
 
 $controlador = new PatrullaController();
