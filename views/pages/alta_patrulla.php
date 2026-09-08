@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+?>
+
+<?php
 $tituloPagina = "Nueva Patrulla";
 require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
 

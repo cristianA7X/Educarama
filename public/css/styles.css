@@ -1,10 +1,13 @@
 /* ==========================================================================
-   EDUCARAMA - ESTILO GENERAL  
+   public,css,styles.css
+EDUCARAMA - ESTILO GENERAL 
+
    ========================================================================== */
 :root {
   /* Paleta institucional */
   --celeste-inst: #00aaf2;
   --violeta-primario: #45009e;
+  --violeta-secundario: #a068d4;
   --violeta-oscuro: #320071;
   --orquidea-bordes: #6110ad;
   --lila-cards: #b85bee;
@@ -32,7 +35,7 @@
 
   /* Variables de Interfaz Dinámicas*/
   --rama-primario: var(--violeta-primario);
-  --rama-secundario: var(--beige-fondo);
+  --rama-secundario: var(--violeta-secundario);
 
   /* Medidas */
   --sidebar-width: 220px;
@@ -274,7 +277,6 @@ h6 {
   box-shadow: 8px 0 24px rgba(50, 0, 113, 0.18);
 }
 
-/* Esta es la separación real entre los 4 contenedores principales */
 .sidebar .nav.flex-column {
   display: flex;
   flex-direction: column;
@@ -287,7 +289,7 @@ h6 {
   gap: 12px;
   min-height: 46px;
   padding: 11px 14px;
-  color: var(--violeta-primario);
+  color: var(--rama-primario);
   text-decoration: none;
   border-radius: 14px;
   transition: all 0.22s ease;
@@ -308,7 +310,7 @@ h6 {
 
 .sidebar .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.96);
-  color: var(--violeta-primario);
+  color: var(--rama-primario);
   transform: translateX(4px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
 }
@@ -319,7 +321,7 @@ h6 {
 
 .sidebar .nav-link.active,
 .sidebar .nav-link:active {
-  background-color: var(--scout-amarillo);
+  background-color: var(--rama-secundario);
   color: var(--violeta-oscuro);
 }
 
@@ -364,7 +366,11 @@ h6 {
    PERFIL / COMPONENTES
    ========================================================================== */
 .barra-superior-inst {
-  background: linear-gradient(180deg, var(--rama-primario), var(--blanco));
+  background: linear-gradient(
+    180deg,
+    var(--rama-primario),
+    var(--rama-secundario)
+  );
   padding: 18px;
   border-radius: 20px;
   box-shadow: var(--borde-suave);
@@ -515,7 +521,11 @@ h6 {
 }
 
 .home-welcome {
-  background: linear-gradient(90deg, #ffd21f, #fff4b8);
+  background: linear-gradient(
+    180deg,
+    var(--rama-primario),
+    var(--rama-secundario)
+  );
   border-radius: 22px;
   padding: 32px 36px;
   margin-bottom: 24px;
@@ -707,7 +717,7 @@ h6 {
   height: 92px;
   min-width: 92px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--amarillo-scout), #fff3a6);
+  background: linear-gradient(135deg, var(--rama-primario), white);
   border: 3px solid var(--violeta-primario);
   display: flex;
   align-items: center;
@@ -771,7 +781,11 @@ h6 {
   height: 82px;
   min-width: 82px;
   border-radius: 22px;
-  background: linear-gradient(135deg, var(--amarillo-scout), #fff3a6);
+  background: linear-gradient(
+    135deg,
+    var(--rama-primario),
+    var(--rama-secundario)
+  );
   border: 3px solid var(--violeta-primario);
   display: flex;
   align-items: center;

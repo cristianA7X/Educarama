@@ -8,7 +8,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Verificar si NO existe el ID de usuario en la sesión
 if (!isset($_SESSION['usuario_id'])) {
-    // Si no está logueado, lo pateamos a la pantalla de login
     header("Location: /Educarama/views/pages/login.php");
     exit; // El exit para detener la ejecución del script
 }

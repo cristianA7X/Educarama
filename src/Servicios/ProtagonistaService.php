@@ -1,3 +1,5 @@
+//src/Servicios/ProtagonistaService.php
+
 <?php
 
 class ProtagonistaService
@@ -90,6 +92,11 @@ class ProtagonistaService
     public function listarCards(): array
     {
         return $this->protagonistaRepository->listarCards();
+    }
+
+    public function listarProtagonistas(): array
+    {
+        return $this->protagonistaRepository->listarTodo();
     }
 
     public function obtenerPerfil(int $id): ?array

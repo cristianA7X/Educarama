@@ -1,9 +1,8 @@
+
 <?php
-/**
- * menu_lateral.php
- * Panel de navegación lateral para la Plataforma Educarama.
- * Incluye secciones de Inicio, Protagonistas, Ramas y Patrullas con submenús colapsables.
- */
+//views/pages/includes/menu_lateral.php
+/** Panel de navegación lateral para la Plataforma Educarama.
+ * Incluye secciones de Inicio, Protagonistas, Ramas y Patrullas con submenús colapsables.*/
 ?>
 
 <div class="sidebar">
@@ -59,9 +58,9 @@
                 </a>
             </div>
 
-            <a href="/Educarama/views/pages/avisos.php" class="nav-link">
+            <a href="/Educarama/views/pages/eventos.php" class="nav-link">
                 <span class="icon"><i class="bi bi-megaphone"></i></span>
-                <span class="description">Avisos</span>
+                <span class="description">Eventos</span>
             </a>
             
             <nav>

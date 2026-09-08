@@ -1,5 +1,6 @@
 
 <?php
+//public/index.php
 require_once __DIR__ . '/../src/Controladores/AuthMiddleware.php';
 
 $tituloPagina = "Inicio";
@@ -58,24 +59,25 @@ $eventos = $eventoControlador->listareventosHome();
             </section>
 
             <section class="home-stats">
-                <div class="home-stat-card">
+                <a class="home-stat-card text-decoration-none" href="/Educarama/views/pages/protagonistas.php">
                     <div class="icon">👦</div>
                     <p>Protagonistas</p>
-                </div>
+                </a>
 
-                <div class="home-stat-card">
+                <a class="home-stat-card text-decoration-none" href="/Educarama/views/pages/patrullas.php">
                     <div class="icon">👥</div>
                     <p>Patrullas</p>
-                </div>
+                </a>
 
-                <div class="home-stat-card">
+                <a class="home-stat-card text-decoration-none" href="/Educarama/views/pages/ramas.php">
                     <div class="icon">🏕️</div>
                     <p>Ramas</p>
-                </div>
+                </a>
 
-                <div class="home-stat-card">
+                <div class="home-stat-card" >
                     <div class="icon">📅</div>
                     <p>Actividades</p>                
+                </div>
             </section>
 
             <section class="home-grid">
@@ -120,8 +122,6 @@ $eventos = $eventoControlador->listareventosHome();
                     </ul>
                 </div>
             </section>
-
-
 
             <section class="home-actions">
                 <a href="/Educarama/views/pages/protagonistas.php" class="home-action-btn">Ver protagonistas</a>
