@@ -1,12 +1,13 @@
-//src/Servicios/ProtagonistaService.php
-
 <?php
+
+require_once __DIR__ . '/../Datos/DocumentoRepository.php';
 
 class ProtagonistaService
 {
     private PDO $conexion;
     private PersonaRepository $personaRepository;
     private ProtagonistaRepository $protagonistaRepository;
+    private DocumentoRepository $documentoRepository;
 
     public function __construct(
         PDO $conexion,
@@ -16,6 +17,8 @@ class ProtagonistaService
         $this->conexion = $conexion;
         $this->personaRepository = $personaRepository;
         $this->protagonistaRepository = $protagonistaRepository;
+        // Instanciamos el repo de documentos acá para no romper el constructor del controlador
+        $this->documentoRepository = new DocumentoRepository();
     }
 
     public function registrarDesdeFormulario(array $post): void
@@ -32,13 +35,23 @@ class ProtagonistaService
                 'dni' => $datos['dni']
             ]);
 
-            $this->protagonistaRepository->crear([
+            // Asumimos que tu repositorio retorna el ID del protagonista insertado
+            $idProtagonista = $this->protagonistaRepository->crear([
                 'promesa' => $datos['promesa'],
                 'anio_ingreso' => $datos['anio_ingreso'],
                 'id_persona' => $idPersona,
                 'id_rama' => $datos['id_rama'],
                 'id_patrulla' => $datos['id_patrulla']
             ]);
+
+            // Si vino un documento adjunto, lo registramos
+            if (!empty($post['ruta_documento']) && !empty($post['nombre_original_documento'])) {
+                $this->documentoRepository->guardarDocumento(
+                    (int) $idProtagonista,
+                    $post['ruta_documento'],
+                    $post['nombre_original_documento']
+                );
+            }
 
             $this->conexion->commit();
 
@@ -77,6 +90,15 @@ class ProtagonistaService
                 'id_rama' => $datos['id_rama'],
                 'id_patrulla' => $datos['id_patrulla']
             ]);
+
+            // Si vino un nuevo documento adjunto en la edición, lo registramos
+            if (!empty($post['ruta_documento']) && !empty($post['nombre_original_documento'])) {
+                $this->documentoRepository->guardarDocumento(
+                    $idProtagonista,
+                    $post['ruta_documento'],
+                    $post['nombre_original_documento']
+                );
+            }
 
             $this->conexion->commit();
 
