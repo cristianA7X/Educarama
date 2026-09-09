@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+?>
+<?php
 $tituloPagina = "Perfil de Protagonista";
 
 require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
@@ -15,7 +18,10 @@ $fechaNacimiento = new DateTime($protagonista['fecha_nacimiento']);
 $hoy = new DateTime();
 $edad = $hoy->diff($fechaNacimiento)->y;
 
-$rama_page = "unidad";
+
+require_once __DIR__ . '/../../src/Controladores/RamaController.php';
+
+
 ?>
 
 <!DOCTYPE html>
@@ -36,8 +42,8 @@ $rama_page = "unidad";
 </head>
 
 
-<body class="rama-<?php echo $rama_page; ?>">    <?php 
-    // Componentes fijos de la interfaz
+<body class="rama-<?php echo $rama_page; ?>">    
+    <?php 
     include __DIR__ . '/includes/barra_superior.php'; 
     include __DIR__ . '/includes/menu_lateral.php'; 
     ?>
@@ -113,16 +119,8 @@ $rama_page = "unidad";
                 <?= htmlspecialchars($protagonista['anio_ingreso'] ?? 'Sin dato') ?>
             </p>
 
-            <p class="m-0 fw-bold">
-                <i class="bi bi-house-heart me-2"></i>
-                Información familiar
-            </p>
+    
 
-            <hr class="border-white opacity-25">
-
-            <p class="m-0 small">
-                Notas adicionales: El beneficiario presenta gran interés en actividades al aire libre.
-            </p>
         </div>
     </div>
 </div>
@@ -171,12 +169,8 @@ $rama_page = "unidad";
 
             <!-- BOTONES DE ACCIÓN -->
             <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-pencil-square me-2"></i>Registrar Actividad</button>
-                </div>
-                <div class="col-12 col-md-4">
-                    <button class="boton-primario w-100 py-3 fw-bold"><i class="bi bi-clock-history me-2"></i>Ver Historial</button>
-                </div>
+
+          
                 <div class="col-12 col-md-4">
                     <a 
                         href="alta_protagonista.php?id=<?= $protagonista['id'] ?>" 
@@ -188,8 +182,12 @@ $rama_page = "unidad";
             
         </div>
     </div>
+        <?php 
+        include __DIR__ . '/includes/barra_inferior.php';   
+    ?>
+        
 
-    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
+    
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
