@@ -16,14 +16,14 @@ $controlador = new ProtagonistaController();
 try {
     $protagonistaEditar = $controlador->obtenerProtagonistaEditar();
     $protagonistas = $controlador->listarProtagonistas();
-    // $filtro = $controlador->obtenerFiltroActual();
+    $filtro = $controlador->obtenerFiltroActual();
 
 } catch (Exception $e) {
     $error = $e->getMessage();
 
     $protagonistaEditar = null;
     $protagonistas = [];
-    //$filtro = $_GET['filtro'] ?? 'todos';
+    $filtro = $_GET['filtro'] ?? 'todos';
 }
 ?>
 <!DOCTYPE html>
