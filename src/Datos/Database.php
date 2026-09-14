@@ -1,4 +1,9 @@
 <?php
+// src/Datos/Database.php
+// Esta clase es responsable de manejar la conexión 
+// a la base de datos utilizando el patrón Singleton 
+// para asegurar que solo exista una instancia de la 
+// conexión durante toda la ejecución del script.
 
 class Database {
     // Variable estática para guardar la única instancia de la conexión (Patrón Singleton)

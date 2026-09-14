@@ -1,22 +1,18 @@
 <?php
+// views/pages/alta_patrulla.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-?>
-
-<?php
-$tituloPagina = "Nueva Patrulla";
 require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
 
+$tituloPagina = "Nueva Patrulla";
 $controlador = new PatrullaController();
-
 $error = null;
+$ramas = $controlador->listarRamas();
 
 try {
     $controlador->crearSiEsPost();
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
-
-$ramas = $controlador->listarRamas();
 ?>
 
 <!DOCTYPE html>

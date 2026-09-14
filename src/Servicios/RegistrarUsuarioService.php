@@ -1,4 +1,7 @@
 <?php
+//src/Servicios/RegistrarUsuarioService.php
+//esta clase es responsable de manejar la lógica de negocio 
+//relacionada con el registro de usuarios
 
 class RegistrarUsuarioService
 {

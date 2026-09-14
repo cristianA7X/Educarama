@@ -1,8 +1,8 @@
-
 <?php
-// Configuración de la página
-$rama_page = ""; // "manada", "unidad", "caminante", "rover"
+$rama_page = ""; 
+$tituloPagina = "Inicio de Sesión";
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,6 +14,7 @@ $rama_page = ""; // "manada", "unidad", "caminante", "rover"
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
+
 <body class="rama-<?php echo $rama_page; ?>">
 
     <?php 

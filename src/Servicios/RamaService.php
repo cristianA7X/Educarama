@@ -18,7 +18,6 @@ class RamaService
     {
         return $this->repositorio->obtenerPorId($id);
     }
-
     public function crearDesdeFormulario(array $post): void
     {
         $nombre = trim($post['nombre'] ?? '');

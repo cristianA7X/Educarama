@@ -1,4 +1,7 @@
-
+<?php 
+$rama_page = ""; 
+$tituloPagina = "Registro";
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -15,14 +18,11 @@
     <!-- Estilos Personalizados -->
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
-<?php 
-$rama_page = "unidad"; // puede ser "manada", "unidad", "caminante", "rover"
-?>
+
 <body class="rama-<?php echo $rama_page; ?>">
 
     <?php 
-    // Componentes fijos de la interfaz
-    include 'includes/barra_superior.php'; 
+     include 'includes/barra_superior.php'; 
     ?>
 
     <!-- CONTENEDOR MAESTRO -->

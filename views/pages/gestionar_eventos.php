@@ -1,7 +1,9 @@
 <?php
+// views/pages/gestionar_eventos.php
+
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-?>
-<?php
+require_once __DIR__ . '/../../src/Controladores/EventoControlador.php';
+
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -9,7 +11,6 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Gestionar eventos";
 
-require_once __DIR__ . '/../../src/Controladores/EventoControlador.php';
 
 $controlador = new EventoControlador();
 
@@ -56,15 +57,15 @@ include __DIR__ . '/includes/menu_lateral.php';
 
         <div class="barra-superior-inst mb-4">
             <h1 class="fw-bold mb-1">
-                <?= $avisoEditar ? 'Editar aviso' : 'Crear aviso' ?>
+                <?= $eventoEditar ? 'Editar evento' : 'Crear evento' ?>
             </h1>
             <p class="mb-0">
-                <?= $avisoEditar ? 'Modificá los datos del aviso seleccionado.' : 'Completá los datos para crear un nuevo aviso.' ?>
+                <?= $eventoEditar ? 'Modificá los datos del evento seleccionado.' : 'Completá los datos para crear un nuevo evento.' ?>
             </p>
         </div>
 
         <form method="POST" class="tarjeta-blanca-borde p-4 mb-4">
-            <input type="hidden" name="id" value="<?= $avisoEditar ? htmlspecialchars($avisoEditar['id']) : '' ?>">
+            <input type="hidden" name="id" value="<?= $eventoEditar ? htmlspecialchars($eventoEditar['id']) : '' ?>">
 
             <div class="mb-3">
                 <label class="form-label fw-bold">Título</label>
@@ -73,13 +74,13 @@ include __DIR__ . '/includes/menu_lateral.php';
                     name="titulo" 
                     class="form-control" 
                     required
-                    value="<?= $avisoEditar ? htmlspecialchars($avisoEditar['titulo']) : '' ?>"
+                    value="<?= $eventoEditar ? htmlspecialchars($eventoEditar['titulo']) : '' ?>"
                 >
             </div>
 
             <div class="mb-3">
                 <label class="form-label fw-bold">Descripción</label>
-                <textarea name="descripcion" class="form-control" rows="3" required><?= $avisoEditar ? htmlspecialchars($avisoEditar['descripcion']) : '' ?></textarea>
+                <textarea name="descripcion" class="form-control" rows="3" required><?= $eventoEditar ? htmlspecialchars($eventoEditar['descripcion']) : '' ?></textarea>
             </div>
 
             <div class="row">
@@ -90,7 +91,7 @@ include __DIR__ . '/includes/menu_lateral.php';
                         name="fecha_inicio" 
                         class="form-control" 
                         required
-                        value="<?= $avisoEditar ? htmlspecialchars($avisoEditar['fecha_inicio']) : '' ?>"
+                        value="<?= $eventoEditar ? htmlspecialchars($eventoEditar['fecha_inicio']) : '' ?>"
                     >
                 </div>
 
@@ -100,27 +101,27 @@ include __DIR__ . '/includes/menu_lateral.php';
                         type="date" 
                         name="fecha_fin" 
                         class="form-control"
-                        value="<?= $avisoEditar ? htmlspecialchars($avisoEditar['fecha_fin'] ?? '') : '' ?>"
+                        value="<?= $eventoEditar ? htmlspecialchars($eventoEditar['fecha_fin'] ?? '') : '' ?>"
                     >
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Prioridad</label>
                     <select name="prioridad" class="form-select" required>
-                        <option value="alta" <?= $avisoEditar && $avisoEditar['prioridad'] === 'alta' ? 'selected' : '' ?>>Alta</option>
-                        <option value="media" <?= !$avisoEditar || $avisoEditar['prioridad'] === 'media' ? 'selected' : '' ?>>Media</option>
-                        <option value="baja" <?= $avisoEditar && $avisoEditar['prioridad'] === 'baja' ? 'selected' : '' ?>>Baja</option>
+                        <option value="alta" <?= $eventoEditar && $eventoEditar['prioridad'] === 'alta' ? 'selected' : '' ?>>Alta</option>
+                        <option value="media" <?= !$eventoEditar || $eventoEditar['prioridad'] === 'media' ? 'selected' : '' ?>>Media</option>
+                        <option value="baja" <?= $eventoEditar && $eventoEditar['prioridad'] === 'baja' ? 'selected' : '' ?>>Baja</option>
                     </select>
                 </div>
             </div>
 
             <button type="submit" class="boton-primario px-4 py-2 fw-bold">
                 <i class="bi bi-save me-2"></i>
-                <?= $avisoEditar ? 'Actualizar aviso' : 'Guardar aviso' ?>
+                <?= $eventoEditar ? 'Actualizar evento' : 'Guardar evento' ?>
             </button>
 
-            <?php if ($avisoEditar): ?>
-                <a href="/Educarama/views/pages/gestionar_avisos.php" class="btn btn-secondary ms-2">
+            <?php if ($eventoEditar): ?>
+                <a href="/Educarama/views/pages/gestionar_eventos.php" class="btn btn-secondary ms-2">
                     Cancelar edición
                 </a>
             <?php endif; ?>
@@ -128,16 +129,16 @@ include __DIR__ . '/includes/menu_lateral.php';
 
         <div class="tarjeta-blanca-borde p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h2 class="h4 texto-violeta fw-bold mb-0">Avisos cargados</h2>
+                <h2 class="h4 texto-violeta fw-bold mb-0">Eventos cargados</h2>
 
                 <div class="btn-group">
-                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=todos" class="btn btn-outline-primary <?= $filtro === 'todos' ? 'active' : '' ?>">Todos</a>
-                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=activos" class="btn btn-outline-primary <?= $filtro === 'activos' ? 'active' : '' ?>">Activos</a>
-                    <a href="/Educarama/views/pages/gestionar_avisos.php?filtro=inactivos" class="btn btn-outline-primary <?= $filtro === 'inactivos' ? 'active' : '' ?>">Inactivos</a>
+                    <a href="/Educarama/views/pages/gestionar_eventos.php?filtro=todos" class="btn btn-outline-primary <?= $filtro === 'todos' ? 'active' : '' ?>">Todos</a>
+                    <a href="/Educarama/views/pages/gestionar_eventos.php?filtro=activos" class="btn btn-outline-primary <?= $filtro === 'activos' ? 'active' : '' ?>">Activos</a>
+                    <a href="/Educarama/views/pages/gestionar_eventos.php?filtro=inactivos" class="btn btn-outline-primary <?= $filtro === 'inactivos' ? 'active' : '' ?>">Inactivos</a>
                 </div>
             </div>
 
-            <?php if (!empty($avisos)): ?>
+            <?php if (!empty($eventos)): ?>
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
@@ -196,7 +197,7 @@ include __DIR__ . '/includes/menu_lateral.php';
                     </table>
                 </div>
             <?php else: ?>
-                <p>No hay avisos cargados.</p>
+                <p>No hay eventos cargados.</p>
             <?php endif; ?>
         </div>
 
@@ -220,10 +221,10 @@ document.querySelectorAll('.btn-desactivar').forEach(boton => {
 
         Swal.fire({
 
-            title: '¿Desactivar aviso?',
+            title: '¿Desactivar evento?',
             html: `
                 <b>${titulo}</b><br><br>
-                El aviso dejará de mostrarse en la pantalla de inicio.
+                El evento dejará de mostrarse en la pantalla de inicio.
             `,
             icon: 'warning',
 
@@ -240,7 +241,7 @@ document.querySelectorAll('.btn-desactivar').forEach(boton => {
             if(result.isConfirmed){
 
                 window.location =
-                    'gestionar_avisos.php?accion=desactivar&id=' + id;
+                    'gestionar_eventos.php?accion=desactivar&id=' + id;
 
             }
 

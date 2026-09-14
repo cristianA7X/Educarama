@@ -21,9 +21,10 @@ class RolRepository implements MostrarTodoInterface, MostrarPorIdInterface, Agre
         return $row ? new Rol((int)$row['id'], $row['nombre']) : null;
     }
 
-    public function agregar($rol): void {
+    public function agregar($rol): int {
         $stmt = $this->db->prepare("INSERT INTO rol (nombre) VALUES (?)");
         $stmt->execute([$rol->nombre]);
+        return (int) $this->db->lastInsertId();
     }
 
     public function actualizar($rol): void {

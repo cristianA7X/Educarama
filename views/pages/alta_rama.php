@@ -1,11 +1,8 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-?>
-<?php
-$tituloPagina = "Nueva Rama";
-
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
+$tituloPagina = "Nueva Rama";
 $controlador = new RamaController();
 
 $error = null;

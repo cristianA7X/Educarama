@@ -1,4 +1,6 @@
 <?php
+// views/pages/recuperar_contrasenia.php
+// Esta página permite a los usuarios recuperar su contraseña en caso de que la hayan olvidado.
 require_once __DIR__ . '/../../src/Datos/Database.php';
 require_once __DIR__ . '/../../src/Datos/UsuarioRepository.php';
 require_once __DIR__ . '/../../src/Servicios/LoginService.php';

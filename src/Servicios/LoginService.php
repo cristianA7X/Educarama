@@ -1,5 +1,6 @@
 <?php
-
+// src/Servicios/LoginService.php
+// Esta clase es responsable de manejar la lógica de negocio relacionada con el inicio de sesión y la
 class LoginService
 {
     private UsuarioRepository $usuarioRepository;

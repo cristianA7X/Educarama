@@ -1,14 +1,17 @@
 <?php
 // src/Controladores/AuthMiddleware.php
+// Este middleware se encarga de verificar si un usuario está autenticado 
+// antes de permitir el acceso a ciertas rutas o recursos protegidos.
 
-// Asegurarnos de que la sesión esté iniciada
+// Asegura de que la sesión esté iniciada
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Verificar si NO existe el ID de usuario en la sesión
+// Verifica si NO existe el ID de usuario en la sesión
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: /Educarama/views/pages/login.php");
-    exit; // El exit para detener la ejecución del script
+    exit; 
 }
+
 ?>

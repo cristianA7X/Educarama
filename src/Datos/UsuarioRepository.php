@@ -1,6 +1,11 @@
 <?php
+// src/Datos/UsuarioRepository.php
+// esta clase es responsable de interactuar 
+// con la base de datos para realizar 
+// operaciones sql relacionadas con los usuarios
 
 class UsuarioRepository
+
 {
     private PDO $conexion;
 

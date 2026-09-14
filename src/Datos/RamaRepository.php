@@ -30,15 +30,31 @@ class RamaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerPerfilDesdeUrl(): string
-    {
-        if (!isset($_GET['id'])) {
-            return null;
-        }
+ public function obtenerPorId(int $id): ?array
+{
+    $stmt = $this->conexion->prepare("
+        SELECT 
+            r.id,
+            r.nombre,
+            r.id_grupo,
+            r.id_rama,
+            g.nombre AS grupo,
+            cr.nombre AS categoria
+        FROM rama r
+        LEFT JOIN grupo g ON r.id_grupo = g.id
+        LEFT JOIN categoria_rama cr ON r.id_rama = cr.id
+        WHERE r.id = :id
+        LIMIT 1
+    ");
 
-        $id = intval($_GET['id']);
-        return $this->obtenerPerfil($id);
-    }
+    $stmt->execute([
+        ':id' => $id
+    ]);
+
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $resultado ?: null;
+}
     public function crear(array $datos): void
     {
         $stmt = $this->conexion->prepare("
