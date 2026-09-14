@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -7,7 +8,6 @@ error_reporting(E_ALL);
 
 $tituloPagina = "Nuevo Protagonista";
 
-require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
 
 $controlador = new ProtagonistaController();
 
@@ -36,7 +36,7 @@ try {
 $ramas = $controlador->listarRamas();
 $patrullas = $controlador->listarPatrullas();
 
-$rama_page = "unidad";
+$rama_page = "";
 
 $esEdicion = !empty($protagonista);
 ?>

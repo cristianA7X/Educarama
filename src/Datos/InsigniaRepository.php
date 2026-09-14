@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/../Model/Insignia.php';
+require_once __DIR__ . '/../Abstracciones/MostrarTodoInterface.php';
+require_once __DIR__ . '/../Abstracciones/MostrarPorIdInterface.php';
+require_once __DIR__ . '/../Abstracciones/AgregarInterface.php';
+require_once __DIR__ . '/../Abstracciones/ActualizarInterface.php';
+require_once __DIR__ . '/../Abstracciones/EliminarInterface.php';
 
 class InsigniaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;
@@ -25,9 +30,10 @@ class InsigniaRepository implements MostrarTodoInterface, MostrarPorIdInterface,
         return $row ? new Insignia((int)$row['id'], $row['nombre'], (int)$row['id_categoria_rama']) : null;
     }
 
-    public function agregar($insignia): void {
+    public function agregar($insignia):  int {
         $stmt = $this->db->prepare("INSERT INTO insignia (nombre, id_categoria_rama) VALUES (?, ?)");
         $stmt->execute([$insignia->nombre, $insignia->id_categoria_rama]);
+        return $this->db->lastInsertId();
     }
 
     public function actualizar($insignia): void {
