@@ -76,7 +76,7 @@ include __DIR__ . '/includes/menu_lateral.php';
         </div>
 
         <!-- BOTONES DE ACCIÓN -->
-        <div class="row g-3 mt-3">
+        <!-- <div class="row g-3 mt-3">
                   <div class="col-12 col-md-4">
                 <a 
                     href="gestionar_ramas.php" 
@@ -84,7 +84,7 @@ include __DIR__ . '/includes/menu_lateral.php';
                     <i class="bi bi-diagram-3-gear me-2"></i>Crear Rama
                     </a>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 

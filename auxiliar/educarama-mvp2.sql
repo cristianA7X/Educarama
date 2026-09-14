@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-09-2026 a las 01:29:39
+-- Tiempo de generación: 14-09-2026 a las 21:05:38
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -70,7 +70,10 @@ CREATE TABLE `aviso` (
 --
 
 INSERT INTO `aviso` (`id`, `titulo`, `descripcion`, `fecha_inicio`, `fecha_fin`, `prioridad`, `activo`) VALUES
-(1, 'Campa', 'Campamento Manada en Pencahuasi', '2026-09-12', '2026-09-13', 'media', 1);
+(1, 'Campa', 'Campamento Manada en Pencahuasi', '2026-09-12', '2026-09-13', 'media', 1),
+(2, 'Encuentro Distrital', 'En el grupo San Calixto nos reuniremos', '2026-09-05', '2026-09-06', 'media', 1),
+(3, 'Campa 2025', 'El Talar', '2026-12-17', '2026-12-20', 'alta', 1),
+(4, 'Campa 2', '2', '2026-09-30', '2026-10-01', 'media', 1);
 
 -- --------------------------------------------------------
 
@@ -142,7 +145,8 @@ CREATE TABLE `documento` (
   `id` int(11) NOT NULL,
   `tipo_documento` varchar(25) DEFAULT NULL,
   `descripcion` text DEFAULT NULL,
-  `id_protagonista` int(11) NOT NULL
+  `id_protagonista` int(11) NOT NULL,
+  `fecha_subida` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -234,7 +238,8 @@ CREATE TABLE `patrulla` (
 
 INSERT INTO `patrulla` (`id`, `nombre`, `id_rama`) VALUES
 (1, 'Orcas', 2),
-(2, 'Aguilas', 2);
+(2, 'Aguilas', 2),
+(3, 'cris', 1);
 
 -- --------------------------------------------------------
 
@@ -250,6 +255,15 @@ CREATE TABLE `persona` (
   `fecha_nacimiento` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `persona`
+--
+
+INSERT INTO `persona` (`id`, `dni`, `nombre`, `apellido`, `fecha_nacimiento`) VALUES
+(2, 12345678, 'Elias', 'Zarate', '2001-10-12'),
+(4, 1234567, 'cris', 'primo', '2010-02-17'),
+(5, 2211122, 'lisandro', 'Martinez', '2001-10-10');
+
 -- --------------------------------------------------------
 
 --
@@ -262,8 +276,17 @@ CREATE TABLE `protagonista` (
   `id_persona` int(11) NOT NULL,
   `id_rama` int(11) NOT NULL,
   `id_patrulla` int(11) DEFAULT NULL,
-  `id_usuario` int(11) DEFAULT NULL
+  `anio_ingreso` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `protagonista`
+--
+
+INSERT INTO `protagonista` (`id`, `promesa`, `id_persona`, `id_rama`, `id_patrulla`, `anio_ingreso`) VALUES
+(1, 1, 2, 1, NULL, 2008),
+(2, 1, 4, 3, 2, 2009),
+(3, 1, 5, 3, 1, 2008);
 
 -- --------------------------------------------------------
 
@@ -284,7 +307,8 @@ CREATE TABLE `rama` (
 
 INSERT INTO `rama` (`id`, `nombre`, `id_grupo`, `id_rama`) VALUES
 (1, 'Pata Tierna', 1, 1),
-(2, 'Malvinas Argentinas', 1, 2);
+(2, 'Malvinas Argentinas', 1, 2),
+(3, 'messi', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -342,7 +366,8 @@ INSERT INTO `usuario` (`id`, `nombre`, `email`, `contrasenia`) VALUES
 (5, 'Elias Hernan Zarate Benito', 'hugozarate@hotmail.es', '$2y$10$jqyxX9sc/JHIPcnySfhiku6ne/Pd6jlsLas/M.Tdv9B7Do8tUhiHK'),
 (6, 'valen', 'vale@gmail.com', '$2y$10$2vO27HB7DnvD.wIT7bsNzeaqNJ6gphFGcwg6bSI4peuKKLD783ahW'),
 (7, 'profe', 'profe@gmail.com', '$2y$10$4ZR1Oa4npDtUU1NT4qi13.h5Iqjp79ZZUkL.GRoYn3kvM24WsrK/W'),
-(8, 'ejemplo', 'ejemplo@gmail.com', '$2y$10$y95RgLJpgUISCjsr2y.eueagX9k3OIDZOrn8NZEBsyg1zvuLpxozK');
+(8, 'ejemplo', 'ejemplo@gmail.com', '$2y$10$y95RgLJpgUISCjsr2y.eueagX9k3OIDZOrn8NZEBsyg1zvuLpxozK'),
+(9, 'Elias', 'ejemplo@outlook.com', '$2y$10$miz2ohoPy0rOoFIdRSMyMO.B1qnGj7t24XVFG9giuZbzHfYtF601S');
 
 --
 -- Índices para tablas volcadas
@@ -494,7 +519,7 @@ ALTER TABLE `asignacion_rol`
 -- AUTO_INCREMENT de la tabla `aviso`
 --
 ALTER TABLE `aviso`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `categoria_rama`
@@ -536,25 +561,25 @@ ALTER TABLE `insignia`
 -- AUTO_INCREMENT de la tabla `patrulla`
 --
 ALTER TABLE `patrulla`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `protagonista`
 --
 ALTER TABLE `protagonista`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `rama`
 --
 ALTER TABLE `rama`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -578,7 +603,7 @@ ALTER TABLE `tipo_accion`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Restricciones para tablas volcadas

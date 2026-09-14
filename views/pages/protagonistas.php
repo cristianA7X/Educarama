@@ -100,7 +100,7 @@ include __DIR__ . '/includes/menu_lateral.php';
 
             <div class="col-12 col-md-4">
                 <a 
-                    href="gestionar_protagonistas.php" 
+                    href="alta_protagonista.php" 
                     class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
                     <i class="bi bi-person-gear me-2"></i>Crear nuevo protagonista
                     </a>

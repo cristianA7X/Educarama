@@ -238,11 +238,12 @@ $esEdicion = !empty($protagonista);
                             </div>
                             
                             <!-- NUEVA SECCIÓN DE DOCUMENTACIÓN -->
+                            <!--
                             <hr>
-                            
                             <h2 class="h4 texto-violeta fw-bold mb-3">Documentación Adjunta</h2>
+                            -->
                             
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label for="documento" class="form-label fw-bold">Subir Documento (Opcional)</label>
                                     <input 
@@ -256,7 +257,7 @@ $esEdicion = !empty($protagonista);
                                         Formatos permitidos: PDF, JPG, PNG. Tamaño máximo recomendado: 5MB.
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="d-flex gap-2 mt-3">
                                 <button type="submit" class="boton-primario px-4 py-2 fw-bold">

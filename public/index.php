@@ -2,15 +2,14 @@
 <?php
 //public/index.php
 require_once __DIR__ . '/../src/Controladores/AuthMiddleware.php';
-
-$tituloPagina = "Inicio";
 require_once __DIR__ . '/../src/Controladores/eventoControlador.php';
 
-// 1. Instancias el controlador
+$tituloPagina = "Inicio";
 $eventoControlador = new eventoControlador();
 
-// 2. Llamas al método y guardas el resultado en la variable que usa el HTML
-$eventos = $eventoControlador->listareventosHome();
+// 2. Llamas al método y guardas el resultado en la variable que usa el 
+// HTML$eventos = $eventoControlador->listareventosHome();
+
 ?>
 
 
@@ -77,49 +76,6 @@ $eventos = $eventoControlador->listareventosHome();
                 <div class="home-stat-card" >
                     <div class="icon">📅</div>
                     <p>Actividades</p>                
-                </div>
-            </section>
-
-            <section class="home-grid">
-                <div class="home-card">
-                    <h3>📅 Próximas actividades</h3>
-
-                    <table class="home-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Actividad</th>
-                                <th>Rama</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>05/07</td>
-                                <td>Reunión semanal</td>
-                                <td>Lobatos</td>
-                            </tr>
-                            <tr>
-                                <td>10/07</td>
-                                <td>Fogón scout</td>
-                                <td>Scouts</td>
-                            </tr>
-                            <tr>
-                                <td>15/07</td>
-                                <td>Campamento</td>
-                                <td>Todo el grupo</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="home-card">
-                    <h3>🎂 Cumpleaños</h3>
-
-                    <ul class="birthday-list">
-                        <li>Juan Pérez - 02/07</li>
-                        <li>Lucía Gómez - 03/07</li>
-                        <li>Mateo Ruiz - 06/07</li>
-                    </ul>
                 </div>
             </section>
 

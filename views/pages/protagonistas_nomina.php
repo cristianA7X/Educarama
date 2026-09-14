@@ -16,7 +16,6 @@ $controlador = new ProtagonistaController();
 try {
     $protagonistaEditar = $controlador->obtenerProtagonistaEditar();
     $protagonistas = $controlador->listarProtagonistas();
-    $filtro = $controlador->obtenerFiltroActual();
 
 } catch (Exception $e) {
     $error = $e->getMessage();
@@ -87,9 +86,9 @@ include __DIR__ . '/includes/menu_lateral.php';
                             <?php foreach ($protagonistas as $protagonista): ?>
                                 <tr>
                                     <td>
-                                        <strong><?= htmlspecialchars($protagonista['nombre']) ?></strong> 
-                                        <strong><?= htmlspecialchars($protagonista['apellido']) ?></strong>
-                                    </td>
+                                        <a href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" class="text-decoration-none">
+                                            <?= htmlspecialchars($protagonista['nombre']) ?> <?= htmlspecialchars($protagonista['apellido']) ?>
+                                        </a>
                                     
                                     <td>
                                     <?php
@@ -123,7 +122,7 @@ include __DIR__ . '/includes/menu_lateral.php';
           
                 <div class="col-12 col-md-4">
                     <a 
-                        href="gestionar_protagonistas.php" 
+                        href="alta_protagonista.php" 
                         class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
                         <i class="bi bi-person-gear me-2"></i>Crear nuevo protagonista
                         </a>

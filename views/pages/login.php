@@ -15,8 +15,7 @@ $tituloPagina = "Inicio de Sesión";
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
-<body class="rama-<?php echo $rama_page; ?>">
-
+<body class="rama-<?php echo $rama_page; ?>"
     <?php 
      // Componentes fijos de la interfaz
     include __DIR__ . '/includes/barra_superior.php'; 
