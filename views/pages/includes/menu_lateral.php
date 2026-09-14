@@ -31,17 +31,19 @@
                 </a>
             </div>
 
-            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#submenu-ramas" aria-expanded="false" aria-controls="submenu-ramas">
-                <span class="icon"><i class="bi bi-diagram-3"></i></span>
-                <span class="description">Ramas <i class="bi bi-caret-down-fill"></i></span>
-            </a>
-            <div class="sub-menu collapse" id="submenu-ramas">
-                <a class="nav-link" href="/Educarama/views/pages/ramas.php">
-                    <span class="icon"><i class="bi bi-eye"></i></span>
-                    <span class="description">Ver ramas</span>
-                </a>
 
-            </div>
+
+
+            <a class="nav-link" href="/Educarama/views/pages/ramas.php">
+                <span class="icon"><i class="bi bi-diagram-3"></i></span>
+                <span class="description">Ramas</span>
+            </a>
+
+       
+  
+
+
+
 
             <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#submenu-patrullas" aria-expanded="false" aria-controls="submenu-patrullas">
                 <span class="icon"><i class="bi bi-shield-shaded"></i></span>

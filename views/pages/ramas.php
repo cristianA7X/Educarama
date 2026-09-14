@@ -2,13 +2,9 @@
 
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-?>
-
-<?php
-$tituloPagina = "Ramas";
-
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
+$tituloPagina = "Ramas";
 $controlador = new RamaController();
 $ramas = $controlador->listar();
 ?>
@@ -32,7 +28,7 @@ include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
-    <div class="container contenedor-principal my-4 p-4">
+    <div class="container contenedor-principal  p-4">
 
         <div class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>

@@ -68,7 +68,7 @@ $documentos = $docRepo->obtenerDocumentosPorProtagonista($protagonista['id']);
     <!-- CONTENEDOR MAESTRO -->
     <div class="main-content-wrapper">
         
-        <div class="container contenedor-principal my-4 p-4">
+        <div class="container contenedor-principal  p-4">
             
             <!-- MENSAJES DE ÉXITO -->
             <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>

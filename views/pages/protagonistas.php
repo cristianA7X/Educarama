@@ -32,9 +32,9 @@ include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
-    <div class="container contenedor-principal my-4 p-4">
+    <div class="container contenedor-principal p-4">
 
-        <div class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
             
             <div>
 
@@ -44,7 +44,7 @@ include __DIR__ . '/includes/menu_lateral.php';
             <a href="/Educarama/views/pages/protagonistas_nomina.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
                 <i class="me-2"></i>Ver nómina completa   
             </a>
-        </div>
+        </section>
 
         
 

@@ -32,11 +32,16 @@ $eventoControlador = new eventoControlador();
     ?>
 
     <div class="main-content-wrapper">
-        <div class="container contenedor-principal home-container my-4 p-4">
+        <div class="container contenedor-principal  p-4">
 
-            <section class="home-welcome">
-                <h2>Bienvenido a Educarama</h2>
-                <p>Panel principal para visualizar eventos, actividades y novedades del grupo scout.</p>
+            <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="fw-bold mb-1">Bienvenido a Educarama</h1>
+                    <p class="mb-0">Panel principal para visualizar eventos, actividades y novedades del grupo scout.</p>
+                </div>
+                <a href="/Educarama/views/pages/protagonistas_nomina.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
+                    <i class="me-2"></i>Ver nómina completa   
+                </a>
             </section>
 
             <h3 class="home-section-title">📢 Eventos</h3>

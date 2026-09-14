@@ -44,7 +44,7 @@ include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
-    <div class="container contenedor-principal my-4 p-4">
+    <div class="container contenedor-principal  p-4">
         <?php if (!empty($error)): ?>
     <div class="alert alert-danger">
         <?= htmlspecialchars($error) ?>

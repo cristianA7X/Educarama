@@ -2,7 +2,7 @@
 $rama_page = ""; 
 $tituloPagina = "Inicio de Sesión";
 ?>
-
+  
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,12 +15,10 @@ $tituloPagina = "Inicio de Sesión";
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
-<body class="rama-<?php echo $rama_page; ?>"
-    <?php 
-     // Componentes fijos de la interfaz
-    include __DIR__ . '/includes/barra_superior.php'; 
-    ?>
+<body class="rama-<?php echo $rama_page; ?>">
 
+    <?php       include 'includes/barra_superior.php'; 
+    ?>
     <div class="main-content-wrapper without-sidebar">
         <div class="container contenedor-principal without-sidebar my-4 p-4">
             
@@ -33,7 +31,8 @@ $tituloPagina = "Inicio de Sesión";
             <div class="row mb-4 align-items-stretch">
                 <div class="col-md-12 mb-3 mb-md-0">
                     <div class="tarjeta-blanca-borde p-3 h-100">
-                        <hr class="border-white opacity-25">
+                        <!--  <hr class="border-white opacity-25"> -->
+                       
                         
                         <form id="formLogin" method="POST">
                             <div class="mb-3">
@@ -58,11 +57,11 @@ $tituloPagina = "Inicio de Sesión";
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
+
+        <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -122,5 +121,6 @@ $tituloPagina = "Inicio de Sesión";
         });
     });
     </script>
+
 </body>
 </html>

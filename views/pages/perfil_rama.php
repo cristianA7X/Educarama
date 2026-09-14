@@ -43,7 +43,7 @@ if (!$rama) {
     <!-- CONTENEDOR MAESTRO -->
     <div class="main-content-wrapper">
         
-        <div class="container contenedor-principal my-4 p-4">
+        <div class="container contenedor-principal p-4">
             <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>

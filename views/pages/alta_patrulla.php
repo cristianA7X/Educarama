@@ -34,7 +34,7 @@ include __DIR__ . '/includes/menu_lateral.php';
 ?>
 
 <div class="main-content-wrapper">
-    <div class="container contenedor-principal my-4 p-4">
+    <div class="container contenedor-principal  p-4">
 
         <div class="barra-superior-inst mb-4">
             <h1 class="fw-bold mb-1">Nueva patrulla</h1>
