@@ -6,10 +6,9 @@ require_once __DIR__ . '/../src/Controladores/eventoControlador.php';
 
 $tituloPagina = "Inicio";
 $eventoControlador = new eventoControlador();
-
-// 2. Llamas al método y guardas el resultado en la variable que usa el 
-// HTML$eventos = $eventoControlador->listareventosHome();
-
+// Llamas al método y guardas el resultado en la variable que usa el 
+// HTML$eventos = $eventoControlador->listareventosHome()
+//
 ?>
 
 
@@ -43,18 +42,7 @@ $eventoControlador = new eventoControlador();
             <h3 class="home-section-title">📢 Eventos</h3>
 
             <section class="home-alerts">
-                <ul>
-                    <?php if (!empty($eventos)): ?>
-                        <?php foreach ($eventos as $evento): ?>
-                            <li>
-                                <strong><?= htmlspecialchars($evento['titulo']) ?>:</strong>
-                                <?= htmlspecialchars($evento['descripcion']) ?>
-                            </li>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <li>No hay eventos importantes pronto.</li>
-                    <?php endif; ?>
-                </ul>
+                <?php require __DIR__ . '/../views/pages/includes/alertas.php'; ?>
             </section>
 
             <section class="home-stats">

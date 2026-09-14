@@ -1,4 +1,5 @@
 <?php
+//src/Controladores/eventoControlador.php
 
 require_once __DIR__ . '/../Datos/Database.php';
 require_once __DIR__ . '/../Datos/eventoRepositorio.php';
