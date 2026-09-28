@@ -1,5 +1,3 @@
-
-
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
