@@ -1,19 +1,18 @@
 <?php
+///src/Controladores/ProgresionController.php
 
 require_once __DIR__ . '/../Datos/Database.php';
 require_once __DIR__ . '/../Datos/PersonaRepository.php';
 require_once __DIR__ . '/../Datos/ProtagonistaRepository.php';
 require_once __DIR__ . '/../Datos/RamaRepository.php';
 require_once __DIR__ . '/../Datos/PatrullaRepository.php';
-require_once __DIR__ . '/../Servicios/ProtagonistaService.php';
+require_once __DIR__ . '/../Servicios/ProgresionService.php';
 
-class ProtagonistaController
+class ProgresionController
 {
     private PDO $conexion;
-    private ProtagonistaService $servicio;
-    private RamaRepository $ramaRepository;
-    private PatrullaRepository $patrullaRepository;
-
+    private ProgresionService $servicio;
+    
     public function __construct()
     {
         $this->conexion = Database::getConexion();
@@ -24,7 +23,7 @@ class ProtagonistaController
         $this->ramaRepository = new RamaRepository($this->conexion);
         $this->patrullaRepository = new PatrullaRepository($this->conexion);
 
-        $this->servicio = new ProtagonistaService(
+        $this->servicio = new ProgresionService(
             $this->conexion,
             $personaRepository,
             $protagonistaRepository

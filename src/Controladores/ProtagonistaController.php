@@ -1,6 +1,5 @@
-/src/Controladores/ProtagonistaController.php
-
 <?php
+///src/Controladores/ProtagonistaController.php
 
 require_once __DIR__ . '/../Datos/Database.php';
 require_once __DIR__ . '/../Datos/PersonaRepository.php';

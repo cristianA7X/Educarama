@@ -1,4 +1,3 @@
-// src/Controladores/RamaController.php
 
 <?php
 
@@ -46,25 +45,18 @@ class RamaController
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    //   public function obtenerPerfilDesdeUrl(): ?array
-    //{
-    //    if (empty($_GET['id'])) {
-    //        return null;
-    //    }
-    //  return $this->servicio->obtenerPerfil((int) $_GET['id']);
-    //}
 
   
-public function obtenerPerfilDesdeUrl()
-{
-    if (!isset($_GET['id'])) {
-        return null;
+    public function obtenerPerfilDesdeUrl()
+    {
+        if (!isset($_GET['id'])) {
+            return null;
+        }
+
+        $id = intval($_GET['id']);
+
+        return $this->servicio->obtenerPerfilDesdeUrl($id);
     }
-
-    $id = intval($_GET['id']);
-
-    return $this->servicio->obtenerPerfilDesdeUrl($id);
-}
 
     public function listarCategorias(): array
     {
