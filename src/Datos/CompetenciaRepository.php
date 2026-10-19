@@ -1,37 +1,41 @@
 <?php
-require_once __DIR__ . '/src/Model/Competencia.php';
+// src/Datos/CompetenciaRepository.php
 
-class CompetenciaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
-    private PDO $db;
-    public function __construct() { $this->db = Database::getConexion(); }
+require_once __DIR__ . '/../Model/Competencia.php';
+require_once __DIR__ . '/Database.php';
 
-    public function mostrarTodo(): array {
-        $stmt = $this->db->query("SELECT * FROM competencia");
-        $items = [];
-        while ($row = $stmt->fetch()) { $items[] = new Competencia((int)$row['id'], (int)$row['codigo'], $row['descripcion'], (int)$row['id_categoria_rama'], (int)$row['id_sendero']); }
-        return $items;
+class CompetenciaRepository {
+    private PDO $conexion;
+
+    public function __construct() {
+        $this->conexion = Database::getConexion();
     }
 
-    public function mostrarPorId(int $id): ?Competencia {
-        $stmt = $this->db->prepare("SELECT * FROM competencia WHERE id = ?");
-        $stmt->execute([$id]);
-        $row = $stmt->fetch();
-        return $row ? new Competencia((int)$row['id'], (int)$row['codigo'], $row['descripcion'], (int)$row['id_categoria_rama'], (int)$row['id_sendero']) : null;
+    public function actualizarEstadoAccion(int $idProtagonista, int $idAccion, string $estado): void {
+        $stmt = $this->conexion->prepare("
+            UPDATE protagonista_accion 
+            SET estado = :estado 
+            WHERE id_protagonista = :id_prota AND id_accion = :id_accion
+        ");
+        $stmt->execute([
+            ':estado' => $estado,
+            ':id_prota' => $idProtagonista,
+            ':id_accion' => $idAccion
+        ]);
     }
 
-    public function agregar($competencia): void {
-        $stmt = $this->db->prepare("INSERT INTO competencia (codigo, descripcion, id_categoria_rama, id_sendero) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$competencia->codigo, $competencia->descripcion, $competencia->id_categoria_rama, $competencia->id_sendero]);
+    public function verificarAccionesCompletas(int $idProtagonista, int $idCompetencia): bool {
+        // Retorna true si el COUNT de acciones totales coincide con el COUNT de acciones 'Realizada'
+        $stmt = $this->conexion->prepare("
+            SELECT 
+                (SELECT COUNT(*) FROM accion WHERE id_competencia = :id_comp) AS totales,
+                (SELECT COUNT(*) FROM protagonista_accion WHERE id_protagonista = :id_prota AND estado = 'Realizada') AS realizadas
+        ");
+        $stmt->execute([':id_comp' => $idCompetencia, ':id_prota' => $idProtagonista]);
+        $resultado = $stmt->fetch();
+        
+        return $resultado['totales'] === $resultado['realizadas'] && $resultado['totales'] > 0;
     }
 
-    public function actualizar($competencia): void {
-        $stmt = $this->db->prepare("UPDATE competencia SET codigo = ?, descripcion = ?, id_categoria_rama = ?, id_sendero = ? WHERE id = ?");
-        $stmt->execute([$competencia->codigo, $competencia->descripcion, $competencia->id_categoria_rama, $competencia->id_sendero, $competencia->id]);
-    }
-
-    public function eliminar(int $id): void {
-        $stmt = $this->db->prepare("DELETE FROM competencia WHERE id = ?");
-        $stmt->execute([$id]);
-    }
 }
 ?>

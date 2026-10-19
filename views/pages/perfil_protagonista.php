@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-$tituloPagina = "Perfil de Protagonista";
 require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
 
+$tituloPagina = "Perfil de Protagonista";
 $controlador = new ProtagonistaController();
 $protagonista = $controlador->obtenerPerfilDesdeUrl();
 

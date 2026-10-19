@@ -1,18 +1,59 @@
 
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+require_once __DIR__ . '/../../src/Controladores/ProgresionController.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $tituloPagina = "Gestionar competencias";
+?>
 
-// require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
-require_once __DIR__ . '/../../src/Controladores/ProgresionController.php';
+<select class="form-select select-accion" data-id-accion="1" data-id-competencia="5" data-id-prota="10">
+    <option value="Pendiente">Pendiente</option>
+    <option value="En curso">En curso</option>
+    <option value="Realizada">Realizada</option>
+</select>
 
+<script>
+document.querySelectorAll('.select-accion').forEach(select => {
+    select.addEventListener('change', async function() {
+        const payload = {
+            tipo_actualizacion: 'accion',
+            id_protagonista: this.dataset.idProta,
+            id_accion: this.dataset.idAccion,
+            id_competencia: this.dataset.idCompetencia,
+            estado: this.value
+        };
 
-$controlador = new ProgresionController();
+        const response = await fetch('/Educarama/src/Controladores/ProgresionController.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // Si el servidor detecta que se completó todo, lanza la alerta sugerida
+        if (data.sugerencia && data.sugerencia.tipo === 'COMPETENCIA_LISTA') {
+            Swal.fire({
+                title: '¡Acciones completas!',
+                text: data.sugerencia.mensaje,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, adquirir competencia'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Aquí harías otro fetch para cambiar el estado de la competencia
+                    actualizarCompetencia(payload.id_competencia, 'Adquirida');
+                }
+            });
+        }
+    });
+});
+</script>
+
 
 try {
     $protagonistaEditar = $controlador->obtenerProtagonistaEditar();

@@ -22,7 +22,7 @@ EDUCARAMA - ESTILO GENERAL
   --sombra-card: 0 8px 20px rgba(50, 0, 113, 0.1);
 
   /* Colores Primarios  */
-  --scout-amarillo: #fdd617;
+  --scout-amarillo: hsl(50, 98%, 54%);
   --scout-verde: #00a651;
   --scout-celeste: #00aaf2;
   --scout-rojo: #e30613;
@@ -34,8 +34,8 @@ EDUCARAMA - ESTILO GENERAL
   --scout-rojo-claro: #f9b2b6; /* Un rojo claro/salmón suave */
 
   /* Variables de Interfaz Dinámicas*/
-  --rama-primario: var(--violeta-primario);
-  --rama-secundario: var(--violeta-secundario);
+  --rama-primario: var(--scout-verde);
+  --rama-secundario: var(--scout-verde-claro);
 
   /* Medidas */
   --sidebar-width: 220px;

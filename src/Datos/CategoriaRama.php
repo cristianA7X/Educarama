@@ -3,7 +3,9 @@ require_once __DIR__ . '/src/Model/CategoriaRama.php';
 
 class CategoriaRamaRepository implements MostrarTodoInterface, MostrarPorIdInterface, AgregarInterface, ActualizarInterface, EliminarInterface {
     private PDO $db;
-    public function __construct() { $this->db = Database::getConexion(); }
+    public function __construct() { 
+        $this->db = Database::getConexion(); 
+    }
 
     public function mostrarTodo(): array {
         $stmt = $this->db->query("SELECT * FROM categoria_rama");
@@ -19,10 +21,11 @@ class CategoriaRamaRepository implements MostrarTodoInterface, MostrarPorIdInter
         return $row ? new CategoriaRama((int)$row['id'], $row['nombre']) : null;
     }
 
-    public function agregar($categoria): void {
-        $stmt = $this->db->prepare("INSERT INTO categoria_rama (nombre) VALUES (?)");
-        $stmt->execute([$categoria->nombre]);
-    }
+public function agregar($categoria): int {
+    $stmt = $this->db->prepare("INSERT INTO categoria_rama (nombre) VALUES (?)");
+    $stmt->execute([$categoria->nombre]);    
+    return (int) $this->db->lastInsertId();
+}
 
     public function actualizar($categoria): void {
         $stmt = $this->db->prepare("UPDATE categoria_rama SET nombre = ? WHERE id = ?");
