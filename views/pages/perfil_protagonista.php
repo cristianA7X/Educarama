@@ -211,9 +211,9 @@ $documentos = $docRepo->obtenerDocumentosPorProtagonista($protagonista['id']);
                     </a>
                 </div>
                 <div class="col-12 col-md-4">
-                    <button type="button" id="btnRecomendarInsignia" class="boton-primario w-100 py-3 fw-bold d-block">
-                        <i class="bi bi-award me-2"></i>Evaluar Insignia
-                    </button>
+                    <a href="gestionar_competencias.php?id=<?= $protagonista['id'] ?>" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
+                        <i class="bi bi-award me-2"></i>Asignar competencias
+                    </a>
                 </div>
             </div>
             

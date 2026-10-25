@@ -27,6 +27,43 @@ class PatrullaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerPorId(int $id): ?array
+    {
+        $stmt = $this->conexion->prepare("
+            SELECT 
+                p.id,
+                p.nombre,
+                p.id_rama,
+                r.nombre AS rama
+            FROM patrulla p
+            LEFT JOIN rama r ON p.id_rama = r.id
+            WHERE p.id = :id
+        ");
+
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+public function obtenerIntegrantes(int $idPatrulla): array 
+    {
+        // Consultamos la tabla protagonista unida a persona, NO a integrante
+        $stmt = $this->conexion->prepare("
+            SELECT 
+                p.id, 
+                p.anio_ingreso, 
+                per.nombre, 
+                per.apellido, 
+                per.fecha_nacimiento
+            FROM protagonista p
+            INNER JOIN persona per ON p.id_persona = per.id
+            WHERE p.id_patrulla = :id_patrulla
+            ORDER BY per.apellido ASC
+        ");
+        
+        $stmt->execute(['id_patrulla' => $idPatrulla]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public function crear(array $datos): void
     {
         $stmt = $this->conexion->prepare("

@@ -14,6 +14,16 @@ class PatrullaService
         return $this->repositorio->listarTodo();
     }
 
+    public function obtenerPorId(int $id): ?array
+    {
+        return $this->repositorio->obtenerPorId($id);
+    }
+
+    public function obtenerIntegrantes(int $idPatrulla): array
+    {
+        return $this->repositorio->obtenerIntegrantes($idPatrulla);
+    }
+
     public function crearDesdeFormulario(array $post): void
     {
         $nombre = trim($post['nombre'] ?? '');

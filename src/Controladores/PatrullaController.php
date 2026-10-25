@@ -1,10 +1,11 @@
 
 <?php
-
+///src/Controladores/PatrullaController.php
 require_once __DIR__ . '/../Datos/Database.php';
 require_once __DIR__ . '/../Datos/PatrullaRepository.php';
 require_once __DIR__ . '/../Datos/RamaRepository.php';
 require_once __DIR__ . '/../Servicios/PatrullaService.php';
+
 
 class PatrullaController
 {
@@ -34,6 +35,15 @@ class PatrullaController
             header("Location: patrullas.php");
             exit;
         }
+    }
+    public function obtenerPatrullaPorId(int $id): ?array
+    {
+        return $this->servicio->obtenerPorId($id);
+    }
+
+    public function obtenerIntegrantesPorPatrulla(int $idPatrulla): array
+    {
+        return $this->servicio->obtenerIntegrantes($idPatrulla);
     }
 
     public function listarRamas(): array

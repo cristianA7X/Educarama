@@ -33,16 +33,14 @@ $patrullas = $controlador->listar();
                     <p class="mb-0">Administrá las patrullas o equipos del grupo.</p>
                 </div>
 
-                <a href="/Educarama/views/pages/alta_patrulla.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
-                    <i class="bi bi-plus-circle me-2"></i>Nueva patrulla
-                </a>
+
             </section>
 
-            <div class="row g-4">
+            <section class="row g-4">
                 <?php if (!empty($patrullas)): ?>
                     <?php foreach ($patrullas as $patrulla): ?>
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="patrulla-card">
+                        <div class="col-12 col-md-6 col-lg-4">  
+                            <a href="/Educarama/views/pages/perfil_patrulla.php?id=<?= $patrulla['id'] ?>" class="patrulla-card text-decoration-none">
                                 <div class="patrulla-icono">
                                     <i class="bi bi-shield-shaded"></i>
                                 </div>
@@ -55,13 +53,23 @@ $patrullas = $controlador->listar();
                                         Rama: <?= htmlspecialchars($patrulla['rama'] ?? 'Sin rama') ?>
                                     </p>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p>No hay patrullas cargadas.</p>
+                    <p>No hay patrullas cargadas. Crea una nueva patrulla.</p>
                 <?php endif; ?>
-            </div>
+            </section>
+
+            <section class="col-12 col-md-4 mt-4">
+                <a href="alta_protagonista.php" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
+                    <i class="bi bi-person-gear me-2"></i> Crear nueva patrulla
+                </a>
+            </section>
+            
+
+        </div>
+        </div>
 
         </div>
     </div>

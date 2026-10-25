@@ -50,49 +50,53 @@ include __DIR__ . '/includes/menu_lateral.php';
 
         <div class="row g-4">
             <?php if (!empty($protagonistas)): ?>
+
                 <?php foreach ($protagonistas as $protagonista): ?>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <a href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" class="protagonista-card">
-                            <div class="protagonista-foto rama-<?= strtolower($protagonista['rama'] ?? '') ?>" >
-                                <i class="bi bi-person-fill"></i>
-                            </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" class="protagonista-card">
+                        <div class="protagonista-foto rama-<?= strtolower($protagonista['rama'] ?? '') ?>" >
+                            <i class="bi bi-person-fill"></i>
+                        </div>
 
-                            <div class="protagonista-info">
-                                <h3>
-                                    <?= htmlspecialchars($protagonista['nombre']) ?>
-                                    <?= htmlspecialchars($protagonista['apellido']) ?>
-                                </h3>
+                        <div class="protagonista-info">
+                            <h3>
+                                <?= htmlspecialchars($protagonista['nombre']) ?>
+                                <?= htmlspecialchars($protagonista['apellido']) ?>
+                            </h3>
 
-                                <p>
-                                    <i class="bi bi-diagram-3 me-1"></i>
-                                    <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama') ?>
-                                </p>
+                            <p>
+                                <i class="bi bi-diagram-3 me-1"></i>
+                                <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama') ?>
+                            </p>
 
-                                <p>
-                                    <i class="bi bi-calendar-event me-1"></i>
-                                    <?= htmlspecialchars($protagonista['fecha_nacimiento'] ?? 'Sin fecha') ?>
-                                </p>
-                                <p>
-                                    <i class="bi bi-calendar-check me-1"></i>
-                                    Ingreso: 
-                                    <?= !empty($protagonista['anio_ingreso']) 
-                                        ? htmlspecialchars($protagonista['anio_ingreso']) 
-                                        : 'Sin dato' 
-                                    ?>
-                                </p>
+                            <p>
+                                <i class="bi bi-calendar-event me-1"></i>
+                                <?= htmlspecialchars($protagonista['fecha_nacimiento'] ?? 'Sin fecha') ?>
+                            </p>
+                            <p>
+                                <i class="bi bi-calendar-check me-1"></i>
+                                Ingreso: 
+                                <?= !empty($protagonista['anio_ingreso']) 
+                                    ? htmlspecialchars($protagonista['anio_ingreso']) 
+                                    : 'Sin dato' 
+                                ?>
+                            </p>
 
-                                <span class="ver-perfil">Ver perfil</span>
-                            </div>
-                            
-
-                        </a>
+                            <span class="ver-perfil">Ver perfil</span>
+                        </div>
                         
-                    </div>
+
+                    </a>
+                </div>
+                        
                   
                 <?php endforeach; ?>
-            <?php else: ?>
-                <p>No hay protagonistas cargados.</p>
-            <?php endif; ?>
+
+                <?php else: ?>
+                <div class="col-12">
+                    <p class="text-muted text-center py-4">No hay protagonistas cargados.</p>
+                </div>
+                <?php endif; ?>
 
         </div>
         <!-- BOTONES DE ACCIÓN -->

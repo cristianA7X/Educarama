@@ -1,6 +1,7 @@
-/views/pages/protagonistas_nomina.php
 
 <?php
+///views/pages/protagonistas_nomina.php
+
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 
 ini_set('display_errors', 1);

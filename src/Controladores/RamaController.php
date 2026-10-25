@@ -46,6 +46,10 @@ class RamaController
     }
     
 
+    public function listarRamas(): array
+    {
+        return $this->servicio->listarRamas();
+    }
   
     public function obtenerPerfilDesdeUrl()
     {

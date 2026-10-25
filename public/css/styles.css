@@ -28,10 +28,10 @@ EDUCARAMA - ESTILO GENERAL
   --scout-rojo: #e30613;
 
   /* Colores Secundarios (Más claros / pasteles para fondos o detalles) */
-  --scout-amarillo-claro: #fef4b8; /* Un amarillo suave */
-  --scout-verde-claro: #b3e8cb; /* Un verde agua/pastel */
-  --scout-celeste-claro: #b3e6fa; /* Un celeste muy clarito */
-  --scout-rojo-claro: #f9b2b6; /* Un rojo claro/salmón suave */
+  --scout-amarillo-claro: #fef4b8;
+  --scout-verde-claro: #b3e8cb;
+  --scout-celeste-claro: #b3e6fa;
+  --scout-rojo-claro: #f9b2b6;
 
   /* Variables de Interfaz Dinámicas*/
   --rama-primario: var(--scout-verde);

@@ -1,17 +1,18 @@
 <?php
+//views/pages/ramas.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
 $tituloPagina = "Ramas";
-$controlador = null;
-$ramas = null;
+$controlador = new RamaController();
+$ramas = $controlador->listarRamas();
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Educarama - Ramas</title>
+    <title>Educarama - <?= htmlspecialchars($tituloPagina) ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -19,11 +20,11 @@ $ramas = null;
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
 
-    <body>
-        <?php
-        include __DIR__ . '/includes/barra_superior.php';
-        include __DIR__ . '/includes/menu_lateral.php';
-        ?>
+<body>
+    <?php
+    include __DIR__ . '/includes/barra_superior.php';
+    include __DIR__ . '/includes/menu_lateral.php';
+    ?>
 
     <div class="main-content-wrapper">
         <div class="container contenedor-principal  p-4">
@@ -35,7 +36,7 @@ $ramas = null;
                 </div>
             </section>
 
-            <div class="row g-4">
+            <section class="row g-4">
                 <?php if (!empty($ramas)): ?>
                     <?php foreach ($ramas as $rama): ?>
                         <div class="col-12 col-md-6 col-lg-4">
@@ -63,9 +64,12 @@ $ramas = null;
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p>No hay ramas cargadas.</p>
+                    <div class="col-12">
+                        <p class="text-muted text-center py-4">No hay ramas cargadas.</p>
+                    </div>
                 <?php endif; ?>
-            </div>
+                
+            </section>
 
             <!-- BOTONES DE ACCIÓN -->
             <!-- <div class="row g-3 mt-3">

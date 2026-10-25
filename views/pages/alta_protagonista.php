@@ -7,7 +7,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$tituloPagina = "Nuevo Protagonista";
+$esEdicion = !empty($protagonista);
+
+$tituloPagina = $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista';
 $controlador = new ProtagonistaController();
 $error = null;
 $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
@@ -33,8 +35,6 @@ try {
 $ramas = $controlador->listarRamas();
 $patrullas = $controlador->listarPatrullas();
 $rama_page = "";
-
-$esEdicion = !empty($protagonista);
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +42,7 @@ $esEdicion = !empty($protagonista);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educarama - <?= $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista' ?></title>
+    <title>Educarama - <?= htmlspecialchars($tituloPagina) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -57,7 +57,8 @@ $esEdicion = !empty($protagonista);
 
     <div class="main-content-wrapper">
         <div class="container contenedor-principal  p-4">
-            <div class="barra-superior-inst mb-4">
+
+            <section class="barra-superior-inst mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-1">
                         <?= $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista' ?>
@@ -70,10 +71,7 @@ $esEdicion = !empty($protagonista);
                         ?>
                     </p>
                 </div>
-            </div> 
-
-
-
+            </section> 
 
             <?php if (!empty($error)): ?>
                 <div class="alert alert-danger">
@@ -81,18 +79,16 @@ $esEdicion = !empty($protagonista);
                 </div>
             <?php endif; ?>
 
-            <div class="row mb-4 align-items-stretch">
+            <section class="row mb-4 align-items-stretch">
                 <div class="col-md-12 mb-3 mb-md-0">
                     <div class="tarjeta-blanca-borde p-4 h-100">
 
-                        <!-- SE AGREGÓ enctype="multipart/form-data" -->
                         <form method="POST" enctype="multipart/form-data">
                             <input 
                                 type="hidden" 
                                 name="id" 
                                 value="<?= $esEdicion ? htmlspecialchars($protagonista['id']) : '' ?>"
                             >
-                            
 
                             <h2 class="h4 texto-violeta fw-bold mb-3">Datos personales</h2>
 
@@ -280,12 +276,13 @@ $esEdicion = !empty($protagonista);
 
                     </div>
                 </div>
-            </div>
+            </section>
 
         </div>
     </div>
 
 <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
