@@ -512,6 +512,28 @@ h6 {
   }
 }
 
+@media (max-width: 576px) {
+  .rama-card,
+  .patrulla-card,
+  .protagonista-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .rama-icono,
+  .patrulla-icono {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+  }
+
+  .rama-card h3,
+  .patrulla-card h3,
+  .protagonista-info h3 {
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+  }
+}
 /* ===== HOME DASHBOARD ===== */
 
 .home-container {

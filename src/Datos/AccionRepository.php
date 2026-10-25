@@ -19,9 +19,10 @@ class AccionRepository implements MostrarTodoInterface, MostrarPorIdInterface, A
         return $row ? new Accion((int)$row['id'], $row['descripcion'], (int)$row['id_competencia'], (int)$row['codigo_competencia'], (int)$row['id_tipo_accion']) : null;
     }
 
-    public function agregar($accion): void {
+    public function agregar($accion): int {
         $stmt = $this->db->prepare("INSERT INTO accion (descripcion, id_competencia, codigo_competencia, id_tipo_accion) VALUES (?, ?, ?, ?)");
         $stmt->execute([$accion->descripcion, $accion->id_competencia, $accion->codigo_competencia, $accion->id_tipo_accion]);
+        return (int)$this->db->lastInsertId();
     }
 
     public function actualizar($accion): void {

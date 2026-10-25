@@ -1,11 +1,8 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-?>
-<?php
-$tituloPagina = "Perfil de Rama";
-
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
 
+$tituloPagina = "Perfil de Rama";
 $controlador = new RamaController();
 $rama = $controlador->obtenerPerfilDesdeUrl();
 

@@ -20,49 +20,55 @@ class ProtagonistaService
         // Instanciamos el repo de documentos acá para no romper el constructor del controlador
         $this->documentoRepository = new DocumentoRepository();
     }
+public function registrarDesdeFormulario(array $post): void
+{
+    $datos = $this->prepararDatosFormulario($post);
 
-    public function registrarDesdeFormulario(array $post): void
-    {
-        $datos = $this->prepararDatosFormulario($post);
+    try {
+        $this->conexion->beginTransaction();
 
-        try {
-            $this->conexion->beginTransaction();
+        $idPersona = $this->personaRepository->crear([
+            'apellido' => $datos['apellido'],
+            'nombre' => $datos['nombre'],
+            'fecha_nacimiento' => $datos['fecha_nacimiento'],
+            'dni' => $datos['dni']
+        ]);
 
-            $idPersona = $this->personaRepository->crear([
-                'apellido' => $datos['apellido'],
-                'nombre' => $datos['nombre'],
-                'fecha_nacimiento' => $datos['fecha_nacimiento'],
-                'dni' => $datos['dni']
-            ]);
+        $idProtagonista = $this->protagonistaRepository->crear([
+            'promesa' => $datos['promesa'],
+            'anio_ingreso' => $datos['anio_ingreso'],
+            'id_persona' => $idPersona,
+            'id_rama' => $datos['id_rama'],
+            'id_patrulla' => $datos['id_patrulla']
+        ]);
 
-            // Asumimos que tu repositorio retorna el ID del protagonista insertado
-            $idProtagonista = $this->protagonistaRepository->crear([
-                'promesa' => $datos['promesa'],
-                'anio_ingreso' => $datos['anio_ingreso'],
-                'id_persona' => $idPersona,
-                'id_rama' => $datos['id_rama'],
-                'id_patrulla' => $datos['id_patrulla']
-            ]);
+        // if (!empty($post['ruta_documento']) && !empty($post['nombre_original_documento'])) {
+        //     $this->documentoRepository->guardarDocumento(
+        //         (int) $idProtagonista,
+        //         $post['ruta_documento'],
+        //         $post['nombre_original_documento']
+        //     );
+        // }
+        
 
-            // Si vino un documento adjunto, lo registramos
-            if (!empty($post['ruta_documento']) && !empty($post['nombre_original_documento'])) {
-                $this->documentoRepository->guardarDocumento(
-                    (int) $idProtagonista,
-                    $post['ruta_documento'],
-                    $post['nombre_original_documento']
-                );
-            }
+        $this->conexion->commit();
 
-            $this->conexion->commit();
-
-        } catch (Exception $e) {
-            if ($this->conexion->inTransaction()) {
-                $this->conexion->rollBack();
-            }
-
-            throw $e;
+    } catch (PDOException $e) {
+        if ($this->conexion->inTransaction()) {
+            $this->conexion->rollBack();
         }
+        if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_persona_dni')) {
+            throw new Exception("Ya existe una persona con ese DNI.");
+        }
+        throw $e;
+
+    } catch (Exception $e) {
+        if ($this->conexion->inTransaction()) {
+            $this->conexion->rollBack();
+        }
+        throw $e;
     }
+}
 
     public function actualizarDesdeFormulario(int $idProtagonista, array $post): void
     {

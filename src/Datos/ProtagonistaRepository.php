@@ -11,7 +11,7 @@ class ProtagonistaRepository
         $this->conexion = $conexion;
     }
 
-    public function crear(array $datos): void
+    public function crear(array $datos): int
     {
         $stmt = $this->conexion->prepare("
             INSERT INTO protagonista
@@ -27,6 +27,7 @@ class ProtagonistaRepository
             ':id_rama' => $datos['id_rama'],
             ':id_patrulla' => $datos['id_patrulla']
         ]);
+        return (int) $this->conexion->lastInsertId();
     }
 
     public function listarCards(): array
@@ -35,11 +36,13 @@ class ProtagonistaRepository
             SELECT 
                 p.id,
                 p.promesa,
+                p.anio_ingreso,
                 per.nombre,
                 per.apellido,
                 per.fecha_nacimiento,
                 r.nombre AS rama,
                 pa.nombre AS patrulla
+                
             FROM protagonista p
             INNER JOIN persona per ON p.id_persona = per.id
             LEFT JOIN rama r ON p.id_rama = r.id

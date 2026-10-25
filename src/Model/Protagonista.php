@@ -7,7 +7,8 @@ class Protagonista {
         public int $id_persona,
         public int $id_rama,
         public ?int $id_patrulla,
-        public ?int $id_usuario
+        public ?int $id_usuario,
+        public ?int $anio_ingreso = null
     ) {}
 }
 
