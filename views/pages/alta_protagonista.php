@@ -1,29 +1,28 @@
-<?php
-//views/pages/alta_protagonista.php
+<?php 
+// views/pages/alta_protagonista.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$esEdicion = !empty($protagonista);
-
-$tituloPagina = $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista';
 $controlador = new ProtagonistaController();
 $error = null;
+
 $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 $protagonista = null;
 
+$esEdicion = !empty($protagonista);
+$tituloPagina = $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista';
+
 if ($id) {
     $protagonista = $controlador->obtenerPerfilPorId($id);
-
     if (!$protagonista) {
         header("Location: protagonistas.php");
         exit;
     }
-
-    $tituloPagina = "Editar Protagonista";
 }
 
 try {
@@ -34,9 +33,7 @@ try {
 
 $ramas = $controlador->listarRamas();
 $patrullas = $controlador->listarPatrullas();
-$rama_page = "";
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -48,30 +45,26 @@ $rama_page = "";
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
-
 <body>
     <?php 
-    include __DIR__ . '/includes/barra_superior.php'; 
-    include __DIR__ . '/includes/menu_lateral.php'; 
+     include __DIR__ . '/includes/barra_superior.php';
+     include __DIR__ . '/includes/menu_lateral.php';
     ?>
-
     <div class="main-content-wrapper">
-        <div class="container contenedor-principal  p-4">
-
+        <div class="container contenedor-principal p-4">
             <section class="barra-superior-inst mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-1">
                         <?= $esEdicion ? 'Editar Protagonista' : 'Nuevo Protagonista' ?>
                     </h1>
-
                     <p class="mb-0">
                         <?= $esEdicion 
-                        ? 'Modificá los datos principales del beneficiario.' 
-                        : 'Cargá los datos principales del beneficiario.' 
+                         ? 'Modificá los datos principales del beneficiario.' 
+                         : 'Cargá los datos principales del beneficiario.' 
                         ?>
                     </p>
                 </div>
-            </section> 
+            </section>
 
             <?php if (!empty($error)): ?>
                 <div class="alert alert-danger">
@@ -82,8 +75,8 @@ $rama_page = "";
             <section class="row mb-4 align-items-stretch">
                 <div class="col-md-12 mb-3 mb-md-0">
                     <div class="tarjeta-blanca-borde p-4 h-100">
-
                         <form method="POST" enctype="multipart/form-data">
+                            <!-- CAMPO OCULTO CLAVE PARA QUE EL CONTROLADOR SEPA QUE ES EDICIÓN -->
                             <input 
                                 type="hidden" 
                                 name="id" 
@@ -91,101 +84,87 @@ $rama_page = "";
                             >
 
                             <h2 class="h4 texto-violeta fw-bold mb-3">Datos personales</h2>
-
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="apellido" class="form-label fw-bold">
                                         Apellido del Protagonista
                                     </label>
-
                                     <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="apellido" 
-                                        name="apellido"
-                                        placeholder="Ingrese el/los apellido/s del protagonista"
-                                        value="<?= htmlspecialchars($protagonista['apellido'] ?? '') ?>"
-                                        required
+                                         type="text" 
+                                         class="form-control" 
+                                         id="apellido" 
+                                         name="apellido" 
+                                         placeholder="Ingrese el/los apellido/s del protagonista"
+                                         value="<?= htmlspecialchars($protagonista['apellido'] ?? '') ?>"
+                                         required 
                                     >
                                 </div>
-
                                 <div class="col-md-6 mb-3">
                                     <label for="nombre" class="form-label fw-bold">
                                         Nombre del Protagonista
-                                    </label>  
-
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="nombre" 
-                                        name="nombre"
-                                        placeholder="Ingrese el/los nombre/s del protagonista"
-                                        value="<?= htmlspecialchars($protagonista['nombre'] ?? '') ?>"
-                                        required
+                                    </label>
+                                      <input 
+                                         type="text" 
+                                         class="form-control" 
+                                         id="nombre" 
+                                         name="nombre" 
+                                         placeholder="Ingrese el/los nombre/s del protagonista"
+                                         value="<?= htmlspecialchars($protagonista['nombre'] ?? '') ?>"
+                                         required 
                                     >
                                 </div>
-
                                 <div class="col-md-4 mb-3">
                                     <label for="fecha_nacimiento" class="form-label fw-bold">
                                         Fecha de Nacimiento
                                     </label>
-
                                     <input 
-                                        type="date" 
-                                        class="form-control" 
-                                        id="fecha_nacimiento"
-                                        name="fecha_nacimiento"
-                                        value="<?= htmlspecialchars($protagonista['fecha_nacimiento'] ?? '') ?>"
-                                        required
+                                         type="date" 
+                                         class="form-control" 
+                                         id="fecha_nacimiento" 
+                                         name="fecha_nacimiento"
+                                         value="<?= htmlspecialchars($protagonista['fecha_nacimiento'] ?? '') ?>"
+                                         required 
                                     >
                                 </div>
-
                                 <div class="col-md-4 mb-3">
                                     <label for="dni" class="form-label fw-bold">DNI</label>
-
                                     <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="dni" 
-                                        name="dni"
-                                        placeholder="Ingrese el DNI del protagonista"
-                                        value="<?= htmlspecialchars($protagonista['dni'] ?? '') ?>"
-                                        required
+                                         type="text" 
+                                         class="form-control" 
+                                         id="dni" 
+                                         name="dni" 
+                                         placeholder="Ingrese el DNI del protagonista"
+                                         value="<?= htmlspecialchars($protagonista['dni'] ?? '') ?>"
+                                         required 
                                     >
                                 </div>
-
                                 <div class="col-md-4 mb-3">
                                     <label for="anio_ingreso" class="form-label fw-bold">
                                         Año de Ingreso
                                     </label>
-
                                     <input 
-                                        type="number" 
-                                        class="form-control" 
-                                        id="anio_ingreso" 
-                                        name="anio_ingreso"
-                                        placeholder="Ingrese el año de ingreso"
-                                        value="<?= htmlspecialchars($protagonista['anio_ingreso'] ?? '') ?>"
+                                         type="number" 
+                                         class="form-control" 
+                                         id="anio_ingreso" 
+                                         name="anio_ingreso" 
+                                         placeholder="Ingrese el año de ingreso"
+                                         value="<?= htmlspecialchars($protagonista['anio_ingreso'] ?? '') ?>"
                                     >
                                 </div>
                             </div>
 
                             <hr>
-
                             <h2 class="h4 texto-violeta fw-bold mb-3">Datos scout</h2>
-
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label for="id_rama" class="form-label fw-bold">
                                         Rama
                                     </label>
-
                                     <select name="id_rama" id="id_rama" class="form-select" required>
                                         <option value="">Seleccionar rama</option>
-
                                         <?php foreach ($ramas as $rama): ?>
                                             <option 
-                                                value="<?= $rama['id'] ?>"
+                                                 value="<?= $rama['id'] ?>"
                                                 <?= isset($protagonista['id_rama']) && (int)$protagonista['id_rama'] === (int)$rama['id'] ? 'selected' : '' ?>
                                             >
                                                 <?= htmlspecialchars($rama['nombre']) ?>
@@ -193,18 +172,15 @@ $rama_page = "";
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
                                 <div class="col-md-4 mb-3">
                                     <label for="id_patrulla" class="form-label fw-bold">
                                         Patrulla
                                     </label>
-
                                     <select name="id_patrulla" id="id_patrulla" class="form-select">
                                         <option value="">Sin patrulla</option>
-
                                         <?php foreach ($patrullas as $patrulla): ?>
                                             <option 
-                                                value="<?= $patrulla['id'] ?>"
+                                                 value="<?= $patrulla['id'] ?>"
                                                 <?= isset($protagonista['id_patrulla']) && (int)$protagonista['id_patrulla'] === (int)$patrulla['id'] ? 'selected' : '' ?>
                                             >
                                                 <?= htmlspecialchars($patrulla['nombre']) ?>
@@ -212,56 +188,31 @@ $rama_page = "";
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
                                 <div class="col-md-4 mb-3 d-flex align-items-end">
                                     <div class="form-check">
                                         <input 
-                                            class="form-check-input" 
-                                            type="checkbox" 
-                                            name="promesa" 
-                                            id="promesa"
+                                             class="form-check-input" 
+                                             type="checkbox" 
+                                             name="promesa" 
+                                             id="promesa"
                                             <?= !empty($protagonista['promesa']) ? 'checked' : '' ?>
                                         >
-
                                         <label class="form-check-label fw-bold" for="promesa">
                                             Tiene promesa scout
                                         </label>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- NUEVA SECCIÓN DE DOCUMENTACIÓN -->
-                            <!--
-                            <hr>
-                            <h2 class="h4 texto-violeta fw-bold mb-3">Documentación Adjunta</h2>
-                            -->
-                            
-                            <!-- <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="documento" class="form-label fw-bold">Subir Documento (Opcional)</label>
-                                    <input 
-                                        type="file" 
-                                        class="form-control" 
-                                        id="documento" 
-                                        name="documento" 
-                                        accept=".pdf, image/jpeg, image/png"
-                                    >
-                                    <div class="form-text">
-                                        Formatos permitidos: PDF, JPG, PNG. Tamaño máximo recomendado: 5MB.
-                                    </div>
-                                </div>
-                            </div> -->
 
                             <div class="d-flex gap-2 mt-3">
                                 <button type="submit" class="boton-primario px-4 py-2 fw-bold">
                                     <i class="bi bi-save me-2"></i>
                                     <?= $esEdicion ? 'Guardar cambios' : 'Registrar' ?>
                                 </button>
-
                                 <?php if ($esEdicion): ?>
                                     <a 
-                                        href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" 
-                                        class="btn btn-secondary px-4 py-2"
+                                         href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" 
+                                         class="btn btn-secondary px-4 py-2"
                                     >
                                         Cancelar
                                     </a>
@@ -271,18 +222,14 @@ $rama_page = "";
                                     </a>
                                 <?php endif; ?>
                             </div>
-
                         </form>
-
                     </div>
                 </div>
             </section>
-
         </div>
     </div>
 
-<?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

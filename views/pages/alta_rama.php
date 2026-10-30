@@ -1,11 +1,12 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
 
-$tituloPagina = "Nueva Rama";
 $controlador = new RamaController();
-
 $error = null;
+$esEdicion = isset($_GET['id']) && !empty($_GET['id']);
+$tituloPagina = $esEdicion ? "Editar Rama" : "Nueva Rama";
 
 try {
     $controlador->crearSiEsPost();
@@ -94,10 +95,16 @@ include __DIR__ . '/includes/menu_lateral.php';
                 <button type="submit" class="boton-primario px-4 py-2 fw-bold">
                     <i class="bi bi-save me-2"></i>Guardar rama
                 </button>
-
-                <a href="/Educarama/views/pages/ramas.php" class="btn btn-secondary px-4 py-2">
-                    Cancelar
-                </a>
+                   <?php if ($esEdicion): ?>
+                    <a  href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>"  
+                    class="btn btn-secondary px-4 py-2">
+                        Cancelar
+                    </a>
+                    <?php else: ?>
+                        <a href="/Educarama/views/pages/protagonistas.php" class="btn btn-secondary px-4 py-2">
+                            Cancelar
+                        </a>
+                    <?php endif; ?>
             </div>
 
         </form>

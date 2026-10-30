@@ -2,6 +2,7 @@
 //views/pages/ramas.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
 
 $tituloPagina = "Ramas";
 $controlador = new RamaController();
@@ -41,7 +42,7 @@ $ramas = $controlador->listarRamas();
                 <?php if (!empty($ramas)): ?>
                     <?php foreach ($ramas as $rama): ?>
                         <div class="col-12 col-md-6 col-lg-4">
-                            <a href="/Educarama/views/pages/perfil_rama.php?id=<?= $rama['id'] ?>" class="rama-card text-decoration-none">
+                            <a href="/Educarama/views/pages/perfil_rama.php?id=<?= $rama['id'] ?>" class="rama-card text-decoration-none <?= claseRama($rama['id_rama'] ?? null) ?>">
                                 <div class="rama-icono">
                                     <i class="bi bi-diagram-3-fill"></i>
                                 </div>

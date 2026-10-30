@@ -11,6 +11,19 @@ class ProgresionService {
         $this->repo = new CompetenciaRepository();
     }
 
+    /**
+     * Marca o desmarca una competencia como desarrollada para un protagonista.
+     */
+    public function procesarCambioCompetencia(int $idProtagonista, int $idCompetencia, bool $desarrollada): array {
+        $ok = $this->repo->marcarCompetencia($idProtagonista, $idCompetencia, $desarrollada);
+
+        if (!$ok) {
+            return ['success' => false, 'error' => 'La competencia indicada no existe.'];
+        }
+
+        return ['success' => true, 'desarrollada' => $desarrollada];
+    }
+
     public function procesarCambioAccion(int $idProtagonista, int $idAccion, int $idCompetencia, string $nuevoEstado): array {
         $this->repo->actualizarEstadoAccion($idProtagonista, $idAccion, $nuevoEstado);
         
@@ -27,6 +40,7 @@ class ProgresionService {
         }
         return $respuesta;
     }
+
     public function obtenerAlertas(int $idProtagonista): array {
         
         return []; 

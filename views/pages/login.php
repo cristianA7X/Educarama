@@ -1,6 +1,7 @@
 <?php
 $rama_page = ""; 
 $tituloPagina = "Inicio de Sesión";
+
 ?>
   
 <!DOCTYPE html>

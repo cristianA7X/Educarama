@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/RamaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+
 
 $tituloPagina = "Perfil de Rama";
 $controlador = new RamaController();
@@ -31,7 +33,8 @@ if (!$rama) {
 </head>
 
 
-<body class="rama-<?php echo $rama_page; ?>">    <?php 
+<body class="<?= claseRama($patrulla['id_categoria_rama'] ?? null) ?>">    
+    <?php 
     // Componentes fijos de la interfaz
     include __DIR__ . '/includes/barra_superior.php'; 
     include __DIR__ . '/includes/menu_lateral.php'; 
@@ -56,38 +59,48 @@ if (!$rama) {
 <?php endif; ?>
             
             <!-- ENCABEZADO DEL PERFIL -->
-<div class="row mb-3 align-items-center barra-superior-inst mx-0">
-    <div class="col-8">
-        <h1 class="h3 fw-bold mb-0">
-            <?= htmlspecialchars($rama['nombre']) ?>
-        </h1>
+            <div class="barra-superior-inst mb-3 row  
+            align-items-center Smx-0">
+                <div class="col-8">
+                    <h1 class="h3 fw-bold mb-0">
+                        <?= htmlspecialchars($rama['nombre']) ?>
+                    </h1>
+       
+                </div>
 
-        <p class="mb-0 fw-bold">
-            <?= htmlspecialchars($rama['descripcion'] ?? 'Sin descripción') ?>
-        </p>
-    </div>
+                <div class="col-4 d-flex justify-content-end">
+                    <div class="circulo-logo">
+                        <img 
+                            class="img-fluid rounded-circle" 
+                            src="../assets/images/RamaLogoLyL.png" 
+                            alt="Logo rama"
+                        >
+                    </div>
+                </div>
 
-    <div class="col-4 d-flex justify-content-end">
-        <div class="circulo-logo">
-            <img 
-                class="img-fluid rounded-circle" 
-                src="../assets/images/RamaLogoLyL.png" 
-                alt="Logo rama"
-            >
-        </div>
-    </div>
-
-    
-</div>
+                
+            </div>
 
 <!-- INFORMACIÓN BÁSICA -->
 <div class="row mb-4 align-items-stretch">
     <div class="col-md-12 mb-3 mb-md-0">
-        <div class="tarjeta-blanca-borde p-3 h-100">
+        <div class="tarjeta-blanca-borde p-4 h-100">
 
-            <p class="m-0 fw-bold">
+            <p>
+                <i class="bi bi-info-circle me-2"></i>
+                Descripción: <?= htmlspecialchars($rama['descripcion'] ?? 'Por Agregar') ?>
+            </p>
+            <p>
+                <i class="bi bi-tag me-2"></i>
+                Categoria Rama: <?= htmlspecialchars($rama['categoria_rama'] ?? 'Sin categoría') ?>
+            </p>
+            <p >
                 <i class="bi bi-diagram-3 me-2"></i>
                 Rama: <?= htmlspecialchars($rama['nombre'] ?? 'Sin rama') ?>
+            </p>
+            <p>
+                <i class="bi bi-people me-2"></i>
+                Grupo: <?= htmlspecialchars($rama['grupo'] ?? 'Sin grupo') ?>
             </p>
 
 

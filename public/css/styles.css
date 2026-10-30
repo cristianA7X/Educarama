@@ -34,8 +34,8 @@ EDUCARAMA - ESTILO GENERAL
   --scout-rojo-claro: #f9b2b6;
 
   /* Variables de Interfaz Dinámicas*/
-  --rama-primario: var(--scout-verde);
-  --rama-secundario: var(--scout-verde-claro);
+  --rama-primario: var(--violeta-primario);
+  --rama-secundario: var(--violeta-secundario);
 
   /* Medidas */
   --sidebar-width: 220px;
@@ -43,8 +43,36 @@ EDUCARAMA - ESTILO GENERAL
   --navbar-height: 72px;
   --footer-height: 50px;
 }
+.rama-manada {
+  --rama-primario: var(--scout-amarillo);
+  --rama-secundario: var(--scout-amarillo-claro);
+}
+.rama-unidad {
+  --rama-primario: var(--scout-verde);
+  --rama-secundario: var(--scout-verde-claro);
+}
+.rama-caminantes {
+  --rama-primario: var(--scout-celeste);
+  --rama-secundario: var(--scout-celeste-claro);
+}
+.rama-rover {
+  --rama-primario: var(--scout-rojo);
+  --rama-secundario: var(--scout-rojo-claro);
+}
 
+/* Acento de color en las cards */
+.protagonista-card,
+.rama-card,
+.patrulla-card {
+  border-left: 8px solid var(--rama-primario);
+}
+.protagonista-card:hover,
+.rama-card:hover,
+.patrulla-card:hover {
+  border-color: var(--rama-primario);
+}
 /* MANADA (Amarillo) */
+
 body.rama-manada {
   --rama-primario: var(--scout-amarillo);
   --rama-secundario: var(--scout-amarillo-claro);
@@ -512,28 +540,6 @@ h6 {
   }
 }
 
-@media (max-width: 576px) {
-  .rama-card,
-  .patrulla-card,
-  .protagonista-card {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .rama-icono,
-  .patrulla-icono {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-  }
-
-  .rama-card h3,
-  .patrulla-card h3,
-  .protagonista-info h3 {
-    font-size: 1.1rem;
-    overflow-wrap: anywhere;
-  }
-}
 /* ===== HOME DASHBOARD ===== */
 
 .home-container {
@@ -833,4 +839,27 @@ h6 {
   color: var(--texto-suave);
   font-weight: 500;
   font-size: 0.95rem;
+}
+
+@media (max-width: 576px) {
+  .rama-card,
+  .patrulla-card,
+  .protagonista-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .rama-icono,
+  .patrulla-icono {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+  }
+
+  .rama-card h3,
+  .patrulla-card h3,
+  .protagonista-info h3 {
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+  }
 }
