@@ -1,45 +1,52 @@
 <?php
-///views/pages/perfil_patrulla.php
-
+// views/pages/perfil_patrulla.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $tituloPagina = "Perfil de Patrulla";
-$controlador = new PatrullaController();
 
+$controlador = new PatrullaController();
 $idPatrulla = $_GET['id'] ?? null;
+
+$patrulla = null;
+$integrantes = [];
+$error = null;
 
 try {
     if (!$idPatrulla) {
         throw new Exception("No se especificó ninguna patrulla.");
     }
     
-    $patrulla = $controlador->obtenerPatrullaPorId($idPatrulla);
-    $integrantes = $controlador->obtenerIntegrantesPorPatrulla($idPatrulla);
+    $patrulla = $controlador->obtenerPatrullaPorId((int)$idPatrulla);
+    if (!$patrulla) {
+        throw new Exception("La patrulla solicitada no existe.");
+    }
 
+    $integrantes = $controlador->obtenerIntegrantesPorPatrulla((int)$idPatrulla);
 } catch (Exception $e) {
     $error = $e->getMessage();
-    $patrulla = null;
-    $integrantes = [];
 }
+
+// Obtenemos la clase CSS de la rama de forma segura
+$claseRamaBody = ($patrulla && isset($patrulla['id_categoria_rama'])) ? claseRama($patrulla['id_categoria_rama']) : '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educarama - Perfil de Patrulla</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
-
-<body>
+<body class="<?= $claseRamaBody ?>">
 <?php
 include __DIR__ . '/includes/barra_superior.php';
 include __DIR__ . '/includes/menu_lateral.php';
@@ -54,8 +61,10 @@ include __DIR__ . '/includes/menu_lateral.php';
             </div>
         <?php endif; ?>
 
-        <!-- BARRA SUPERIOR Y DATOS BÁSICOS DE LA PATRULLA -->
-        <div class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <!-- ENCABEZADO DEL PERFIL -->
+        <div class="barra-superior-inst mb-4 gap-3 d-flex flex-wrap
+        justify-content-between align-items-center 
+         ">
             <div>
                 <h1 class="fw-bold mb-1">
                     Patrulla <?= htmlspecialchars($patrulla['nombre'] ?? 'Desconocida') ?>
@@ -65,7 +74,7 @@ include __DIR__ . '/includes/menu_lateral.php';
                 </p>
             </div>
             <a href="/Educarama/views/pages/patrullas.php" class="boton-primario px-4 py-2 fw-bold text-decoration-none">
-                <i class="bi bi-arrow-left me-2"></i>Volver a patrullas   
+                <i class="bi bi-arrow-left me-2"></i>Volver a patrullas
             </a>
         </div>
 
@@ -121,9 +130,9 @@ include __DIR__ . '/includes/menu_lateral.php';
         <!-- BOTONES DE ACCIÓN -->
         <div class="row g-3 mt-3">
             <div class="col-12 col-md-4">
-                <a href="asignar_protagonista.php?id_patrulla=<?= htmlspecialchars($idPatrulla) ?>" 
+                <a href="alta_protagonista.php" 
                    class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
-                   <i class="bi bi-person-plus me-2"></i>Añadir integrante
+                   <i class="bi bi-person-plus me-2"></i>Añadir integrante (Nuevo)
                 </a>
             </div>
         </div>
@@ -132,9 +141,7 @@ include __DIR__ . '/includes/menu_lateral.php';
 </div>
 
 <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </body>
 </html>

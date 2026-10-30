@@ -34,8 +34,8 @@ EDUCARAMA - ESTILO GENERAL
   --scout-rojo-claro: #f9b2b6;
 
   /* Variables de Interfaz Dinámicas*/
-  --rama-primario: var(--scout-verde);
-  --rama-secundario: var(--scout-verde-claro);
+  --rama-primario: var(--violeta-primario);
+  --rama-secundario: var(--violeta-secundario);
 
   /* Medidas */
   --sidebar-width: 220px;
@@ -43,8 +43,36 @@ EDUCARAMA - ESTILO GENERAL
   --navbar-height: 72px;
   --footer-height: 50px;
 }
+.rama-manada {
+  --rama-primario: var(--scout-amarillo);
+  --rama-secundario: var(--scout-amarillo-claro);
+}
+.rama-unidad {
+  --rama-primario: var(--scout-verde);
+  --rama-secundario: var(--scout-verde-claro);
+}
+.rama-caminantes {
+  --rama-primario: var(--scout-celeste);
+  --rama-secundario: var(--scout-celeste-claro);
+}
+.rama-rover {
+  --rama-primario: var(--scout-rojo);
+  --rama-secundario: var(--scout-rojo-claro);
+}
 
+/* Acento de color en las cards */
+.protagonista-card,
+.rama-card,
+.patrulla-card {
+  border-left: 8px solid var(--rama-primario);
+}
+.protagonista-card:hover,
+.rama-card:hover,
+.patrulla-card:hover {
+  border-color: var(--rama-primario);
+}
 /* MANADA (Amarillo) */
+
 body.rama-manada {
   --rama-primario: var(--scout-amarillo);
   --rama-secundario: var(--scout-amarillo-claro);

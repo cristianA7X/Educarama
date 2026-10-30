@@ -1,4 +1,5 @@
 <?php
+// src/Datos/PatrullaRepository.php
 
 class PatrullaRepository
 {
@@ -16,14 +17,14 @@ class PatrullaRepository
                 p.id,
                 p.nombre,
                 p.id_rama,
-                r.nombre AS rama
+                r.nombre AS rama,
+                r.id_rama AS id_categoria_rama
             FROM patrulla p
             LEFT JOIN rama r ON p.id_rama = r.id
             ORDER BY p.nombre
         ");
 
         $stmt->execute();
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -34,18 +35,18 @@ class PatrullaRepository
                 p.id,
                 p.nombre,
                 p.id_rama,
-                r.nombre AS rama
+                r.nombre AS rama,
+                r.id_rama AS id_categoria_rama
             FROM patrulla p
             LEFT JOIN rama r ON p.id_rama = r.id
             WHERE p.id = :id
         ");
 
         $stmt->execute([':id' => $id]);
-
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-public function obtenerIntegrantes(int $idPatrulla): array 
+    public function obtenerIntegrantes(int $idPatrulla): array 
     {
         // Consultamos la tabla protagonista unida a persona, NO a integrante
         $stmt = $this->conexion->prepare("
@@ -64,6 +65,7 @@ public function obtenerIntegrantes(int $idPatrulla): array
         $stmt->execute(['id_patrulla' => $idPatrulla]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function crear(array $datos): void
     {
         $stmt = $this->conexion->prepare("
@@ -76,6 +78,21 @@ public function obtenerIntegrantes(int $idPatrulla): array
         $stmt->execute([
             ':nombre' => $datos['nombre'],
             ':id_rama' => $datos['id_rama']
+        ]);
+    }
+
+    public function actualizar(int $id, array $datos): void
+    {
+        $stmt = $this->conexion->prepare("
+            UPDATE patrulla
+            SET nombre = :nombre, id_rama = :id_rama
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':nombre' => $datos['nombre'],
+            ':id_rama' => $datos['id_rama'],
+            ':id' => $id
         ]);
     }
 }

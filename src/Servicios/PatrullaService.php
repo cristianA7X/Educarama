@@ -1,5 +1,5 @@
 <?php
-
+// src/Servicios/PatrullaService.php
 class PatrullaService
 {
     private PatrullaRepository $repositorio;
@@ -28,18 +28,25 @@ class PatrullaService
     {
         $nombre = trim($post['nombre'] ?? '');
         $idRama = $post['id_rama'] ?? null;
+        $idRegistro = !empty($post['id']) ? (int)$post['id'] : null;
 
         if ($nombre === '') {
             throw new Exception("El nombre de la patrulla es obligatorio.");
         }
-
         if (empty($idRama)) {
             throw new Exception("Debe seleccionar una rama.");
         }
 
-        $this->repositorio->crear([
+        $datos = [
             'nombre' => $nombre,
             'id_rama' => $idRama
-        ]);
+        ];
+
+        if ($idRegistro) {
+            $this->repositorio->actualizar($idRegistro, $datos);
+        } else {
+            $this->repositorio->crear($datos);
+        }
     }
 }
+?>

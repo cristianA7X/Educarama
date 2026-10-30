@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+
 
 $tituloPagina = "Perfil de Protagonista";
 $controlador = new ProtagonistaController();
@@ -26,18 +28,7 @@ $progRepo = new ProgresionRepository();
 $progService = new ProgresionService($progRepo);
 $docRepo = new DocumentoRepository();
 
-// Determinamos la clase CSS de la rama
-$rama_page = strtolower($protagonista['rama'] ?? 'unidad');
-
-// Mapeo dinámico de rama a ID de categoría
-$idCategoriaRama = 2; // Default a Unidad/Scouts
-if (strpos($rama_page, 'manada') !== false || strpos($rama_page, 'lobato') !== false) {
-    $idCategoriaRama = 1;
-} elseif (strpos($rama_page, 'caminante') !== false) {
-    $idCategoriaRama = 3;
-} elseif (strpos($rama_page, 'rover') !== false) {
-    $idCategoriaRama = 4;
-}
+$idCategoriaRama = (int) ($protagonista['id_categoria_rama'] ?? 2);
 
 // Obtenemos alertas y documentos
 $alertas = $progService->obtenerAlertas($protagonista['id'], $idCategoriaRama);
@@ -58,8 +49,8 @@ $documentos = $docRepo->obtenerDocumentosPorProtagonista($protagonista['id']);
     <!-- Estilos Personalizados -->
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
-<body class="rama-<?php echo $rama_page; ?>">
 
+<body class="<?= claseRama($idCategoriaRama) ?>">
     <?php 
     include __DIR__ . '/includes/barra_superior.php'; 
     include __DIR__ . '/includes/menu_lateral.php'; 
@@ -94,9 +85,10 @@ $documentos = $docRepo->obtenerDocumentosPorProtagonista($protagonista['id']);
             <?php endif; ?>
             
             <!-- ENCABEZADO DEL PERFIL -->
-            <div class="row mb-3 align-items-center barra-superior-inst mx-0">
+            <div class="barra-superior-inst mb-3 row align-items-center 
+             mx-0">
                 <div class="col-8">
-                    <h1 class="h3 fw-bold mb-0">
+                <h1 class="fw-bold mb-1">
                         <?= htmlspecialchars($protagonista['nombre']) ?> 
                         <?= htmlspecialchars($protagonista['apellido']) ?>, 
                         <?= $edad ?> años

@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 $tituloPagina = "Protagonistas";
 
 require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+
+
 
 $controlador = new ProtagonistaController();
 $protagonistas = $controlador->listarCards();
@@ -55,7 +58,7 @@ include __DIR__ . '/includes/menu_lateral.php';
                 <?php foreach ($protagonistas as $protagonista): ?>
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="/Educarama/views/pages/perfil_protagonista.php?id=<?= $protagonista['id'] ?>" class="protagonista-card">
-                        <div class="protagonista-foto rama-<?= strtolower($protagonista['rama'] ?? '') ?>" >
+                        <div class="protagonista-card <?= claseRama($protagonista['id_categoria_rama'] ?? null) ?>" >
                             <i class="bi bi-person-fill"></i>
                         </div>
 

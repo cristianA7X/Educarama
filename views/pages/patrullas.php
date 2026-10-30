@@ -1,11 +1,14 @@
 <?php
+// views/pages/patrullas.php
 require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
 require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
+require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+
 $tituloPagina = "Patrullas";
+
 $controlador = new PatrullaController();
 $patrullas = $controlador->listar();
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,7 +21,6 @@ $patrullas = $controlador->listar();
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
 </head>
-
 <body>
     <?php
     include __DIR__ . '/includes/barra_superior.php';
@@ -26,29 +28,25 @@ $patrullas = $controlador->listar();
     ?>
 
     <div class="main-content-wrapper">
-        <div class="container contenedor-principal  p-4">
+        <div class="container contenedor-principal p-4">
 
             <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h1 class="fw-bold mb-1">Patrullas</h1>
                     <p class="mb-0">Administrá las patrullas o equipos del grupo.</p>
                 </div>
-
-
             </section>
 
             <section class="row g-4">
                 <?php if (!empty($patrullas)): ?>
                     <?php foreach ($patrullas as $patrulla): ?>
-                        <div class="col-12 col-md-6 col-lg-4">  
-                            <a href="/Educarama/views/pages/perfil_patrulla.php?id=<?= $patrulla['id'] ?>" class="patrulla-card text-decoration-none">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="/Educarama/views/pages/perfil_patrulla.php?id=<?= $patrulla['id'] ?>" class="patrulla-card text-decoration-none <?= claseRama($patrulla['id_categoria_rama'] ?? null) ?>">
                                 <div class="patrulla-icono">
                                     <i class="bi bi-shield-shaded"></i>
                                 </div>
-
                                 <div>
                                     <h3><?= htmlspecialchars($patrulla['nombre']) ?></h3>
-
                                     <p>
                                         <i class="bi bi-diagram-3 me-1"></i>
                                         Rama: <?= htmlspecialchars($patrulla['rama'] ?? 'Sin rama') ?>
@@ -63,19 +61,15 @@ $patrullas = $controlador->listar();
             </section>
 
             <section class="col-12 col-md-4 mt-4">
-                <a href="alta_protagonista.php" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
+                <a href="alta_patrulla.php" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
                     <i class="bi bi-person-gear me-2"></i> Crear nueva patrulla
                 </a>
             </section>
-            
-
-        </div>
-        </div>
 
         </div>
     </div>
 
-    <?php include 'includes/barra_inferior.php'; ?>
+    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

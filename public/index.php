@@ -66,15 +66,17 @@ $eventoControlador = new eventoControlador();
                     <div class="icon">🏕️</div>
                     <p>Ramas</p>
                 </a>
+                <a class="home-stat-card text-decoration-none" href="/Educarama/views/pages/eventos.php">
+                    <div class="icon">📢</div>
+                    <p>Eventos</p>
+                </a>
 
-                <div class="home-stat-card" >
-                    <div class="icon">📅</div>
-                    <p>Actividades</p>                
-                </div>
+           
+                
             </section>
 
             <section class="home-actions">
-                <a href="/Educarama/views/pages/protagonistas.php" class="home-action-btn">Ver protagonistas</a>
+                <a href="/Educarama/views/pages/alta_protagonista.php" class="home-action-btn">Nuevo protagonista</a>
                 <a href="/Educarama/views/pages/alta_patrulla.php" class="home-action-btn">Nueva patrulla</a>
             </section>
 
