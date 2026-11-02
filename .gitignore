@@ -1,1 +1,5 @@
-.vscode/
+# Configuración propia de cada desarrollador (contraseña de MySQL, URL base).
+/config/config.local.php
+
+# CSV exportados de la planilla: la fuente de verdad es la planilla.
+/database/seeds/csv/

@@ -1,0 +1,35 @@
+<?php
+// config/config.php
+//
+// Configuración general del proyecto.
+//
+// Los valores de abajo son los de un XAMPP recién instalado. Si en tu máquina
+// algo cambia (por ejemplo, tu MySQL tiene contraseña), NO edites este archivo:
+// creá config/config.local.php y definí ahí solo lo que cambia. Ese archivo
+// está en .gitignore, así que no pisa la configuración de tus compañeros.
+//
+// Ejemplo de config/config.local.php:
+//   <?php
+//   define('DB_PASS', 'mi_contraseña');
+
+declare(strict_types=1);
+
+$configLocal = __DIR__ . '/config.local.php';
+if (is_file($configLocal)) {
+    require $configLocal;
+}
+
+// URL base del proyecto: la parte de la dirección que va después del dominio.
+// Con XAMPP y la carpeta en htdocs/Educarama, la página de inicio es
+// http://localhost/Educarama/public/index.php, entonces BASE_URL es '/Educarama'.
+// Todos los links se arman con la función url() de config/bootstrap.php,
+// así que si la carpeta cambia de nombre o se sube a un hosting,
+// se cambia solo esta línea.
+defined('BASE_URL') || define('BASE_URL', '/Educarama');
+
+// Conexión a la base de datos (la usa Educarama\Config\Database).
+defined('DB_HOST')    || define('DB_HOST', 'localhost');
+defined('DB_NAME')    || define('DB_NAME', 'educarama_v2');
+defined('DB_USER')    || define('DB_USER', 'root');
+defined('DB_PASS')    || define('DB_PASS', '');
+defined('DB_CHARSET') || define('DB_CHARSET', 'utf8mb4');

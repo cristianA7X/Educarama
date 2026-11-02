@@ -1,0 +1,75 @@
+<?php
+// src/Repository/AccesoSeccionRepository.php
+
+declare(strict_types=1);
+
+namespace Educarama\Repository;
+
+use Educarama\Model\AccesoSeccion;
+
+/**
+ * Lectura y escritura de `acceso_seccion`: qué rol tiene un usuario sobre una sección.
+ * No tiene id propio: cada fila se identifica por id_usuario + id_seccion.
+ *
+ * ⚠️ El Jefe de grupo NO tiene filas acá: es Jefe de todas las secciones de su
+ * grupo por derivación, y eso lo resuelve el Service mirando acceso_grupo.
+ * Por eso listarPorSeccion() no devuelve a los Jefes de grupo.
+ */
+final class AccesoSeccionRepository extends RepositorioBase
+{
+    public function buscar(int $idUsuario, int $idSeccion): ?AccesoSeccion
+    {
+        return $this->buscarUno(
+            'SELECT * FROM acceso_seccion WHERE id_usuario = ? AND id_seccion = ?',
+            [$idUsuario, $idSeccion],
+            AccesoSeccion::class,
+        );
+    }
+
+    /** @return AccesoSeccion[] Las secciones a las que accede un usuario (sin las derivadas de ser Jefe de grupo). */
+    public function listarPorUsuario(int $idUsuario): array
+    {
+        return $this->listar(
+            'SELECT * FROM acceso_seccion WHERE id_usuario = ? ORDER BY id_seccion',
+            [$idUsuario],
+            AccesoSeccion::class,
+        );
+    }
+
+    /** @return AccesoSeccion[] Los usuarios asignados a una sección (sin los Jefes de grupo). */
+    public function listarPorSeccion(int $idSeccion): array
+    {
+        return $this->listar(
+            'SELECT * FROM acceso_seccion WHERE id_seccion = ? ORDER BY id_usuario',
+            [$idSeccion],
+            AccesoSeccion::class,
+        );
+    }
+
+    /** Asigna un usuario a la sección. Si ya estaba asignado, la base lanza una excepción (PK duplicada). */
+    public function insertar(AccesoSeccion $acceso): void
+    {
+        $this->ejecutar(
+            'INSERT INTO acceso_seccion (id_usuario, id_seccion, id_rol) VALUES (:id_usuario, :id_seccion, :id_rol)',
+            ['id_usuario' => $acceso->idUsuario, 'id_seccion' => $acceso->idSeccion, 'id_rol' => $acceso->idRol],
+        );
+    }
+
+    /** Cambia el rol de un usuario ya asignado (lo único que puede hacer el Jefe de sección). */
+    public function actualizar(AccesoSeccion $acceso): void
+    {
+        $this->ejecutar(
+            'UPDATE acceso_seccion SET id_rol = :id_rol WHERE id_usuario = :id_usuario AND id_seccion = :id_seccion',
+            ['id_rol' => $acceso->idRol, 'id_usuario' => $acceso->idUsuario, 'id_seccion' => $acceso->idSeccion],
+        );
+    }
+
+    /** Quita el acceso. */
+    public function eliminar(int $idUsuario, int $idSeccion): void
+    {
+        $this->ejecutar(
+            'DELETE FROM acceso_seccion WHERE id_usuario = ? AND id_seccion = ?',
+            [$idUsuario, $idSeccion],
+        );
+    }
+}
