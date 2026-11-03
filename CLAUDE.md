@@ -53,10 +53,10 @@ Educarama/
 - Sin SQL ni reglas de negocio.
 - Enums en `Educarama\Model\Enum`: `EstadoProgresion`, `Elemento`, `EstadoSolicitud`, `Prioridad`, `NivelRol` (int 1–4). Todos con `etiqueta()`.
 
-### Repositories (lo próximo)
+### Repositories (hechos)
 
 - **Siempre devuelven Models** (o arrays de Models), nunca arrays asociativos.
-- Una consulta con JOIN para una pantalla devuelve una clase "vista" aparte (ej. `PerfilProtagonista`), no campos extra en un Model.
+- Una consulta con JOIN para una pantalla devuelve una clase "vista" aparte en `src/Repository/Vista/` (ej. `FichaProtagonista`), no campos extra en un Model.
 - Los de tablas estáticas son de solo lectura.
 - Consultas preparadas siempre.
 - `Usuario` tiene el hash de la contraseña: nunca se pasa entero a una vista.
@@ -117,6 +117,14 @@ Educarama/
 - **Quién deshace:** destildar acciones y volver atrás el estado de una competencia, Responsable en adelante. Quitar una etapa lograda o una insignia otorgada, solo Jefe.
 - **Casos borde:** si ya logró todas las etapas, una competencia nueva se asigna a la última etapa de la rama, con aviso de cupo excedido. Solo se puede quitar la **última** etapa lograda. Retroceder una competencia a Pendiente conserva sus acciones cumplidas. No se pueden tildar acciones de una competencia Pendiente: primero hay que elegirla.
 - **Insignias: registro aparte y manual.** No están atadas a confirmar una etapa. Se registran a mano en un submenú propio del protagonista, con su propia fecha (la de la entrega física), en `insignia_otorgada`. Según el programa, la insignia de una etapa se entrega cuando la etapa empieza: apenas una etapa pasa a estar en curso, si el protagonista no tiene su insignia se avisa "tiene la etapa X en curso y todavía no recibió su insignia". Nada automático. `etapa_lograda` no tiene relación funcional con la insignia.
+
+### Protagonistas y patrullas
+
+- Obligatorios: DNI (entero positivo), nombre y apellido. Fecha de nacimiento opcional. Año de ingreso opcional y no futuro.
+- El DNI es único en `persona`: si ya existe, el alta se rechaza, aunque sea de un familiar.
+- Pase de sección: método aparte, solo dentro del mismo grupo, con Responsable en las dos secciones. Queda sin patrulla; la progresión de la rama anterior queda como historial.
+- Eliminar un protagonista (Jefe) borra en cascada su progresión, documentos y vínculos; su `persona` queda.
+- Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla).
 
 ### Pantalla de competencias del protagonista
 

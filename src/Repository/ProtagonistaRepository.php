@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Educarama\Repository;
 
 use Educarama\Model\Protagonista;
+use Educarama\Repository\Vista\FichaProtagonista;
 
 /**
  * Lectura y escritura de `protagonista`.
@@ -62,6 +63,60 @@ final class ProtagonistaRepository extends RepositorioBase
             Protagonista::class,
         );
     }
+
+    /**
+     * El protagonista que corresponde a una persona, o null si la persona no es
+     * protagonista (por ejemplo, es solo familiar). Una persona es a lo sumo un
+     * protagonista: id_persona es UNIQUE.
+     */
+    public function buscarPorPersona(int $idPersona): ?Protagonista
+    {
+        return $this->buscarUno('SELECT * FROM protagonista WHERE id_persona = ?', [$idPersona], Protagonista::class);
+    }
+
+    // -----------------------------------------------------------------
+    // Fichas (clase vista: protagonista + persona + nombre de patrulla)
+    // -----------------------------------------------------------------
+
+    public function buscarFicha(int $id): ?FichaProtagonista
+    {
+        return $this->buscarUno(self::SELECT_FICHA . ' WHERE p.id = ?', [$id], FichaProtagonista::class);
+    }
+
+    /** @return FichaProtagonista[] Los de una sección, por apellido y nombre. */
+    public function listarFichasPorSeccion(int $idSeccion): array
+    {
+        return $this->listar(
+            self::SELECT_FICHA . ' WHERE p.id_seccion = ? ORDER BY per.apellido, per.nombre',
+            [$idSeccion],
+            FichaProtagonista::class,
+        );
+    }
+
+    /** @return FichaProtagonista[] Los integrantes de una patrulla, por apellido y nombre. */
+    public function listarFichasPorPatrulla(int $idPatrulla): array
+    {
+        return $this->listar(
+            self::SELECT_FICHA . ' WHERE p.id_patrulla = ? ORDER BY per.apellido, per.nombre',
+            [$idPatrulla],
+            FichaProtagonista::class,
+        );
+    }
+
+    /**
+     * Parte común de las consultas de fichas. Las columnas de persona y patrulla
+     * van con alias porque `id` y `nombre` se repiten (ver FichaProtagonista::desdeFila).
+     */
+    private const SELECT_FICHA =
+        'SELECT p.*,
+                per.dni              AS persona_dni,
+                per.nombre           AS persona_nombre,
+                per.apellido         AS persona_apellido,
+                per.fecha_nacimiento AS persona_fecha_nacimiento,
+                pa.nombre            AS patrulla_nombre
+           FROM protagonista p
+           JOIN persona per     ON per.id = p.id_persona
+           LEFT JOIN patrulla pa ON pa.id = p.id_patrulla';
 
     /**
      * Guarda un protagonista nuevo, le completa el id y lo devuelve.

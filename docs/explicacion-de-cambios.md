@@ -462,3 +462,55 @@ Se probó todo contra `educarama_v2` dentro de una transacción que después se 
 - quitar solo la última etapa, y el retroceso que conserva las acciones;
 - el elemento en Caminantes y Rovers sin acciones ni especialidades;
 - las insignias con su aviso, y las fechas inválidas.
+
+## ProtagonistaService y PatrullaService
+
+**Cómo reciben los datos.** El Controller lee `$_POST`, convierte los tipos y arma los Models: `Persona` y `Protagonista`, o `Patrulla`. El Service los valida, limpia los espacios de los textos y los guarda. En el alta, `$protagonista->idPersona` se ignora: el Controller puede pasar `0`, y el Service lo completa con la persona recién creada.
+
+**Los ids salen de la base.** En `actualizar`, el `$protagonista->id` indica a quién se edita, pero la persona y la sección se toman de lo guardado. Así un formulario adulterado (con otro `id_persona` en un campo oculto) no puede editar a otra persona. Si la sección del objeto es distinta de la guardada, se rechaza: para eso está `cambiarSeccion`.
+
+**`ProtagonistaService`**
+
+| Método | Rol | Qué hace |
+| --- | --- | --- |
+| `listarPorSeccion`, `buscarFicha` | Ayudante | Devuelven `FichaProtagonista`. El Supervisor no ve datos personales |
+| `alta` | Responsable | Crea la persona y el protagonista en una transacción |
+| `actualizar` | Responsable | Datos personales, patrulla, promesa y año de ingreso |
+| `cambiarSeccion` | Responsable en las dos secciones | Solo dentro del mismo grupo. Queda sin patrulla; la progresión anterior queda como historial |
+| `eliminar` | Jefe | Cascada en la base; la persona queda |
+
+Validaciones:
+
+- DNI (entero positivo), nombre y apellido son obligatorios.
+- La fecha de nacimiento es opcional, pero si viene tiene que ser una fecha real.
+- El año de ingreso, si se carga, no puede ser futuro.
+- El DNI es único en `persona`. Si ya existe, se rechaza, aunque sea de un familiar.
+- La patrulla tiene que ser de la misma sección.
+
+**`PatrullaService`**
+
+| Método | Rol | Qué hace |
+| --- | --- | --- |
+| `listarPorSeccion`, `buscar`, `integrantes` | Ayudante | |
+| `crear`, `renombrar` | Responsable | El nombre no se repite en la sección |
+| `asignarIntegrante` | Responsable | `null` lo saca de la patrulla. Es lo que necesita la pantalla de la patrulla (el legacy enlazaba a un archivo inexistente) |
+| `eliminar` | Jefe | Los integrantes quedan sin patrulla (`ON DELETE SET NULL`) |
+
+`exigirDeSeccion($idPatrulla, $idSeccion)` es público porque `ProtagonistaService` lo usa para validar la patrulla. Así la regla está escrita una sola vez. El nombre repetido se busca con la intercalación de la base (`utf8mb4_spanish_ci`), que no distingue mayúsculas ni acentos: "Ñandú" y "ñandu" cuentan como el mismo nombre.
+
+**Primera clase vista de un repositorio: `FichaProtagonista`.** Está en `src/Repository/Vista/` y contiene el `Protagonista`, la `Persona` y el nombre de la patrulla. Sale de un JOIN (protagonista + persona + patrulla), así un listado de sección se resuelve en una sola consulta. Las columnas de persona y patrulla vienen con alias (`persona_nombre`, `patrulla_nombre`), porque `id` y `nombre` se repiten entre tablas. Con esto deja de valer la regla anterior "sin clases vista por ahora". Las clases vista de los repositorios van en `src/Repository/Vista/`, y las que arman los Services, en `src/Service/Vista/`.
+
+**Otros cambios.**
+
+- `ProtagonistaRepository`: se agregaron `buscarPorPersona`, `buscarFicha`, `listarFichasPorSeccion` y `listarFichasPorPatrulla`.
+- `PatrullaRepository`: se agregó `buscarPorNombre`.
+- `ServicioBase`: se agregó `exigirFecha()`, que controla que una fecha sea real y esté en formato `AAAA-MM-DD`. Antes estaba solo en `ProgresionService`; ahora la usan los dos Services.
+
+Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo, con 41 casos. Además se repitió la prueba de `ProgresionService`, y sus 49 casos siguen pasando.
+
+- Patrullas: nombre repetido (también con otras mayúsculas o sin acentos), vacío y renombrar a su mismo nombre.
+- Alta: DNI repetido, también el de un familiar; patrulla de otra sección; y fechas y años inválidos.
+- Listado ordenado por apellido, con los tipos bien convertidos.
+- Edición con ids adulterados: edita la persona correcta.
+- Pase: entre grupos se rechaza; dentro del grupo, el protagonista queda sin patrulla.
+- Borrado de una patrulla con integrantes, y de un protagonista: su persona queda.

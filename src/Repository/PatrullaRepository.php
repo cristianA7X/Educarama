@@ -29,6 +29,20 @@ final class PatrullaRepository extends RepositorioBase
         );
     }
 
+    /**
+     * La patrulla de la sección con ese nombre, o null. Compara con la
+     * intercalación de la base (utf8mb4_spanish_ci): no distingue mayúsculas
+     * ni acentos, así "Ñandú" y "ñandu" cuentan como el mismo nombre.
+     */
+    public function buscarPorNombre(int $idSeccion, string $nombre): ?Patrulla
+    {
+        return $this->buscarUno(
+            'SELECT * FROM patrulla WHERE id_seccion = ? AND nombre = ?',
+            [$idSeccion, $nombre],
+            Patrulla::class,
+        );
+    }
+
     /** Guarda una patrulla nueva, le completa el id y lo devuelve. */
     public function insertar(Patrulla $patrulla): int
     {
