@@ -232,7 +232,9 @@ CREATE TABLE `es_familia` (
   CONSTRAINT `fk_es_familia_familiar`     FOREIGN KEY (`id_familiar`)     REFERENCES `familiar` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- La subida de archivos se implementa más adelante.
+-- El archivo vive en el almacén (src/Almacen, carpeta ALMACEN_RUTA), no acá:
+-- ruta_archivo es relativa al almacén, ej. 'documentos/protagonista/7/3f9a...e1.pdf'.
+-- tipo_mime es el tipo real (detectado por contenido, no por la extensión).
 CREATE TABLE `documento` (
   `id`              INT          NOT NULL AUTO_INCREMENT,
   `id_protagonista` INT          NOT NULL,
@@ -240,6 +242,8 @@ CREATE TABLE `documento` (
   `descripcion`     TEXT         NULL,
   `ruta_archivo`    VARCHAR(255) NOT NULL,
   `nombre_original` VARCHAR(255) NOT NULL,
+  `tipo_mime`       VARCHAR(100) NOT NULL,
+  `tamanio_bytes`   INT          NOT NULL,
   `fecha_subida`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_documento_protagonista` FOREIGN KEY (`id_protagonista`) REFERENCES `protagonista` (`id`) ON DELETE CASCADE

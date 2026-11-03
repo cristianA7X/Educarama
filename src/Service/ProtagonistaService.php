@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Educarama\Service;
 
+use Educarama\Almacen\AlmacenArchivos;
 use Educarama\Model\Enum\NivelRol;
 use Educarama\Model\Persona;
 use Educarama\Model\Protagonista;
@@ -37,6 +38,7 @@ final class ProtagonistaService extends ServicioBase
     private ProtagonistaRepository $protagonistas;
     private PersonaRepository $personas;
     private SeccionRepository $secciones;
+    private AlmacenArchivos $almacen;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -44,6 +46,7 @@ final class ProtagonistaService extends ServicioBase
         ?ProtagonistaRepository $protagonistas = null,
         ?PersonaRepository $personas = null,
         ?SeccionRepository $secciones = null,
+        ?AlmacenArchivos $almacen = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -51,6 +54,7 @@ final class ProtagonistaService extends ServicioBase
         $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
         $this->personas = $personas ?? new PersonaRepository();
         $this->secciones = $secciones ?? new SeccionRepository();
+        $this->almacen = $almacen ?? new AlmacenArchivos();
     }
 
     // -----------------------------------------------------------------
@@ -169,6 +173,11 @@ final class ProtagonistaService extends ServicioBase
     /**
      * Borra al protagonista y, en cascada, su progresión, documentos y vínculos
      * con familiares. Su persona queda: si vuelve a entrar, el DNI ya está cargado.
+     *
+     * La base borra las filas de `documento`, pero no los archivos: después de
+     * borrar en la base se borra su carpeta del almacén. Si eso falla, el
+     * protagonista ya está borrado: se anota en el log del servidor y no se le
+     * muestra un error al usuario (los archivos quedan sin fila, no a la vista).
      */
     public function eliminar(int $idUsuario, int $idProtagonista): void
     {
@@ -178,6 +187,12 @@ final class ProtagonistaService extends ServicioBase
         $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Jefe);
 
         $this->protagonistas->eliminar($idProtagonista);
+
+        try {
+            $this->almacen->borrarCarpeta(DocumentoService::carpetaDe($idProtagonista));
+        } catch (\Throwable $e) {
+            error_log("No se pudo borrar la carpeta de documentos del protagonista $idProtagonista: " . $e->getMessage());
+        }
     }
 
     // -----------------------------------------------------------------

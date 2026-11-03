@@ -21,20 +21,34 @@ PHP 8.1+ con POO, MySQL/MariaDB con PDO, HTML/CSS/JS, Bootstrap 5, todo sobre XA
 
 ```
 Educarama/
-├── config/        config.php (BASE_URL, DB_*), config.local.php (gitignored),
+├── config/        config.php (BASE_URL, DB_*, ALMACEN_*), config.local.php (gitignored),
 │                  bootstrap.php (autoload propio + url()), Database.php
 ├── database/      educarama.sql (base educarama_v2)
 ├── docs/          explicacion-de-cambios.md
 ├── src/
+│   ├── Almacen/   componente genérico de archivos subidos (no depende de nada del proyecto)
 │   ├── Model/     una clase por tabla + Enum/
-│   ├── Repository/
-│   ├── Service/
+│   ├── Repository/  + Vista/ (clases vista de consultas con JOIN)
+│   ├── Service/     + Vista/ (avisos y resúmenes) + Excepcion/
 │   ├── Controller/
-│   └── Helper/
+│   └── Helper/    Csrf
 ├── public/        index.php, css, fuentes
+├── storage/       archivos subidos (gitignored salvo su .htaccess "Require all denied")
 ├── views/         páginas, includes, assets
 └── _legacy/       código viejo, solo lectura
 ```
+
+### Archivos subidos: dos capas
+
+1. **`src/Almacen/` (`Educarama\Almacen`)**: componente genérico y reutilizable en otros proyectos. **No depende de ninguna otra clase del proyecto** (ni Models, ni Repositories, ni Services, ni la base): solo PHP y las constantes `ALMACEN_*`. Guarda (valida tamaño y tipo real con `finfo`, nombre aleatorio), envía (headers seguros) y borra. No sabe qué es un protagonista. No agregarle nada específico de Educarama.
+2. **El Service de cada caso** (ej. `DocumentoService`): permisos, pertenencia, tabla y en qué subcarpeta va cada cosa. Traduce `ArchivoInvalidoException` a `ReglaNegocioException`.
+
+Nunca un link directo a un archivo: la descarga pasa por un Controller que llama al Service (permisos) y después a `AlmacenArchivos::enviar()`.
+
+### Formularios POST
+
+- **Todo formulario POST usa `Educarama\Helper\Csrf`**: `<?= Csrf::campo() ?>` en la vista y `Csrf::esValido($_POST[Csrf::CAMPO] ?? null)` en el Controller antes de procesar.
+- Los mensajes de error al usuario nunca muestran rutas del disco ni detalles internos: solo los de `ServicioException`.
 
 ## Convenciones de código
 
@@ -93,7 +107,7 @@ Educarama/
 ## Modelo de datos (ver `database/educarama.sql`)
 
 - **Estáticas** (solo devs): `rama`, `area`, `area_rama` (nombre del área en cada rama), `nomenclatura` (términos por rama: `areas`, `competencias`, `pequenio_equipo`), `competencia`, `accion`, `etapa` (`habilitaciones` es solo texto), `tarea_etapa`, `insignia`, `especialidad`, `rol`.
-- **Dinámicas**: `grupo`, `seccion`, `patrulla`, `persona`, `protagonista` (no es usuario), `familiar`, `es_familia`, `documento` (subida pendiente), `usuario`, `acceso_grupo`, `acceso_seccion`, `solicitud_alta` (datos en JSON), `evento` + `evento_seccion` (sin filas = todo el grupo).
+- **Dinámicas**: `grupo`, `seccion`, `patrulla`, `persona`, `protagonista` (no es usuario), `familiar`, `es_familia`, `documento` (el archivo vive en el almacén; la fila guarda ruta relativa, nombre original, tipo MIME y tamaño), `usuario`, `acceso_grupo`, `acceso_seccion`, `solicitud_alta` (datos en JSON), `evento` + `evento_seccion` (sin filas = todo el grupo).
 - **Progresión** (sin fila = pendiente; avanzar de estado = UPDATE): `competencia_protagonista` (con `id_etapa` en que la eligió), `accion_cumplida`, `tarea_etapa_cumplida`, `etapa_lograda` (la actual es la última), `especialidad_protagonista`, `insignia_otorgada` (toda insignia, incluidas las de etapa).
 
 ## Reglas de negocio
@@ -125,6 +139,14 @@ Educarama/
 - Pase de sección: método aparte, solo dentro del mismo grupo, con Responsable en las dos secciones. Queda sin patrulla; la progresión de la rama anterior queda como historial.
 - Eliminar un protagonista (Jefe) borra en cascada su progresión, documentos y vínculos; su `persona` queda.
 - Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla).
+
+### Documentos
+
+- Ver y descargar, Ayudante; subir y editar tipo/descripción, Responsable; eliminar, Jefe.
+- PDF, JPG y PNG hasta 5 MB (`ALMACEN_*`). `tipo_documento` texto libre opcional. En disco: `documentos/protagonista/{id}/`.
+- Pertenencia: documento → protagonista → sección → acceso. Sin acceso a la sección, **404** (no se confirma que existe); con acceso pero sin el rol, 403.
+- Subir: primero el archivo, después la fila (si la fila falla, se borra el archivo). Eliminar: primero la fila, después el archivo. Eliminar un protagonista borra también su carpeta.
+- PDF siempre como adjunto; imágenes pueden mostrarse en línea.
 
 ### Pantalla de competencias del protagonista
 

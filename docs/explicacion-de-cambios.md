@@ -514,3 +514,96 @@ Se probó todo contra `educarama_v2` dentro de una transacción que después se 
 - Edición con ids adulterados: edita la persona correcta.
 - Pase: entre grupos se rechaza; dentro del grupo, el protagonista queda sin patrulla.
 - Borrado de una patrulla con integrantes, y de un protagonista: su persona queda.
+
+## Almacenamiento de archivos
+
+Los documentos de los protagonistas (fichas médicas, autorizaciones) son datos de menores. Se guardan en un **almacén** que no se puede abrir por URL, y solo se descargan después de controlar quién los pide.
+
+### Por qué hay dos capas
+
+| Capa | Dónde | Qué sabe | Qué no sabe |
+| --- | --- | --- | --- |
+| Componente genérico | `src/Almacen/` (`Educarama\Almacen`) | Guardar un archivo subido, enviarlo al navegador y borrarlo, de forma segura | Qué es un protagonista, la base de datos o los permisos |
+| Uso en Educarama | `DocumentoService` | Quién puede ver o subir, en qué subcarpeta va cada protagonista y la tabla `documento` | Cómo se valida un archivo o qué encabezados HTTP hacen falta |
+
+La seguridad de los archivos (validar el tipo, generar nombres, impedir `../`) es difícil de hacer bien y es la misma en cualquier proyecto. Por eso está separada y no depende de nada de Educarama: no usa Models, Repositories, Services ni la base. Así se puede llevar a otro proyecto, y un cambio en las reglas de Educarama no la puede romper. La regla quedó en CLAUDE.md: al componente no se le agrega nada específico de Educarama.
+
+### El componente (`src/Almacen/`)
+
+- `AlmacenArchivos`:
+  - `guardar($_FILES['x'], $subcarpeta)` valida y guarda el archivo, y devuelve un `ArchivoGuardado` con la ruta relativa, el nombre original, el tipo MIME y el tamaño.
+  - `enviar($ruta, $nombre, $enLinea)` manda el archivo al navegador.
+  - `borrar($ruta)` y `borrarCarpeta($subcarpeta)` borran del disco.
+  - `verificarLimiteDelServidor()` detecta cuando el pedido superó `post_max_size` (ver más abajo).
+- `ArchivoInvalidoException`: su mensaje es para el usuario ("El archivo supera los 5 MB.", "Solo se aceptan archivos PDF, JPG o PNG."). Los errores del servidor (no se pudo crear la carpeta, disco lleno) son `\RuntimeException`, y su mensaje no se le muestra al usuario.
+- **Configuración** en `config/config.php`, con valores por defecto:
+  - `ALMACEN_RUTA`: la carpeta del almacén. Por defecto, `storage/` en la raíz del proyecto.
+  - `ALMACEN_TAMANIO_MAXIMO`: 5 MB.
+  - `ALMACEN_TIPOS_PERMITIDOS`: tipo MIME => extensión (PDF, JPG y PNG).
+
+  Para sacar el almacén de `htdocs`, alcanza con definir otra `ALMACEN_RUTA` en `config.local.php`.
+
+### Cómo se protege
+
+- **Tipo real.** El tipo se detecta leyendo el contenido con `finfo`, nunca por la extensión ni por el tipo que manda el navegador. Un PHP renombrado `foto.jpg` se rechaza. El archivo se guarda con la extensión que corresponde a su tipo real.
+- **Nombre aleatorio.** En el disco, cada archivo se llama `bin2hex(random_bytes(16))` + extensión: no se puede adivinar y no usa nada de lo que escribió el usuario. El nombre original se guarda en la base solo para mostrarlo y para la descarga. Antes se limpia: se le sacan carpetas, comillas y saltos de línea, y si llega en Windows-1252 se convierte a UTF-8.
+- **Solo subidas reales.** `is_uploaded_file` y `move_uploaded_file` impiden "guardar" un archivo cualquiera del servidor.
+- **Rutas encerradas.** Cada parte de una ruta solo acepta letras, números, punto, guion y guion bajo, y no puede ser `.` ni `..`. Para lo que ya existe, además se compara su `realpath` con la raíz del almacén, así tampoco pasa un enlace simbólico que apunte afuera.
+- **Descarga.** `enviar()` vuelve a leer el tipo del contenido y manda estos encabezados:
+  - `Content-Type`;
+  - `Content-Disposition`, con el nombre en ASCII y en UTF-8 (`filename*`);
+  - `X-Content-Type-Options: nosniff`;
+  - `Cache-Control: private, no-store`.
+
+  Solo las imágenes se muestran en línea; un PDF siempre se descarga como adjunto, aunque se pida en línea.
+- **`post_max_size`.** Si un pedido lo supera, PHP deja `$_POST` y `$_FILES` vacíos sin avisar. `verificarLimiteDelServidor()` lo detecta y muestra el mismo mensaje de "supera el tamaño máximo".
+- **`storage/`.** Tiene un `.htaccess` con `Require all denied`, así que Apache no lo sirve. En `.gitignore` está todo su contenido salvo ese `.htaccess`. El `.htaccess` **solo funciona en Apache**: en otro servidor, `ALMACEN_RUTA` tiene que estar fuera de la carpeta pública.
+
+### Cómo se reutiliza
+
+Está explicado en la cabecera de `AlmacenArchivos.php`:
+
+1. Copiar la carpeta `src/Almacen/` completa.
+2. Cambiar el namespace (o registrarlo en el autoload del otro proyecto).
+3. Definir las constantes `ALMACEN_*`, o pasar los valores al constructor.
+4. Proteger la carpeta: con `.htaccess` en Apache, o poniéndola fuera de la carpeta pública en otro servidor.
+
+### Uso en Educarama: `DocumentoService`
+
+- **Columnas nuevas.** La tabla `documento` sumó `tipo_mime VARCHAR(100) NOT NULL` y `tamanio_bytes INT NOT NULL`. `ruta_archivo` es relativa al almacén (por ejemplo, `documentos/protagonista/7/3f9a…e1.pdf`) y nunca se le muestra al usuario. Hay un script de migración para la base ya importada.
+- **Subcarpeta.** Cada protagonista tiene la suya, `documentos/protagonista/{id}/`. La regla está en un solo lugar, `DocumentoService::carpetaDe()`, y también la usa `ProtagonistaService`.
+- **Permisos:**
+  - ver y descargar, Ayudante;
+  - subir y editar el tipo y la descripción, Responsable;
+  - eliminar, Jefe.
+- **Pertenencia.** Cada operación recorre documento → protagonista → sección y controla el acceso del usuario a esa sección; el Jefe de grupo entra por derivación. Si el usuario no tiene ningún acceso a esa sección, la respuesta es **404**, con el mismo mensaje que un documento inexistente, así no se confirma que existe. Si tiene acceso pero le falta el rol, es 403. Esto lo controla el Service (no el Controller), como el resto de los permisos, así ningún Controller se lo puede olvidar.
+- **Orden de las operaciones:**
+  - Subir: primero se guarda el archivo y después se inserta la fila. Si el insert falla, se borra el archivo, así no quedan archivos sin fila.
+  - Eliminar: primero se borra la fila y después el archivo. Si borrar el archivo falla, se anota en el log y no se le muestra error al usuario: el archivo quedó sin fila, así que nadie lo puede pedir.
+  - Eliminar un protagonista: la base borra sus filas de `documento` en cascada, y `ProtagonistaService::eliminar` borra después su carpeta del almacén.
+- **Excepciones.** `ArchivoInvalidoException` se traduce a `ReglaNegocioException` con el mismo mensaje. Así el Controller sigue atrapando una sola familia de excepciones (`ServicioException`).
+- **La descarga, en el Controller (paso 4):**
+
+  ```php
+  $documento = $documentoService->buscar($idUsuario, $idDocumento);  // controla la pertenencia
+  $almacen->enviar($documento->rutaArchivo, $documento->nombreOriginal, enLinea: true);
+  ```
+
+### CSRF: `src/Helper/Csrf.php`
+
+Protege contra que otra página, abierta en el mismo navegador, mande un formulario a Educarama en nombre del usuario. Cada sesión tiene un token aleatorio:
+
+- En la vista, cada formulario POST lo manda en un campo oculto: `<?= Csrf::campo() ?>`.
+- En el Controller, antes de procesar el POST, se compara con el de la sesión: `Csrf::esValido($_POST[Csrf::CAMPO] ?? null)`. La comparación usa `hash_equals`, que tarda lo mismo acierte o no.
+- `Csrf::regenerar()` se va a llamar al iniciar y al cerrar sesión.
+
+CLAUDE.md lo deja como regla: todo formulario POST nuevo lo usa. Se va a aplicar en los formularios de subida y de borrado cuando se hagan las vistas.
+
+### Prueba manual en XAMPP (el bloqueo de `storage/`)
+
+El servidor de `php -S` no lee `.htaccess`, así que esto no se pudo probar automáticamente. Hay que probarlo en XAMPP (Apache):
+
+1. Copiar cualquier archivo a `storage/`, por ejemplo `storage/prueba.txt`. Cuando existan las vistas, se puede subir un documento desde la aplicación y ver su `ruta_archivo` en la tabla `documento`.
+2. Abrir en el navegador `http://localhost/Educarama/storage/prueba.txt` (o `http://localhost/Educarama/storage/` + la `ruta_archivo`).
+3. **Tiene que dar 403 Forbidden.** Si se ve el archivo, Apache no está leyendo el `.htaccess`: revisar que `AllowOverride` no esté en `None` para `htdocs` en `httpd.conf`.
+4. Borrar el archivo de prueba.

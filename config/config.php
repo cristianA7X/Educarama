@@ -33,3 +33,17 @@ defined('DB_NAME')    || define('DB_NAME', 'educarama_v2');
 defined('DB_USER')    || define('DB_USER', 'root');
 defined('DB_PASS')    || define('DB_PASS', '');
 defined('DB_CHARSET') || define('DB_CHARSET', 'utf8mb4');
+
+// Almacén de archivos subidos (lo usa Educarama\Almacen\AlmacenArchivos).
+// ALMACEN_RUTA es la carpeta donde se guardan. Por defecto, storage/ en la raíz
+// del proyecto, protegida con un .htaccess (solo sirve en Apache). Para sacarla
+// de htdocs, definí en config.local.php una ruta absoluta, por ejemplo:
+//   define('ALMACEN_RUTA', 'C:/educarama-archivos');
+defined('ALMACEN_RUTA')             || define('ALMACEN_RUTA', dirname(__DIR__) . '/storage');
+defined('ALMACEN_TAMANIO_MAXIMO')   || define('ALMACEN_TAMANIO_MAXIMO', 5 * 1024 * 1024);  // 5 MB, en bytes
+// Tipo MIME real (el que detecta finfo, no el que manda el navegador) => extensión con la que se guarda.
+defined('ALMACEN_TIPOS_PERMITIDOS') || define('ALMACEN_TIPOS_PERMITIDOS', [
+    'application/pdf' => 'pdf',
+    'image/jpeg'      => 'jpg',
+    'image/png'       => 'png',
+]);

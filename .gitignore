@@ -3,3 +3,8 @@
 
 # CSV exportados de la planilla: la fuente de verdad es la planilla.
 /database/seeds/csv/
+
+# Archivos subidos por los usuarios: datos personales, nunca al repositorio.
+# Se versiona solo el .htaccess que bloquea el acceso por URL.
+/storage/*
+!/storage/.htaccess

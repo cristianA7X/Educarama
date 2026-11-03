@@ -10,8 +10,8 @@ use Educarama\Model\Documento;
 /**
  * Lectura y escritura de `documento`: los archivos adjuntos de un protagonista.
  *
- * Este repositorio solo maneja la fila de la base. Subir, mover o borrar el
- * archivo del disco es tarea del Service (la subida se implementa más adelante).
+ * Este repositorio solo maneja la fila de la base. El archivo lo guarda y lo
+ * borra DocumentoService con el almacén (Educarama\Almacen\AlmacenArchivos).
  */
 final class DocumentoRepository extends RepositorioBase
 {
@@ -37,14 +37,18 @@ final class DocumentoRepository extends RepositorioBase
     public function insertar(Documento $documento): int
     {
         $documento->id = $this->insertarFila(
-            'INSERT INTO documento (id_protagonista, tipo_documento, descripcion, ruta_archivo, nombre_original)
-             VALUES (:id_protagonista, :tipo_documento, :descripcion, :ruta_archivo, :nombre_original)',
+            'INSERT INTO documento (id_protagonista, tipo_documento, descripcion, ruta_archivo,
+                                    nombre_original, tipo_mime, tamanio_bytes)
+             VALUES (:id_protagonista, :tipo_documento, :descripcion, :ruta_archivo,
+                     :nombre_original, :tipo_mime, :tamanio_bytes)',
             [
                 'id_protagonista' => $documento->idProtagonista,
                 'tipo_documento'  => $documento->tipoDocumento,
                 'descripcion'     => $documento->descripcion,
                 'ruta_archivo'    => $documento->rutaArchivo,
                 'nombre_original' => $documento->nombreOriginal,
+                'tipo_mime'       => $documento->tipoMime,
+                'tamanio_bytes'   => $documento->tamanioBytes,
             ],
         );
 
