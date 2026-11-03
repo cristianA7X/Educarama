@@ -330,3 +330,63 @@ En esa consulta el mismo id se pasa dos veces con nombres distintos (`:id_seccio
 | `EventoSeccionRepository` | `listarPorEvento`, `listarPorSeccion` | `insertar`, `eliminar`, `eliminarPorEvento` |
 
 Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo: un evento de todo el grupo y otro de una sola sección, vistos desde las dos secciones; la actualización con el enum, el bool y la fecha nula; la PK duplicada; el paso a todo el grupo al quitar las secciones; y el borrado en cascada.
+
+## Base de los Services, excepciones y permisos
+
+Es la base sobre la que se van a apoyar todos los Services: una clase común, las excepciones y el cálculo de permisos.
+
+**Qué hace un Service.** Aplica las reglas de negocio y usa los repositorios para leer y guardar. No lee `$_SESSION` ni imprime HTML. Recibe el id del usuario actual como parámetro (lo saca de la sesión el Controller). Devuelve Models, o lanza una excepción si la operación no se puede hacer.
+
+**`ServicioBase`.** Es la clase de la que heredan todos los Services.
+
+- Cada Service recibe sus repositorios en el constructor como parámetros opcionales. Si no se pasan, crea los de siempre. Es el mismo criterio que `RepositorioBase` con el `PDO`, y permite probar un Service con repositorios falsos.
+- `transaccion(callable)` ejecuta la operación y hace commit. Si algo lanza una excepción, hace rollback y la vuelve a lanzar. Funciona porque los Services y los repositorios comparten la misma conexión (`Database::getConexion()`).
+- Si ya hay una transacción abierta (por ejemplo, un Service que llama a otro), `transaccion` no abre otra, porque MySQL no tiene transacciones anidadas. La operación queda dentro de la de afuera, y es la de afuera la que hace el commit o el rollback.
+
+**Excepciones** (`src/Service/Excepcion/`). Todas heredan de `ServicioException`, y su mensaje se le puede mostrar al usuario tal cual. El Controller las atrapa juntas:
+
+```php
+try {
+    $servicio->hacerAlgo($idUsuario, ...);
+} catch (ServicioException $e) {
+    $error = $e->getMessage();
+}
+```
+
+| Excepción | Cuándo se lanza | Respuesta típica |
+| --- | --- | --- |
+| `ReglaNegocioException` | La operación viola una regla (patrulla de otra sección, acciones en Rovers) | Mensaje en el formulario |
+| `AccesoDenegadoException` | El usuario no tiene el rol necesario | 403 |
+| `NoEncontradoException` | Se pidió un id que no existe | 404 |
+
+Una `PDOException` u otro error de PHP no es una `ServicioException`: es un error del sistema, y su mensaje no se le muestra al usuario. `RequisitosPendientesException` se agrega junto con `ProgresionService`.
+
+**`PermisoService`.** Calcula qué rol tiene un usuario y corta la operación si no le alcanza. Sigue las reglas que se agregaron a CLAUDE.md:
+
+- **En una sección:**
+  1. Si es Jefe del grupo de la sección, es Jefe en la sección, tenga o no fila en `acceso_seccion`.
+  2. Si no, vale su fila de `acceso_seccion`.
+  3. Si no tiene fila, no tiene acceso. Los otros roles de grupo (Supervisor, Ayudante, Responsable) no pasan a las secciones.
+- **En un grupo:** vale solo la fila de `acceso_grupo`. Se usa para las pantallas del grupo: estadísticas, listado de secciones y eventos grupales.
+- **El admin** no tiene acceso a ningún grupo por ser admin. `exigirAdmin` solo se usa para aprobar o rechazar solicitudes de alta.
+
+| Método | Para qué |
+| --- | --- |
+| `nivelEnSeccion`, `nivelEnGrupo` | Devuelven el `NivelRol`, o `null` si no hay acceso |
+| `puedeEnSeccion`, `puedeEnGrupo` | Devuelven `bool`, para mostrar u ocultar botones en las vistas |
+| `exigirEnSeccion`, `exigirEnGrupo` | Lanzan `AccesoDenegadoException` si no llega al rol mínimo; si llega, devuelven el rol |
+| `esJefeDeGrupo`, `exigirAdmin` | Casos puntuales |
+
+Uso típico dentro de otro Service, antes de escribir:
+
+```php
+$this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Responsable);
+```
+
+Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo:
+
+- Un Jefe de grupo es Jefe en sus secciones aunque tenga una fila de Ayudante, y no tiene acceso a las de otro grupo.
+- Un Supervisor de grupo no tiene acceso a una sección donde no tiene fila, y es Responsable donde tiene fila de Responsable.
+- El admin no tiene acceso a ninguna sección.
+- Si la sección no existe, se lanza `NoEncontradoException`.
+- `transaccion` hace rollback ante una excepción, y dentro de una transacción ya abierta no hace commit.
