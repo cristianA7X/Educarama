@@ -15,6 +15,7 @@ use Throwable;
  * Un Service aplica las reglas de negocio y usa los repositorios para leer y guardar.
  * No toca $_SESSION ni imprime HTML: recibe datos (incluido el id del usuario
  * actual) y devuelve Models, o lanza una excepción de Educarama\Service\Excepcion.
+ * La única excepción es UsuarioService, que maneja la sesión (login y logout).
  *
  * Cada Service recibe sus repositorios en el constructor como parámetros
  * opcionales; si no se pasan, crea los de siempre:

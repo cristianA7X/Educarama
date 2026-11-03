@@ -637,3 +637,48 @@ El servidor de `php -S` no lee `.htaccess`, así que esto no se pudo probar auto
 | Repetidas | 41 + 49 | `ProtagonistaService` y `ProgresionService`, después de los cambios en `Validacion` |
 
 El script de migración también se probó sobre una copia a la que antes se le quitaron las columnas. El bloqueo de `storage/` por `.htaccess` queda para la prueba manual en XAMPP de más arriba.
+
+## UsuarioService y SolicitudAltaService
+
+### Cuentas y sesión: `UsuarioService`
+
+**Es el único Service que toca `$_SESSION`.** Así se decidió para el login. Todos los demás Services siguen recibiendo el `$idUsuario` como parámetro. El Controller lo obtiene de acá:
+
+```php
+$usuario = $usuarioService->exigirSesion();   // sin sesión: SesionRequeridaException → al login
+$protagonistaService->alta($usuario->id, $persona, $protagonista);
+```
+
+En la sesión se guarda **solo el id** del usuario. Sus datos (nombre, si es admin) se vuelven a leer de la base en cada pedido, así un cambio se nota enseguida, y si la cuenta se borra, la sesión deja de valer. Las vistas reciben un `UsuarioSesion` (id, nombre, email, esAdmin), nunca el `Usuario` con el hash.
+
+| Método | Qué hace |
+| --- | --- |
+| `registrar` | Crea la cuenta sin accesos y deja al usuario logueado |
+| `iniciarSesion` | Verifica el email y la contraseña, y abre la sesión |
+| `cerrarSesion` | Borra los datos de la sesión, la cookie y la sesión del servidor |
+| `usuarioActual` / `exigirSesion` | El usuario logueado, o `null` / la excepción |
+| `cambiarContrasenia` | Pide la contraseña actual. Al terminar renueva el id de sesión |
+
+**Seguridad del login.**
+
+- **Mensaje único.** Con un email inexistente y con una contraseña incorrecta, el mensaje es el mismo: "Email o contraseña incorrectos." El legacy los distinguía, y eso permitía averiguar qué emails están registrados.
+- **Mismo tiempo de respuesta.** Si el email no existe, igual se compara la contraseña contra un hash ficticio, así el login tarda lo mismo y tampoco se puede averiguar midiendo tiempos.
+- **Renovación al loguearse.** Se renuevan el id de sesión (`session_regenerate_id`) y el token CSRF. Un id de sesión que alguien conociera de antes deja de servir.
+- **Hashes viejos.** `password_needs_rehash` actualiza el hash si PHP cambió el algoritmo o el costo por defecto.
+- **Email.** Se guarda sin espacios y en minúsculas, así no hay dos cuentas "Ana@…" y "ana@…".
+
+**`src/Helper/Sesion.php`.** Arranca siempre la sesión con la misma configuración:
+
+- cookie `httponly`, así el JavaScript de la página no la puede leer;
+- `SameSite=Lax`;
+- `secure` si la página se sirve por HTTPS;
+- `use_strict_mode`, así PHP no acepta un id de sesión inventado por el cliente.
+
+`Csrf` también lo usa. Nunca se llama a `session_start()` suelto.
+
+**Contraseña: dos versiones.** Está activa la **versión B**, con un mínimo de 6 caracteres, porque en las pruebas se usan contraseñas cortas. La **versión A**, para producción, está comentada en `UsuarioService::validarContrasenia()`: mínimo 8 caracteres y máximo 72 bytes, porque bcrypt ignora lo que pasa de 72 bytes. Para activarla, se borra el bloque de la B y se descomenta el de la A.
+
+**Quedan para más adelante:**
+
+- **Recuperar la contraseña.** Hace falta envío de emails; la columna `token_recuperacion` queda reservada. El legacy mostraba el código en pantalla, así que cualquiera que supiera un email podía cambiar esa contraseña.
+- **Bloqueo por intentos fallidos.** No hay dónde contarlos.

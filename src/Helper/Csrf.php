@@ -86,8 +86,6 @@ final class Csrf
 
     private static function iniciarSesion(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        Sesion::iniciar();
     }
 }
