@@ -24,6 +24,7 @@ final class SolicitudAlta
         public EstadoSolicitud $estado,
         public ?string         $fecha,           // La pone la base al insertar
         public ?int            $idAdminRevisor,  // Dev que la revisó
+        public ?string         $motivoRechazo = null,  // Solo si se rechazó; lo ve el solicitante
     ) {}
 
     /**
@@ -40,6 +41,7 @@ final class SolicitudAlta
             estado: EstadoSolicitud::from($fila['estado']),
             fecha: $fila['fecha'] === null ? null : (string) $fila['fecha'],
             idAdminRevisor: $fila['id_admin_revisor'] === null ? null : (int) $fila['id_admin_revisor'],
+            motivoRechazo: $fila['motivo_rechazo'] === null ? null : (string) $fila['motivo_rechazo'],
         );
     }
 }

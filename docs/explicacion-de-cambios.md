@@ -682,3 +682,31 @@ En la sesión se guarda **solo el id** del usuario. Sus datos (nombre, si es adm
 
 - **Recuperar la contraseña.** Hace falta envío de emails; la columna `token_recuperacion` queda reservada. El legacy mostraba el código en pantalla, así que cualquiera que supiera un email podía cambiar esa contraseña.
 - **Bloqueo por intentos fallidos.** No hay dónde contarlos.
+
+### Alta de grupos: `SolicitudAltaService`
+
+El circuito es: el usuario se registra → envía una solicitud → un admin la aprueba → se crean el grupo y sus secciones, y el usuario queda como Jefe del grupo.
+
+- **Contenido.**
+  - `datosGrupo` lleva `{codigo, nombre}`, las columnas de `grupo`.
+  - `datosSecciones` es una lista de `{nombre, id_rama}`, las columnas de `seccion`.
+  - Se guardan limpios: sin espacios de más y solo con esas claves. Lo que venga de más en el formulario se descarta.
+- **Validaciones.** Se hacen al enviar y otra vez al aprobar, porque mientras tanto otro grupo pudo tomar el código:
+  - el código no tiene que estar usado;
+  - tiene que haber al menos una sección;
+  - las ramas tienen que existir;
+  - no se repiten nombres de sección, aunque cambien las mayúsculas.
+- **Una pendiente por usuario.** Si se la rechazan, puede enviar otra. La solicitud no se edita.
+- **Aprobar** (solo admin). En una sola transacción crea el grupo, las secciones y el `acceso_grupo` del solicitante con el rol Jefe. Con eso queda Jefe de todas las secciones por derivación, sin filas en `acceso_seccion`. Si la validación falla, no se crea nada.
+- **Rechazar** (solo admin). Exige un motivo, que se guarda en la columna nueva `solicitud_alta.motivo_rechazo` y que el solicitante ve en `misSolicitudes`. El aviso por email está preparado en `notificarRechazo()`, pero todavía no hace nada.
+- **Ver una solicitud.** La ven su dueño y los admins. A cualquier otro usuario se le responde "no existe".
+- **Cruz del Sur.** La validación queda para más adelante; `email_validado` sigue siempre en `false`. Por eso no se creó la interfaz `ValidadorCruzDelSur`.
+
+Para la base ya importada hay un script de migración que agrega `motivo_rechazo`.
+
+**Pruebas.** Se probó todo con 46 casos sobre una copia de `educarama_v2` con la migración aplicada, dentro de una transacción que después se deshizo.
+
+- **Cuentas:** registro, login, logout, el mensaje único, la renovación del id de sesión y del token CSRF, la actualización de un hash viejo, una cuenta borrada y el cambio de contraseña.
+- **Solicitudes:** todas las validaciones, la aprobación (grupo, secciones y el Jefe por derivación), el código tomado entre el envío y la aprobación (no crea nada) y el rechazo con motivo.
+
+Además se repitieron las pruebas anteriores: progresión (49), protagonistas (41), familiares (27) y documentos (25).

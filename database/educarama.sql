@@ -293,6 +293,7 @@ CREATE TABLE `solicitud_alta` (
   `estado`           ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
   `fecha`            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_admin_revisor` INT      NULL,
+  `motivo_rechazo`   TEXT     NULL COMMENT 'Obligatorio al rechazar; lo ve el solicitante',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_solicitud_usuario` FOREIGN KEY (`id_usuario`)       REFERENCES `usuario` (`id`),
   CONSTRAINT `fk_solicitud_admin`   FOREIGN KEY (`id_admin_revisor`) REFERENCES `usuario` (`id`)

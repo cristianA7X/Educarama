@@ -68,12 +68,19 @@ final class SolicitudAltaRepository extends RepositorioBase
         return $solicitud->id;
     }
 
-    /** Registra que un dev aprobó o rechazó la solicitud. */
-    public function registrarRevision(int $idSolicitud, EstadoSolicitud $estado, int $idAdminRevisor): void
-    {
+    /**
+     * Registra que un dev aprobó o rechazó la solicitud. El motivo va solo en
+     * los rechazos (que sea obligatorio lo controla el Service).
+     */
+    public function registrarRevision(
+        int $idSolicitud,
+        EstadoSolicitud $estado,
+        int $idAdminRevisor,
+        ?string $motivoRechazo = null,
+    ): void {
         $this->ejecutar(
-            'UPDATE solicitud_alta SET estado = ?, id_admin_revisor = ? WHERE id = ?',
-            [$estado->value, $idAdminRevisor, $idSolicitud],
+            'UPDATE solicitud_alta SET estado = ?, id_admin_revisor = ?, motivo_rechazo = ? WHERE id = ?',
+            [$estado->value, $idAdminRevisor, $motivoRechazo, $idSolicitud],
         );
     }
 
