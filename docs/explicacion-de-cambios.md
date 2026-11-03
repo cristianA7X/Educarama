@@ -304,3 +304,29 @@ $repo->insertar(new AccionCumplida($idProtagonista, $idAccion, date('Y-m-d')));
 | `InsigniaOtorgadaRepository` | — |
 
 Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo: etapa actual con fechas cargadas al revés y con cambio de rama, acciones de dos competencias sin mezclarse, el elemento de Caminantes ida y vuelta, y el borrado en cascada al eliminar el protagonista.
+
+## Repositories de eventos
+
+Son `EventoRepository` y `EventoSeccionRepository`. Con estos dos quedan hechos todos los repositorios.
+
+**De quién es un evento.** Un evento siempre pertenece a un grupo (`evento.id_grupo`). Si no tiene filas en `evento_seccion`, es de **todo el grupo**. Si tiene filas, es solo de esas secciones.
+
+**Eventos de una sección.** `EventoRepository::listarPorSeccion($idSeccion)` devuelve los dos casos juntos: los de todo el grupo y los asignados a esa sección. El grupo se saca de la propia sección con un JOIN, así no hace falta pasarlo y no aparecen eventos de otro grupo. `EventoSeccionRepository::listarPorSeccion()` hace otra cosa: devuelve solo las asignaciones explícitas, sin los eventos de todo el grupo.
+
+En esa consulta el mismo id se pasa dos veces con nombres distintos (`:id_seccion` y `:id_seccion2`). Es necesario porque la conexión no emula los prepares, y en ese modo PDO no deja usar dos veces el mismo `:nombre`.
+
+**Cambiar las secciones de un evento.** `eliminarPorEvento($idEvento)` borra todas sus filas, y el evento pasa a ser de todo el grupo. Para reemplazar la lista, el Service hace `eliminarPorEvento` y después un `insertar` por cada sección, todo dentro de una transacción. Ojo: si se quita la última sección con `eliminar`, el evento también pasa a ser de todo el grupo.
+
+**Otros detalles.**
+
+- `actualizar` no modifica `id_grupo`: un evento no se pasa a otro grupo.
+- `eliminar` borra el evento, y la base borra en cascada sus filas de `evento_seccion`.
+- Los listados traen eventos activos e inactivos, ordenados por `fecha_inicio`. Filtrar por `activo`, o por `es_publico` (lo que ve un Supervisor), lo hace el Service.
+- Que las secciones sean del mismo grupo que el evento lo valida el Service.
+
+| Repositorio | Lectura | Escritura |
+| --- | --- | --- |
+| `EventoRepository` | `buscarPorId`, `listarPorGrupo`, `listarPorSeccion` | `insertar`, `actualizar`, `eliminar` |
+| `EventoSeccionRepository` | `listarPorEvento`, `listarPorSeccion` | `insertar`, `eliminar`, `eliminarPorEvento` |
+
+Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo: un evento de todo el grupo y otro de una sola sección, vistos desde las dos secciones; la actualización con el enum, el bool y la fecha nula; la PK duplicada; el paso a todo el grupo al quitar las secciones; y el borrado en cascada.
