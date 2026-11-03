@@ -11,8 +11,8 @@ use Educarama\Model\EtapaLograda;
  * Lectura y escritura de `etapa_lograda`: las etapas que un protagonista logró.
  * La etapa actual es la última lograda (ver buscarActual).
  *
- * Tabla de progresión: sin fila = no lograda. La fila la crea un educador al confirmar;
- * ofrecer la insignia de la etapa en la misma operación lo hace el Service.
+ * Tabla de progresión: sin fila = no lograda. La fila la crea un educador al confirmar
+ * que la etapa se completó. No tiene relación con la insignia: esa se registra aparte.
  * Sin id propio: cada fila se identifica por id_protagonista + id_etapa.
  */
 final class EtapaLogradaRepository extends RepositorioBase

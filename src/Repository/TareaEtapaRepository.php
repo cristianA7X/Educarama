@@ -14,6 +14,11 @@ use Educarama\Model\TareaEtapa;
  */
 final class TareaEtapaRepository extends RepositorioEstatico
 {
+    public function buscarPorId(int $id): ?TareaEtapa
+    {
+        return $this->buscarUno('SELECT * FROM tarea_etapa WHERE id = ?', [$id], TareaEtapa::class);
+    }
+
     /** @return TareaEtapa[] Ordenadas por número. */
     public function listarPorEtapa(int $idEtapa): array
     {

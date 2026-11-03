@@ -415,3 +415,50 @@ Es un dato estático en la base, no una constante de PHP ni un cálculo en vivo.
 - En la misma conversación se cambió la regla de las insignias. Ya no se ofrecen al confirmar una etapa: se registran a mano, con la fecha de la entrega física. Solo hay un aviso cuando una etapa empieza y el protagonista todavía no recibió su insignia. Las reglas completas de progresión están en CLAUDE.md, en "Progresión" y "Pantalla de competencias del protagonista".
 
 **Base ya importada.** Para aplicarlo sin reimportar, hay un script de migración que agrega la columna, carga los cupos, la pasa a NOT NULL, borra las cuatro columnas viejas y controla que los cupos de cada rama sumen su total de competencias. Se probó sobre una copia de `educarama_v2`.
+
+## ProgresionService
+
+Es el Service de la progresión personal: competencias, acciones, tareas de etapa, etapas, especialidades e insignias. Aplica las reglas de "Progresión" de CLAUDE.md.
+
+**Cómo avisa.** Hay dos tipos de mensaje, y los dos usan la clase `Aviso` (un tipo `TipoAviso` y un mensaje listo para mostrar):
+
+- **Requisitos que se pueden saltear** (cupo excedido, acciones requeridas sin cumplir, cupo incompleto o tareas al confirmar una etapa). El Service no guarda nada y lanza `RequisitosPendientesException`, que trae los avisos en `$e->avisos`. La vista los muestra y pregunta "¿Registrar igual?". Si el educador acepta, se repite la misma llamada con `$confirmarIgual = true`. Así nadie puede registrar algo sin haber visto el aviso.
+- **Sugerencias** ("¿dar la competencia por desarrollada?", "¿confirmar la etapa?"). Llegan después de guardar, dentro del `ResultadoProgresion` que devuelve la operación, y no frenan nada. Ese objeto tiene solo propiedades públicas, así que el Controller lo puede mandar al fetch con `json_encode`.
+
+Lo único que bloquea siempre, aunque se pase `$confirmarIgual`, es confirmar una etapa sin tener lograda la anterior. Esto, igual que las validaciones de rama, lanza `ReglaNegocioException`.
+
+**Etapa actual y etapa en curso.** La etapa actual es la última lograda en la rama de la sección. La etapa en curso es la siguiente, o la primera si no logró ninguna. Las dos se calculan en vivo en cada llamada.
+
+**Operaciones** (todas reciben primero el `$idUsuario`; la fecha es opcional y, si no se pasa, se usa la de hoy):
+
+| Método | Rol | Qué hace |
+| --- | --- | --- |
+| `resumen` | Ayudante | Devuelve un `ResumenProgresion`: etapa actual y en curso, contadores (de la etapa, total y por área), lo adeudado y la insignia pendiente |
+| `avanzarCompetencia` | Responsable | Pendiente → En proceso (la asigna a la etapa en curso; avisa si se pasa del cupo) → Desarrollada (avisa si faltan acciones; sugiere confirmar la etapa) |
+| `retrocederCompetencia` | Responsable | Desarrollada → En proceso → Pendiente (borra la fila y conserva las acciones) |
+| `marcarAccion`, `desmarcarAccion` | Responsable | Exigen que la competencia esté elegida; al cumplir la última acción requerida, sugiere darla por desarrollada |
+| `marcarTarea`, `desmarcarTarea` | Responsable | Tareas de etapa |
+| `confirmarEtapa` | Responsable | Avisa por el cupo y las tareas; bloquea si falta la etapa anterior; en Caminantes exige el elemento y en las demás ramas lo rechaza |
+| `quitarEtapa` | Jefe | Solo la última etapa lograda |
+| `otorgarInsignia` | Responsable | Registro manual, con la fecha de la entrega física |
+| `quitarInsignia` | Jefe | |
+| `avanzarEspecialidad`, `retrocederEspecialidad` | Responsable | Igual que las competencias, pero sin avisos; solo en ramas con `usa_especialidades` |
+
+**Detalles de implementación.**
+
+- Las operaciones que marcan o desmarcan (acciones y tareas) no fallan si se repiten: si ya estaba tildada, no hacen nada. Así, si el guardado inmediato manda dos veces el mismo pedido, no da error.
+- "Acción requerida" significa `es_opcional = 0`. En Scouts y Caminantes todas sus acciones tienen 0, así que la misma regla sirve para todas las ramas sin preguntar cuál es.
+- Caminantes se reconoce por su id (3, de "Datos oficiales"), porque la tabla `rama` no tiene una columna que indique si la rama usa elemento. Es la constante `ID_RAMA_CAMINANTES`.
+- La rama sale siempre por ids: protagonista → sección → rama. Los contadores recorren el catálogo de la rama actual, así no se cuentan competencias de una rama anterior.
+- Las clases que devuelven los Services y que no son Models van en `src/Service/Vista/`: `Aviso`, `TipoAviso`, `ResultadoProgresion`, `ResumenProgresion` y `ContadorArea`.
+- A `TareaEtapaRepository` se le agregó `buscarPorId`.
+
+Se probó todo contra `educarama_v2` dentro de una transacción que después se deshizo, con 49 casos:
+
+- permisos de Ayudante, Responsable y Jefe de grupo;
+- el ciclo completo de una competencia con sus acciones y la sugerencia al cumplir la última;
+- llenar el cupo de Pata Tierna, la sugerencia de confirmar y el aviso al elegir la competencia 13;
+- el bloqueo por la etapa anterior, lo adeudado de la etapa 2 (cupo y tarea) y la confirmación igual;
+- quitar solo la última etapa, y el retroceso que conserva las acciones;
+- el elemento en Caminantes y Rovers sin acciones ni especialidades;
+- las insignias con su aviso, y las fechas inválidas.

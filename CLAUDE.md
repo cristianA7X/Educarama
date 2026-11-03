@@ -100,12 +100,34 @@ Educarama/
 
 - **Nada se confirma automáticamente.** Confirman Responsable o Jefe de la sección, o el Jefe del grupo.
 - El sistema **avisa** cuando un protagonista alcanza requisitos y **permite saltearlos**: muestra lo adeudado, pide confirmación y registra igual. Lo adeudado se calcula en vivo, no se guarda.
-- Al confirmar una etapa, ofrecer otorgar su insignia en la misma operación.
 - El Service valida (no la base): la patrulla es de la misma sección; especialidades solo si `rama.usa_especialidades`; acciones solo si `rama.usa_acciones`.
 - Alta: el usuario se registra sin accesos → envía `solicitud_alta` → un dev (`usuario.es_admin`) aprueba → se crean grupo y secciones y queda como Jefe del grupo. Cruz del Sur: interfaz `ValidadorCruzDelSur` que hoy devuelve siempre "pendiente".
 - Roles (`NivelRol`): Supervisor 1 (estadísticas, sin datos personales), Ayudante 2 (lectura), Responsable 3 (crear/modificar y confirmar logros), Jefe 4 (eliminar y gestionar roles). En sección, el Jefe solo cambia el rol de usuarios ya asignados. El Jefe de grupo es Jefe de todas sus secciones **por derivación en código**, sin filas en `acceso_seccion`.
 - Herencia de accesos: **solo** el Jefe de grupo hereda el rol Jefe en todas las secciones de su grupo. Los demás roles de grupo (Supervisor, Ayudante, Responsable) valen solo para las pantallas del grupo (estadísticas agregadas, listado de secciones, eventos grupales) y no dan acceso al detalle de ninguna sección: para eso hace falta una fila en `acceso_seccion`. Si un usuario tiene rol de grupo y de sección, en la sección vale el de sección (salvo que sea Jefe de grupo, que siempre es Jefe).
 - Admin (`usuario.es_admin`): solo aprueba o rechaza solicitudes de alta. No ve datos de ningún grupo por ser admin; si necesita entrar a uno, se le da un acceso como a cualquier usuario.
+
+### Progresión
+
+- **Etapa actual** = la última lograda (`etapa_lograda` es la etapa **completada**). **Etapa en curso** = la siguiente a la actual, o la primera de la rama si no logró ninguna. Al elegir una competencia (pasarla a En proceso), su `id_etapa` toma la etapa en curso.
+- **Cupo:** se cuentan las competencias con `id_etapa` igual a la etapa y se comparan con su `competencias_etapa`. Dos avisos, los dos se pueden saltear:
+  1. Al elegir: si en proceso + desarrolladas de la etapa en curso ya llegan al cupo, se avisa que está eligiendo de más; si el educador confirma, se registra igual.
+  2. Al completar: cuando las desarrolladas de la etapa en curso llegan al cupo, se sugiere confirmar la etapa.
+- **Competencia desarrollada:** LyL requiere todas sus acciones requeridas (`es_opcional = 0`); Scouts y Caminantes, todas sus acciones; Rovers, nada. Si falta algo, se avisa y se puede saltear. Al cumplir la última acción, se sugiere "¿dar la competencia por desarrollada?".
+- **Confirmar una etapa:** requiere el cupo de competencias desarrolladas y todas sus tareas (`tarea_etapa`); las dos cosas se pueden saltear mostrando lo adeudado. Lo que **bloquea** (no se saltea) es que la etapa anterior no esté lograda. En Caminantes el elemento es **obligatorio**; en las demás ramas el Service lo rechaza.
+- **Quién deshace:** destildar acciones y volver atrás el estado de una competencia, Responsable en adelante. Quitar una etapa lograda o una insignia otorgada, solo Jefe.
+- **Casos borde:** si ya logró todas las etapas, una competencia nueva se asigna a la última etapa de la rama, con aviso de cupo excedido. Solo se puede quitar la **última** etapa lograda. Retroceder una competencia a Pendiente conserva sus acciones cumplidas. No se pueden tildar acciones de una competencia Pendiente: primero hay que elegirla.
+- **Insignias: registro aparte y manual.** No están atadas a confirmar una etapa. Se registran a mano en un submenú propio del protagonista, con su propia fecha (la de la entrega física), en `insignia_otorgada`. Según el programa, la insignia de una etapa se entrega cuando la etapa empieza: apenas una etapa pasa a estar en curso, si el protagonista no tiene su insignia se avisa "tiene la etapa X en curso y todavía no recibió su insignia". Nada automático. `etapa_lograda` no tiene relación funcional con la insignia.
+
+### Pantalla de competencias del protagonista
+
+- Una pestaña por área, con todas las competencias de la rama aunque no tengan fila (sin fila = pendiente).
+- Cada competencia tiene un botón que **solo avanza**: Pendiente → En proceso (la elige para la etapa en curso; aviso de cupo) → Desarrollada (aviso de acciones).
+- **Volver atrás:** botón ⋮ arriba de las pestañas, al lado del filtro, con la opción "Corregir". Activa un modo que permite retroceder (Desarrollada → En proceso → Pendiente, que borra la fila). Solo Responsable en adelante.
+- **Acciones:** casillas sí/no dentro de cada competencia, en una sección desplegable. Rovers no las muestra.
+- **Contadores:** "Etapa en curso: X/cupo" y "Total: X/total de la rama" arriba; en cada pestaña, las desarrolladas de esa área.
+- **Filtro** arriba de las pestañas: Todas / Pendientes / En proceso / Desarrolladas.
+- **Guardado inmediato:** cada clic se guarda en el momento por fetch, con operaciones de a una (no hay guardado por lote). Si hay un aviso (cupo excedido, acciones sin cumplir), primero se muestra la confirmación y después se guarda.
+- `ProgresionService::resumen()` (Ayudante en adelante) devuelve una clase vista con: etapa actual, etapa en curso, contadores (etapa, total y por área), lo adeudado para confirmar la etapa en curso y el aviso de insignia pendiente.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
 
