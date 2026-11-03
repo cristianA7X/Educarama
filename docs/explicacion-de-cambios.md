@@ -738,3 +738,43 @@ Gestiona quién tiene acceso a un grupo o a una sección, y con qué rol. Las re
 - el último Jefe, también cuando se intenta bajar a sí mismo;
 - los límites del Jefe de sección (hasta Responsable, sin tocar a otros Jefes, sin agregar ni quitar);
 - que la lista no traiga el hash.
+
+## EventoService
+
+Es el último Service. Maneja los eventos de un grupo, que pueden ser de todo el grupo o de algunas de sus secciones. Las reglas quedaron en CLAUDE.md, en "Eventos".
+
+**Un evento sin secciones es de todo el grupo.** Al crear o editar, el Controller pasa la lista completa de secciones elegidas. Vacía significa todo el grupo. El Service saca los repetidos y controla que cada sección exista y sea del grupo del evento. Al editar, borra las filas de `evento_seccion` e inserta las nuevas, todo dentro de una transacción: si algo falla, el evento queda como estaba.
+
+**Quién escribe.** Depende de a quién le toca el evento:
+
+| El evento es de… | Crear, editar, desactivar, reactivar | Eliminar |
+| --- | --- | --- |
+| Todo el grupo | Responsable de grupo (o Jefe de grupo) | Jefe de grupo |
+| Algunas secciones | Responsable en **cada** sección | Jefe en cada sección |
+
+El Jefe de grupo es Jefe de todas sus secciones por derivación, así que puede todo. Un Responsable de grupo **no** puede crear eventos de una sección: los roles de grupo no se heredan. Al editar se pide el permiso dos veces, sobre el evento como está y como queda. Así, pasar un evento de la Manada a todo el grupo pide ser Responsable en la Manada **y** en el grupo.
+
+**Quién ve.** El Service calcula el rol más alto del usuario entre su rol de grupo y su rol en cada sección a la que le toca el evento (todas las del grupo, si es de todo el grupo). Con ese rol decide:
+
+- sin ningún rol, 404 (no se confirma que el evento existe, igual que con los documentos);
+- Supervisor: solo los que tienen `es_publico`;
+- inactivos: solo Responsable en adelante.
+
+Los listados son dos: `listarPorGrupo` es la pantalla del grupo y pide un rol de grupo; `listarPorSeccion` es la de la sección y pide acceso a esa sección. Por defecto traen solo los activos; con `$incluirInactivos = true` traen todos, y eso es de Responsable.
+
+**Próximos eventos.** `proximosPorGrupo` y `proximosPorSeccion` traen los activos que todavía no terminaron: su `fecha_fin`, o su `fecha_inicio` si no tiene fin, es de hoy en adelante. Un campamento que empezó ayer y termina mañana sigue apareciendo.
+
+**Fechas.** No se crea un evento que empieza antes de hoy. Al editar, si la fecha de inicio no cambia, puede quedar en el pasado: un evento que ya empezó se sigue pudiendo corregir. Para calcular "hoy", `config.php` define `ZONA_HORARIA` (America/Argentina/Buenos_Aires). PHP en XAMPP viene con Europe/Berlin, y con esa zona el día cambiaba unas horas antes.
+
+**La clase vista `EventoConSecciones`** (en `src/Service/Vista/`) junta el evento y los ids de sus secciones, para los listados y el formulario de edición. Para no hacer una consulta por evento, `EventoSeccionRepository::listarPorGrupo` trae en una sola consulta las filas de todos los eventos del grupo.
+
+**Lo que no cambia por `actualizar`:** el grupo, `activo` (para eso están `desactivar` y `reactivar`) y `id_tipo_evento`, que queda siempre en NULL porque está reservado para las plantillas.
+
+**Pruebas.** Se probó todo con 60 casos contra `educarama_v2`, dentro de una transacción que después se deshizo:
+
+- permisos de cada rol, en el grupo y en las secciones, incluido el Jefe de otro grupo;
+- secciones de otro grupo, inexistentes y repetidas;
+- validaciones de título, descripción y fechas, también al editar un evento que ya empezó;
+- lo que ve el Supervisor, los inactivos y el 404;
+- reemplazar la lista de secciones al editar;
+- los próximos eventos (terminados, en curso, que terminan hoy, inactivos).

@@ -21,7 +21,7 @@ PHP 8.1+ con POO, MySQL/MariaDB con PDO, HTML/CSS/JS, Bootstrap 5, todo sobre XA
 
 ```
 Educarama/
-├── config/        config.php (BASE_URL, DB_*, ALMACEN_*), config.local.php (gitignored),
+├── config/        config.php (BASE_URL, ZONA_HORARIA, DB_*, ALMACEN_*), config.local.php (gitignored),
 │                  bootstrap.php (autoload propio + url()), Database.php
 ├── database/      educarama.sql (base educarama_v2)
 ├── docs/          explicacion-de-cambios.md
@@ -173,6 +173,15 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Pertenencia: documento → protagonista → sección → acceso. Sin acceso a la sección, **404** (no se confirma que existe); con acceso pero sin el rol, 403.
 - Subir: primero el archivo, después la fila (si la fila falla, se borra el archivo). Eliminar: primero la fila, después el archivo. Eliminar un protagonista borra también su carpeta.
 - PDF siempre como adjunto; imágenes pueden mostrarse en línea.
+
+### Eventos
+
+- De todo el grupo (sin filas en `evento_seccion`) o de algunas secciones del mismo grupo. Al crear o editar se pasa la lista completa de secciones (vacía = todo el grupo) y se reemplaza en una transacción.
+- Crear, editar, desactivar y reactivar: evento de todo el grupo, Responsable de grupo (o Jefe de grupo); de algunas secciones, Responsable en **cada una**. Eliminar: lo mismo, con Jefe. Editar pide el permiso sobre el evento como está y como queda.
+- Ver: los de todo el grupo, cualquiera con acceso al grupo o a alguna de sus secciones; los de algunas secciones, quien tiene acceso a una de ellas, más los roles de grupo. El Supervisor ve solo los `es_publico`. Si no lo puede ver, 404.
+- Desactivar (`activo`) los oculta: los listados traen solo los activos y el Responsable puede pedir también los inactivos.
+- Título (hasta 200) y descripción obligatorios. No se crea un evento que empieza antes de hoy; al editar, el inicio puede quedar en el pasado solo si no cambia. `fecha_fin` opcional, no anterior al inicio.
+- Próximos eventos (home y perfil de sección): activos que no terminaron (`fecha_fin`, o `fecha_inicio` si no tiene fin, de hoy en adelante). "Hoy" usa `ZONA_HORARIA`. `id_tipo_evento` queda siempre en NULL.
 
 ### Pantalla de competencias del protagonista
 

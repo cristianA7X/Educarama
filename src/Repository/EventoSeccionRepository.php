@@ -38,6 +38,25 @@ final class EventoSeccionRepository extends RepositorioBase
         );
     }
 
+    /**
+     * Las filas de todos los eventos de un grupo, en una sola consulta (para
+     * los listados: evita una consulta por evento).
+     *
+     * @return EventoSeccion[]
+     */
+    public function listarPorGrupo(int $idGrupo): array
+    {
+        return $this->listar(
+            'SELECT es.*
+               FROM evento_seccion es
+               JOIN evento e ON e.id = es.id_evento
+              WHERE e.id_grupo = ?
+              ORDER BY es.id_evento, es.id_seccion',
+            [$idGrupo],
+            EventoSeccion::class,
+        );
+    }
+
     /** Asigna el evento a una sección. Si ya estaba asignado, la base lanza una excepción (PK duplicada). */
     public function insertar(EventoSeccion $eventoSeccion): void
     {

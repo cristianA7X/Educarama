@@ -27,6 +27,12 @@ if (is_file($configLocal)) {
 // se cambia solo esta línea.
 defined('BASE_URL') || define('BASE_URL', '/Educarama');
 
+// Zona horaria de las fechas que calcula PHP (por ejemplo, "hoy" en los
+// próximos eventos). XAMPP trae Europe/Berlin por defecto, que en Argentina
+// cambia de día unas horas antes.
+defined('ZONA_HORARIA') || define('ZONA_HORARIA', 'America/Argentina/Buenos_Aires');
+date_default_timezone_set(ZONA_HORARIA);
+
 // Conexión a la base de datos (la usa Educarama\Config\Database).
 defined('DB_HOST')    || define('DB_HOST', 'localhost');
 defined('DB_NAME')    || define('DB_NAME', 'educarama_v2');
