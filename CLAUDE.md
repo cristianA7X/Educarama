@@ -130,6 +130,14 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Herencia de accesos: **solo** el Jefe de grupo hereda el rol Jefe en todas las secciones de su grupo. Los demás roles de grupo (Supervisor, Ayudante, Responsable) valen solo para las pantallas del grupo (estadísticas agregadas, listado de secciones, eventos grupales) y no dan acceso al detalle de ninguna sección: para eso hace falta una fila en `acceso_seccion`. Si un usuario tiene rol de grupo y de sección, en la sección vale el de sección (salvo que sea Jefe de grupo, que siempre es Jefe).
 - Admin (`usuario.es_admin`): solo aprueba o rechaza solicitudes de alta. No ve datos de ningún grupo por ser admin; si necesita entrar a uno, se le da un acceso como a cualquier usuario.
 
+### Accesos (gestión de roles)
+
+- Se suma a alguien buscando su cuenta **ya registrada** por email; si no hay, se le pide que se registre (sin invitaciones por ahora).
+- Jefe de grupo: agrega, cambia y quita accesos del grupo y de cualquier sección de su grupo, con cualquier rol.
+- Jefe de sección: solo cambia el rol de los ya asignados a su sección, **hasta Responsable**. No agrega, no quita y no toca a otro Jefe (ni a sí mismo). Nombrar Jefes de sección es del Jefe de grupo.
+- El **último Jefe de un grupo** no se puede quitar ni bajar de rol, ni siquiera él mismo.
+- Ver la lista (nombre, email, rol): la del grupo, el Jefe de grupo; la de una sección, su Jefe y el Jefe de grupo.
+
 ### Progresión
 
 - **Etapa actual** = la última lograda (`etapa_lograda` es la etapa **completada**). **Etapa en curso** = la siguiente a la actual, o la primera de la rama si no logró ninguna. Al elegir una competencia (pasarla a En proceso), su `id_etapa` toma la etapa en curso.
@@ -192,7 +200,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ## Para más adelante (no implementar todavía)
 
-Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorCruzDelSur`, resultado al revisar solicitudes, `email_validado`) · envío de emails (aviso de solicitud rechazada: `SolicitudAltaService::notificarRechazo`) · recuperación de contraseña (`token_recuperacion` reservado; necesita envío de emails) · bloqueo por intentos de login fallidos · activar la versión A de contraseña · plantillas de evento (`id_tipo_evento` reservado) · acciones personalizadas de protagonistas · momentos de la progresión · rutas de imágenes de insignias · auditoría de confirmaciones · habilitaciones que bloqueen · generador del catálogo desde CSV (reservado fuera del repo).
+Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorCruzDelSur`, resultado al revisar solicitudes, `email_validado`) · envío de emails (aviso de solicitud rechazada: `SolicitudAltaService::notificarRechazo`) · recuperación de contraseña (`token_recuperacion` reservado; necesita envío de emails) · bloqueo por intentos de login fallidos · invitar por email a quien no tiene cuenta (al dar un acceso) · activar la versión A de contraseña · plantillas de evento (`id_tipo_evento` reservado) · acciones personalizadas de protagonistas · momentos de la progresión · rutas de imágenes de insignias · auditoría de confirmaciones · habilitaciones que bloqueen · generador del catálogo desde CSV (reservado fuera del repo).
 
 ## Orden de trabajo
 

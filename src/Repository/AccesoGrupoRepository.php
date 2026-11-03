@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Educarama\Repository;
 
 use Educarama\Model\AccesoGrupo;
+use Educarama\Repository\Vista\UsuarioConAcceso;
 
 /**
  * Lectura y escritura de `acceso_grupo`: qué rol tiene un usuario sobre un grupo.
@@ -43,6 +44,26 @@ final class AccesoGrupoRepository extends RepositorioBase
             'SELECT * FROM acceso_grupo WHERE id_grupo = ? ORDER BY id_usuario',
             [$idGrupo],
             AccesoGrupo::class,
+        );
+    }
+
+    /**
+     * Los usuarios con acceso al grupo, con nombre, email y rol, para la pantalla
+     * de gestión. Primero los de mayor rol, después por nombre.
+     *
+     * @return UsuarioConAcceso[]
+     */
+    public function listarUsuariosPorGrupo(int $idGrupo): array
+    {
+        return $this->listar(
+            'SELECT ag.id_usuario, u.nombre AS usuario_nombre, u.email AS usuario_email, r.nivel AS rol_nivel
+               FROM acceso_grupo ag
+               JOIN usuario u ON u.id = ag.id_usuario
+               JOIN rol r     ON r.id = ag.id_rol
+              WHERE ag.id_grupo = ?
+              ORDER BY r.nivel DESC, u.nombre',
+            [$idGrupo],
+            UsuarioConAcceso::class,
         );
     }
 

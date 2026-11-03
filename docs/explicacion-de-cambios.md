@@ -710,3 +710,31 @@ Para la base ya importada hay un script de migración que agrega `motivo_rechazo
 - **Solicitudes:** todas las validaciones, la aprobación (grupo, secciones y el Jefe por derivación), el código tomado entre el envío y la aprobación (no crea nada) y el rechazo con motivo.
 
 Además se repitieron las pruebas anteriores: progresión (49), protagonistas (41), familiares (27) y documentos (25).
+
+## AccesoService
+
+Gestiona quién tiene acceso a un grupo o a una sección, y con qué rol. Las reglas quedaron en CLAUDE.md, en "Accesos".
+
+**Cómo se suma a alguien.** El Jefe escribe el email de una cuenta **ya registrada**. Si no hay ninguna cuenta con ese email, el mensaje es "No hay una cuenta con ese email: pedile que se registre en Educarama". La idea es que más adelante se pueda invitar por email, pero hoy no hay envío de emails (quedó anotado en "Para más adelante"). El email se busca sin importar mayúsculas, igual que en el login.
+
+| Método | Quién | Qué hace |
+| --- | --- | --- |
+| `listarAccesosGrupo` | Jefe de grupo | Nombre, email y rol de cada usuario con acceso al grupo |
+| `darAccesoGrupo`, `cambiarRolGrupo`, `quitarAccesoGrupo` | Jefe de grupo | Cualquier rol. No deja al grupo sin Jefe |
+| `listarAccesosSeccion` | Jefe de la sección o Jefe de grupo | Los asignados a la sección (los Jefes de grupo no figuran, porque no tienen fila) |
+| `darAccesoSeccion`, `quitarAccesoSeccion` | Jefe de grupo | |
+| `cambiarRolSeccion` | Jefe de grupo: cualquier rol. Jefe de sección: hasta Responsable | El Jefe de sección no puede tocar a otro Jefe ni a sí mismo |
+
+**El último Jefe del grupo.** Antes de quitar o bajar de rol a un Jefe de grupo, se cuentan los Jefes del grupo. Si es el único, la operación se rechaza con "Es el único Jefe del grupo: primero nombrá a otro Jefe", aunque lo intente él mismo. Así un grupo nunca se queda sin nadie que lo administre.
+
+**Quitar el acceso de grupo** no borra las filas de sección que tuviera esa persona. Son accesos aparte, y se quitan desde cada sección.
+
+**La clase vista `UsuarioConAcceso`** (en `src/Repository/Vista/`) trae solo el id, el nombre, el email y el `NivelRol`. Sale de un JOIN entre el acceso, `usuario` y `rol`, así la lista nunca carga el hash de la contraseña. Los repositorios de acceso suman `listarUsuariosPorGrupo` y `listarUsuariosPorSeccion`, que ordenan primero por el rol más alto y después por nombre.
+
+**Pruebas.** Se probó todo con 35 casos contra `educarama_v2`, dentro de una transacción que después se deshizo:
+
+- permisos de cada rol, incluido el Jefe de otro grupo;
+- dar acceso por email (sin importar mayúsculas, sin cuenta, repetido);
+- el último Jefe, también cuando se intenta bajar a sí mismo;
+- los límites del Jefe de sección (hasta Responsable, sin tocar a otros Jefes, sin agregar ni quitar);
+- que la lista no traiga el hash.

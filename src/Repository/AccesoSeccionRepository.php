@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Educarama\Repository;
 
 use Educarama\Model\AccesoSeccion;
+use Educarama\Repository\Vista\UsuarioConAcceso;
 
 /**
  * Lectura y escritura de `acceso_seccion`: qué rol tiene un usuario sobre una sección.
@@ -43,6 +44,27 @@ final class AccesoSeccionRepository extends RepositorioBase
             'SELECT * FROM acceso_seccion WHERE id_seccion = ? ORDER BY id_usuario',
             [$idSeccion],
             AccesoSeccion::class,
+        );
+    }
+
+    /**
+     * Los usuarios asignados a la sección, con nombre, email y rol, para la
+     * pantalla de gestión. Primero los de mayor rol, después por nombre.
+     * No incluye a los Jefes de grupo (no tienen filas acá).
+     *
+     * @return UsuarioConAcceso[]
+     */
+    public function listarUsuariosPorSeccion(int $idSeccion): array
+    {
+        return $this->listar(
+            'SELECT a.id_usuario, u.nombre AS usuario_nombre, u.email AS usuario_email, r.nivel AS rol_nivel
+               FROM acceso_seccion a
+               JOIN usuario u ON u.id = a.id_usuario
+               JOIN rol r     ON r.id = a.id_rol
+              WHERE a.id_seccion = ?
+              ORDER BY r.nivel DESC, u.nombre',
+            [$idSeccion],
+            UsuarioConAcceso::class,
         );
     }
 
