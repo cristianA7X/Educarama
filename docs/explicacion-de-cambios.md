@@ -390,3 +390,28 @@ Se probó todo contra `educarama_v2` dentro de una transacción que después se 
 - El admin no tiene acceso a ninguna sección.
 - Si la sección no existe, se lanza `NoEncontradoException`.
 - `transaccion` hace rollback ante una excepción, y dentro de una transacción ya abierta no hace commit.
+
+## Cupo fijo de competencias por etapa
+
+**Qué cambió.** En la tabla `etapa` se borraron las columnas `min_competencias`, `max_competencias`, `pct_desde` y `pct_hasta`. En su lugar hay una sola columna, `competencias_etapa INT NOT NULL`: el cupo fijo de competencias de cada etapa. El Model `Etapa` cambió igual: ahora tiene `$competenciasEtapa` en vez de las cuatro propiedades viejas.
+
+**Por qué (decisión de diseño).** El programa de Lobatos y Lobeznas pide "16 a 20 competencias por etapa", pero el catálogo de LyL tiene 47 competencias. Como cada competencia se elige una sola vez (la PK de `competencia_protagonista` es protagonista + competencia), cuatro etapas de 16 necesitarían 64, y no alcanzan. Contar el acumulado tampoco servía, porque todas las etapas tenían el mismo mínimo. Por eso se tomó un esquema único para las cuatro ramas: cada rama reparte su total de competencias entre sus etapas. Caminantes deja de usar porcentajes, y Rovers, que no tenía regla, pasa a tener cupo.
+
+**Cómo se calcula el cupo.** Es el total de la rama dividido por la cantidad de etapas, redondeado. La última etapa se lleva el resto, así los cupos de cada rama suman exactamente su total:
+
+| Rama | Total | Etapa 1 | Etapa 2 | Etapa 3 | Etapa 4 |
+| --- | --- | --- | --- | --- | --- |
+| Lobatos y Lobeznas | 47 | 12 | 12 | 12 | 11 |
+| Scouts | 53 | 13 | 13 | 13 | 14 |
+| Caminantes | 49 | 12 | 12 | 12 | 13 |
+| Rovers (3 etapas) | 37 | 12 | 12 | 13 | — |
+
+Es un dato estático en la base, no una constante de PHP ni un cálculo en vivo. Si cambia el catálogo, el dev actualiza la columna.
+
+**Cómo funciona.**
+
+- Las competencias se cuentan por etapa: las que tienen `id_etapa` igual a esa etapa, comparadas con su cupo. Al elegir una competencia, su `id_etapa` toma la etapa en curso, que es la siguiente a la última lograda.
+- Hay dos avisos, y los dos se pueden saltear. Al elegir: si la etapa en curso ya llegó a su cupo, se avisa que se está eligiendo de más. Al completar: cuando las desarrolladas de la etapa en curso llegan al cupo, se sugiere confirmar la etapa.
+- En la misma conversación se cambió la regla de las insignias. Ya no se ofrecen al confirmar una etapa: se registran a mano, con la fecha de la entrega física. Solo hay un aviso cuando una etapa empieza y el protagonista todavía no recibió su insignia. Las reglas completas de progresión están en CLAUDE.md, en "Progresión" y "Pantalla de competencias del protagonista".
+
+**Base ya importada.** Para aplicarlo sin reimportar, hay un script de migración que agrega la columna, carga los cupos, la pasa a NOT NULL, borra las cuatro columnas viejas y controla que los cupos de cada rama sumen su total de competencias. Se probó sobre una copia de `educarama_v2`.

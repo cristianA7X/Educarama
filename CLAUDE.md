@@ -80,7 +80,14 @@ Educarama/
 - Áreas 1 Salud y Bienestar, 2 Paz y Desarrollo, 3 Ambiente, 4 Habilidades para la Vida → LyL, Scouts y Caminantes. Áreas 5–10 (Corporalidad, Creatividad, Carácter, Afectividad, Sociabilidad, Espiritualidad) → solo Rovers.
 - Etapas: LyL Pata Tierna, Lobo/a Saltador/a, Rastreador/a, Cazador/a · Scouts **Pistas**, Senda, Rumbo, Travesía · Caminantes 4 etapas por nivel, con el elemento elegido (agua, tierra, fuego, aire) · Rovers Encuentro, Compromiso, Proyección.
 - Acción opcional/requerida solo existe en LyL. Rovers tiene competencias pero no acciones. Rovers numera las competencias desde 1 dentro de cada área.
-- Cantidades por etapa (datos en `etapa`, los evalúa el Service): LyL 16–20 competencias, Scouts 12–14, Caminantes por porcentaje (0–25, 25–50, 50–75, 75–100), Rovers sin regla.
+- **Cupo fijo de competencias por etapa** (`etapa.competencias_etapa`, dato estático; lo evalúa el Service). Es el total de la rama dividido por la cantidad de etapas, redondeado; la última etapa se lleva el resto. Adapta el "16 a 20 por etapa" del programa de LyL, imposible con 47 competencias. No hay mínimos, máximos ni porcentajes (Caminantes usa el mismo esquema).
+
+  | Rama | Total | Etapa 1 | Etapa 2 | Etapa 3 | Etapa 4 |
+  |---|---|---|---|---|---|
+  | Lobatos y Lobeznas | 47 | 12 | 12 | 12 | 11 |
+  | Scouts | 53 | 13 | 13 | 13 | 14 |
+  | Caminantes | 49 | 12 | 12 | 12 | 13 |
+  | Rovers (3 etapas) | 37 | 12 | 12 | 13 | — |
 - Catálogo cargado: 186 competencias y 848 acciones.
 
 ## Modelo de datos (ver `database/educarama.sql`)

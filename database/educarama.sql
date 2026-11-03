@@ -99,17 +99,17 @@ CREATE TABLE `accion` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- habilitaciones: texto informativo (no bloquea nada en el sistema).
--- min/max/pct: datos para que el Service sugiera el pase; nunca se fuerzan acá.
+-- competencias_etapa: cupo fijo de competencias de la etapa. Es el total de la
+-- rama dividido por la cantidad de etapas, redondeado; la última se lleva el resto,
+-- así los cupos de cada rama suman exactamente su total. El Service lo usa para
+-- avisar y sugerir el pase; acá no se fuerza nada.
 CREATE TABLE `etapa` (
-  `id`               INT          NOT NULL AUTO_INCREMENT,
-  `id_rama`          INT          NOT NULL,
-  `numero`           INT          NOT NULL,
-  `titulo`           VARCHAR(100) NOT NULL,
-  `habilitaciones`   TEXT         NULL,
-  `min_competencias` INT          NULL,
-  `max_competencias` INT          NULL,
-  `pct_desde`        INT          NULL,
-  `pct_hasta`        INT          NULL,
+  `id`                 INT          NOT NULL AUTO_INCREMENT,
+  `id_rama`            INT          NOT NULL,
+  `numero`             INT          NOT NULL,
+  `titulo`             VARCHAR(100) NOT NULL,
+  `habilitaciones`     TEXT         NULL,
+  `competencias_etapa` INT          NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_etapa` (`id_rama`, `numero`),
   CONSTRAINT `fk_etapa_rama` FOREIGN KEY (`id_rama`) REFERENCES `rama` (`id`)
@@ -443,22 +443,23 @@ INSERT INTO `nomenclatura` (`clave`, `id_rama`, `texto`) VALUES
 ('pequenio_equipo', 2, 'Patrulla'),
 ('pequenio_equipo', 3, 'Equipo');
 
-INSERT INTO `etapa` (`id`, `id_rama`, `numero`, `titulo`, `habilitaciones`, `min_competencias`, `max_competencias`, `pct_desde`, `pct_hasta`) VALUES
-(1,  1, 1, 'Pata Tierna',                        'Puede comenzar a realizar especialidades e insignias especiales.', 16, 20, NULL, NULL),
-(2,  1, 2, 'Lobo Saltador / Loba Saltadora',     NULL, 16, 20, NULL, NULL),
-(3,  1, 3, 'Lobo Rastreador / Loba Rastreadora', NULL, 16, 20, NULL, NULL),
-(4,  1, 4, 'Lobo Cazador / Loba Cazadora',       NULL, 16, 20, NULL, NULL),
-(5,  2, 1, 'Pistas',                             'Puede comenzar a realizar especialidades e insignias especiales.', 12, 14, NULL, NULL),
-(6,  2, 2, 'Senda',                              NULL, 12, 14, NULL, NULL),
-(7,  2, 3, 'Rumbo',                              NULL, 12, 14, NULL, NULL),
-(8,  2, 4, 'Travesía',                           NULL, 12, 14, NULL, NULL),
-(9,  3, 1, 'Primera etapa',                      NULL, NULL, NULL, 0, 25),
-(10, 3, 2, 'Segunda etapa',                      NULL, NULL, NULL, 25, 50),
-(11, 3, 3, 'Tercera etapa',                      NULL, NULL, NULL, 50, 75),
-(12, 3, 4, 'Cuarta etapa',                       NULL, NULL, NULL, 75, 100),
-(13, 4, 1, 'Encuentro',                          NULL, NULL, NULL, NULL, NULL),
-(14, 4, 2, 'Compromiso',                         NULL, NULL, NULL, NULL, NULL),
-(15, 4, 3, 'Proyección',                         NULL, NULL, NULL, NULL, NULL);
+-- Cupos: LyL 47 = 12+12+12+11 · Scouts 53 = 13+13+13+14 · Caminantes 49 = 12+12+12+13 · Rovers 37 = 12+12+13
+INSERT INTO `etapa` (`id`, `id_rama`, `numero`, `titulo`, `habilitaciones`, `competencias_etapa`) VALUES
+(1,  1, 1, 'Pata Tierna',                        'Puede comenzar a realizar especialidades e insignias especiales.', 12),
+(2,  1, 2, 'Lobo Saltador / Loba Saltadora',     NULL, 12),
+(3,  1, 3, 'Lobo Rastreador / Loba Rastreadora', NULL, 12),
+(4,  1, 4, 'Lobo Cazador / Loba Cazadora',       NULL, 11),
+(5,  2, 1, 'Pistas',                             'Puede comenzar a realizar especialidades e insignias especiales.', 13),
+(6,  2, 2, 'Senda',                              NULL, 13),
+(7,  2, 3, 'Rumbo',                              NULL, 13),
+(8,  2, 4, 'Travesía',                           NULL, 14),
+(9,  3, 1, 'Primera etapa',                      NULL, 12),
+(10, 3, 2, 'Segunda etapa',                      NULL, 12),
+(11, 3, 3, 'Tercera etapa',                      NULL, 12),
+(12, 3, 4, 'Cuarta etapa',                       NULL, 13),
+(13, 4, 1, 'Encuentro',                          NULL, 12),
+(14, 4, 2, 'Compromiso',                         NULL, 12),
+(15, 4, 3, 'Proyección',                         NULL, 13);
 
 INSERT INTO `tarea_etapa` (`id_etapa`, `numero`, `descripcion`) VALUES
 -- Lobatos y Lobeznas

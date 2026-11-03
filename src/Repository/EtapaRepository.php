@@ -8,8 +8,8 @@ namespace Educarama\Repository;
 use Educarama\Model\Etapa;
 
 /**
- * Lectura de `etapa`: las etapas de progresión de cada rama, con los datos
- * (min/max de competencias o porcentajes) que el Service usa para sugerir el pase.
+ * Lectura de `etapa`: las etapas de progresión de cada rama, con el cupo fijo
+ * de competencias (competencias_etapa) que el Service usa para avisar y sugerir el pase.
  * Tabla estática: solo lectura.
  */
 final class EtapaRepository extends RepositorioEstatico
