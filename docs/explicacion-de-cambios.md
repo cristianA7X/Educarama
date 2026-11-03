@@ -607,3 +607,33 @@ El servidor de `php -S` no lee `.htaccess`, así que esto no se pudo probar auto
 2. Abrir en el navegador `http://localhost/Educarama/storage/prueba.txt` (o `http://localhost/Educarama/storage/` + la `ruta_archivo`).
 3. **Tiene que dar 403 Forbidden.** Si se ve el archivo, Apache no está leyendo el `.htaccess`: revisar que `AllowOverride` no esté en `None` para `htdocs` en `httpd.conf`.
 4. Borrar el archivo de prueba.
+
+## FamiliarService y validaciones compartidas
+
+**`FamiliarService`.** Los familiares se gestionan siempre desde un protagonista: el permiso se controla en la sección de ese protagonista, y el familiar tiene que estar vinculado a él. Un mismo familiar (por ejemplo, la madre de dos hermanos) es una sola fila en `familiar`, vinculada a cada protagonista por `es_familia`. Para mostrarlo se usa la clase vista `FichaFamiliar` (familiar + persona + vínculo), que sale de un JOIN.
+
+| Método | Rol | Qué hace |
+| --- | --- | --- |
+| `listarPorProtagonista`, `buscarFicha` | Ayudante | Primero los contactos de emergencia |
+| `alta` | Responsable | Crea persona, familiar y vínculo. Si el DNI ya existe, avisa y deja confirmar (ver abajo) |
+| `actualizar` | Responsable | Datos personales, contacto y el vínculo con ese protagonista. Los ids salen de la base |
+| `desvincular` | Responsable | Si el familiar queda sin protagonistas, avisa y deja confirmar (ver abajo) |
+
+- **DNI ya cargado.** El aviso (`persona_existente`) muestra solo el nombre, nunca a qué otros protagonistas está vinculada, porque pueden ser de otro grupo. Si se confirma con `$confirmarIgual`, se crea solo el vínculo y no se pisan los datos guardados. Si la persona existe pero no era familiar (por ejemplo, un hermano Rover), se crea su ficha de familiar sobre esa misma persona. El DNI del propio protagonista se rechaza.
+- **Desvincular el último vínculo.** El aviso (`familiar_huerfano`) dice "Ana Pérez no queda vinculada a ningún protagonista". Solo si se confirma se borra su fila de `familiar`. La persona queda, como cuando se borra un protagonista.
+- **Validaciones.** DNI, nombre y apellido son obligatorios. El teléfono es texto libre de hasta 30 caracteres. El email, si viene, tiene que ser válido. El vínculo admite hasta 50 caracteres. Los textos vacíos se guardan como `NULL`.
+
+**`Validacion`** (`src/Service/Validacion.php`). Junta las validaciones que comparten varios Services y que no consultan la base: `fecha`, `persona`, `textoOpcional` (con el largo de la columna) y `emailOpcional`. `ServicioBase::exigirFecha()` se reemplazó por `Validacion::fecha()`, y `ProtagonistaService` pasó a usar `Validacion::persona()`. Así las reglas de una persona son las mismas para un protagonista y para un familiar.
+
+**Textos que no son UTF-8.** `Validacion` rechaza cualquier texto que no sea UTF-8 válido, con el mensaje "… tiene caracteres no válidos". Los navegadores mandan los formularios en UTF-8. Si llega otra codificación (en las pruebas pasó con `curl` en Windows, que manda Windows-1252), MySQL guardaba "Ficha m?dica" sin avisar. Es mejor rechazarlo que guardar el texto alterado.
+
+**Pruebas.** Se probó todo contra `educarama_v2` o contra una copia que después se borró. Las subidas fueron HTTP reales, con el servidor de PHP (`php -S`) y `curl`.
+
+| Prueba | Casos | Qué cubre |
+| --- | --- | --- |
+| Almacén | 28 | Tipo real contra lo que dice el navegador, PHP disfrazado de JPG, vacío, más de 5 MB, `post_max_size`, archivo que no llegó por HTTP, `../` y rutas absolutas, encabezados de descarga, nombre con comillas o saltos de línea, borrar |
+| `DocumentoService` | 25 | Permisos (403 con acceso a la sección, 404 sin acceso, con el mismo mensaje que un documento inexistente), Jefe de grupo por derivación, insert que falla sin dejar el archivo, texto que no es UTF-8, borrar la carpeta al eliminar un protagonista |
+| `FamiliarService` | 27 | DNI ya cargado (aviso, reutilización, datos no pisados), vínculo de cada protagonista, ids adulterados, desvincular con y sin aviso |
+| Repetidas | 41 + 49 | `ProtagonistaService` y `ProgresionService`, después de los cambios en `Validacion` |
+
+El script de migración también se probó sobre una copia a la que antes se le quitaron las columnas. El bloqueo de `storage/` por `.htaccess` queda para la prueba manual en XAMPP de más arriba.

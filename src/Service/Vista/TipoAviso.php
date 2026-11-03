@@ -23,6 +23,10 @@ enum TipoAviso: string
     case CupoIncompleto     = 'cupo_incompleto';       // Al confirmar etapa: faltan competencias desarrolladas
     case TareaPendiente     = 'tarea_pendiente';       // Al confirmar etapa: falta una tarea
 
+    // --- Requisitos que se pueden saltear: familiares ---
+    case PersonaExistente   = 'persona_existente';     // El DNI ya está cargado: ¿vincular a esa persona?
+    case FamiliarHuerfano   = 'familiar_huerfano';     // Al desvincular, el familiar queda sin protagonistas y se borra
+
     // --- Sugerencias ---
     case CompetenciaLista   = 'competencia_lista';     // Cumplió la última acción requerida
     case EtapaLista         = 'etapa_lista';           // Las desarrolladas de la etapa en curso llegaron al cupo

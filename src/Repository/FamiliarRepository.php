@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Educarama\Repository;
 
 use Educarama\Model\Familiar;
+use Educarama\Repository\Vista\FichaFamiliar;
 
 /**
  * Lectura y escritura de `familiar`: los adultos responsables de los protagonistas.
@@ -47,6 +48,50 @@ final class FamiliarRepository extends RepositorioBase
             Familiar::class,
         );
     }
+
+    // -----------------------------------------------------------------
+    // Fichas (clase vista: familiar + persona + vínculo con un protagonista)
+    // -----------------------------------------------------------------
+
+    /**
+     * Los familiares de un protagonista con sus datos personales y su vínculo,
+     * en una sola consulta. Primero los contactos de emergencia, después por apellido.
+     *
+     * @return FichaFamiliar[]
+     */
+    public function listarFichasPorProtagonista(int $idProtagonista): array
+    {
+        return $this->listar(
+            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ?
+              ORDER BY ef.es_contacto_de_emergencia DESC, per.apellido, per.nombre',
+            [$idProtagonista],
+            FichaFamiliar::class,
+        );
+    }
+
+    /** La ficha de un familiar vinculado a ese protagonista, o null si no están vinculados. */
+    public function buscarFicha(int $idProtagonista, int $idFamiliar): ?FichaFamiliar
+    {
+        return $this->buscarUno(
+            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ? AND f.id = ?',
+            [$idProtagonista, $idFamiliar],
+            FichaFamiliar::class,
+        );
+    }
+
+    /** Parte común de las consultas de fichas (ver FichaFamiliar::desdeFila). */
+    private const SELECT_FICHA =
+        'SELECT f.*,
+                per.dni                       AS persona_dni,
+                per.nombre                    AS persona_nombre,
+                per.apellido                  AS persona_apellido,
+                per.fecha_nacimiento          AS persona_fecha_nacimiento,
+                ef.id_protagonista            AS ef_id_protagonista,
+                ef.vinculo                    AS ef_vinculo,
+                ef.es_contacto_de_emergencia  AS ef_es_contacto_de_emergencia
+           FROM familiar f
+           JOIN persona per    ON per.id = f.id_persona
+           JOIN es_familia ef  ON ef.id_familiar = f.id';
 
     /** Guarda un familiar nuevo, le completa el id y lo devuelve. La persona tiene que existir antes. */
     public function insertar(Familiar $familiar): int

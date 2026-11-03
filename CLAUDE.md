@@ -140,6 +140,14 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Eliminar un protagonista (Jefe) borra en cascada su progresión, documentos y vínculos; su `persona` queda.
 - Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla).
 
+### Familiares
+
+- Se gestionan siempre desde un protagonista: permiso en su sección y el familiar tiene que estar vinculado a él. Leer, Ayudante; alta, edición y desvincular, Responsable.
+- Obligatorios: DNI, nombre y apellido. Teléfono (texto libre) y email (validado) opcionales. Contactos de emergencia libres (varios o ninguno); los listados los muestran primero.
+- Alta con un DNI ya cargado: aviso con solo el nombre (nunca a quién más está vinculado) y, si se confirma, solo se crea el vínculo; no se pisan datos guardados. Si la persona existe pero no es familiar (ej. un hermano Rover), se crea su ficha de familiar sobre esa persona.
+- Editar un familiar compartido cambia sus datos para todos sus protagonistas; el vínculo (`es_familia`) es de cada protagonista.
+- Desvincular: si queda sin protagonistas, aviso con su nombre y, solo si se confirma, se borra su ficha de `familiar` (la `persona` queda).
+
 ### Documentos
 
 - Ver y descargar, Ayudante; subir y editar tipo/descripción, Responsable; eliminar, Jefe.
