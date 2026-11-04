@@ -896,3 +896,42 @@ En la Unidad hay además uno que logró todas las etapas. Los Caminantes tienen 
   - lo que ve cada rol en protagonistas, eventos, solicitudes y accesos.
 
 **Mantenerlo al día:** si cambia el esquema, hay que actualizar este archivo y volver a verificar que importa (está anotado en CLAUDE.md).
+
+## ProgresionController
+
+El Controller de la progresión: la pantalla de competencias y todas las operaciones de guardado inmediato.
+
+**Lectura de la pantalla: `ProgresionService::pantallaCompetencias()`.** Faltaba un método que trajera todo lo que muestra la pantalla de competencias. `resumen()` solo tenía los contadores. Ahora hay uno nuevo, Ayudante en adelante, que devuelve la clase vista `PantallaCompetencias`:
+
+- el `ResumenProgresion` de siempre;
+- una `AreaEnPantalla` por pestaña, con su contador y **todas** las competencias del área (también las pendientes, que no tienen fila). Cada `CompetenciaEnPantalla` trae su estado (`null` = pendiente), el `id_etapa` en que se eligió y sus acciones como `AccionEnPantalla` (la acción y "cumplida sí/no");
+- los términos de la rama (`nomenclatura`): "Senderos", "Competencias intermedias", "Seisena";
+- `puedeEditar` (Responsable) y `puedeQuitar` (Jefe), para que la vista sepa qué botones mostrar.
+
+Para no hacer una consulta por competencia, las acciones de la rama y las cumplidas del protagonista se traen en dos consultas y se agrupan en PHP. `resumen()` se partió en dos: el permiso por un lado y `armarResumen()` por el otro, así la pantalla no controla el permiso dos veces.
+
+**404 en vez de 403.** Si el usuario no tiene ningún acceso a la sección del protagonista, la progresión responde 404, como los documentos y los eventos: un Jefe de otro grupo no puede averiguar que el protagonista existe. Si tiene acceso pero no el rol (un Ayudante que quiere avanzar una competencia), sigue siendo 403. Lo resuelve `cargarConNivel()`, que además devuelve el rol para armar `puedeEditar` y `puedeQuitar`.
+
+**Fechas no futuras.** Confirmar una etapa y otorgar una insignia aceptan una fecha, porque la ceremonia o la entrega física pueden ser de otro día. Es opcional (vacía = hoy) y puede ser pasada, pero **no futura**: "La fecha no puede ser posterior a hoy.". Las demás operaciones no reciben fecha desde el navegador: usan la de hoy.
+
+**Insignias de la rama.** `otorgarInsignia` no controlaba que la insignia fuera de la rama del protagonista: se le podía dar a un Scout la de Pata Tierna. Ahora la rechaza ("La insignia Pistas no es de Lobatos y Lobeznas."). Las insignias sin rama (`id_rama` NULL) siguen valiendo para cualquiera.
+
+**El Controller.** `paginaCompetencias` arma la página con la ficha del protagonista (`ProtagonistaService::buscarFicha`) y la pantalla. Las 12 acciones (`progresion.*` en `api.php`) son competencias, acciones y tareas, etapas, insignias y especialidades, cada una con su par avanzar/retroceder, marcar/desmarcar o confirmar/quitar. Todas pasan por un mismo esqueleto, `operar()`: saca el usuario y el protagonista, hace la operación y responde
+
+```json
+{"ok": true, "datos": {"sugerencias": [...], "resumen": {...}}}
+```
+
+El resumen viene actualizado después de cada clic, así el JS repinta "Etapa en curso: X/cupo", el total, el contador de cada pestaña, lo adeudado y el aviso de insignia sin calcular nada por su cuenta. Se arma como un array chico de números, ids y textos, no como los Models enteros. Si faltan requisitos salteables, Api responde 409 con los avisos y el JS repite el mismo pedido con `confirmarIgual=1`.
+
+**Pruebas.** 56 casos por CLI, sobre una base temporal armada con `datos_ejemplo.sql` y dentro de una transacción que después se deshizo:
+
+- la pantalla según cada rol (Jefe, Responsable, Ayudante), Rovers sin acciones;
+- el 404 al Supervisor de grupo, al Responsable de otra sección y al Jefe de otro grupo;
+- el 409 por cupo y su `confirmarIgual`;
+- la sugerencia al cumplir la última acción requerida;
+- tareas, etapas con fechas futuras, mal escritas y pasadas, y el elemento de Caminantes;
+- insignias de otra rama, y quitar etapas e insignias (solo Jefe);
+- especialidades.
+
+Las 49 pruebas de `ProgresionService` siguen pasando sin cambios.

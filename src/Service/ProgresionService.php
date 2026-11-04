@@ -30,16 +30,22 @@ use Educarama\Repository\EtapaLogradaRepository;
 use Educarama\Repository\EtapaRepository;
 use Educarama\Repository\InsigniaOtorgadaRepository;
 use Educarama\Repository\InsigniaRepository;
+use Educarama\Repository\NomenclaturaRepository;
 use Educarama\Repository\ProtagonistaRepository;
 use Educarama\Repository\RamaRepository;
 use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\TareaEtapaCumplidaRepository;
 use Educarama\Repository\TareaEtapaRepository;
+use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Excepcion\RequisitosPendientesException;
+use Educarama\Service\Vista\AccionEnPantalla;
+use Educarama\Service\Vista\AreaEnPantalla;
 use Educarama\Service\Vista\Aviso;
+use Educarama\Service\Vista\CompetenciaEnPantalla;
 use Educarama\Service\Vista\ContadorArea;
+use Educarama\Service\Vista\PantallaCompetencias;
 use Educarama\Service\Vista\ResultadoProgresion;
 use Educarama\Service\Vista\ResumenProgresion;
 use Educarama\Service\Vista\TipoAviso;
@@ -57,10 +63,13 @@ use Educarama\Service\Vista\TipoAviso;
  *    con $confirmarIgual = true. Lo único que bloquea siempre es confirmar una
  *    etapa sin tener lograda la anterior.
  *  - Permisos: leer, Ayudante; registrar y corregir, Responsable; quitar una
- *    etapa lograda o una insignia, Jefe.
+ *    etapa lograda o una insignia, Jefe. Sin ningún acceso a la sección del
+ *    protagonista, NoEncontradoException (404): no se confirma que existe.
  *
  * Todas las operaciones reciben primero el id del usuario que la hace, y las
- * fechas son opcionales: si no se pasa, se usa la de hoy ('AAAA-MM-DD').
+ * fechas son opcionales: si no se pasa, se usa la de hoy ('AAAA-MM-DD'). Una
+ * fecha pasada se acepta (ej. la ceremonia del campamento del mes pasado);
+ * una futura, no.
  */
 final class ProgresionService extends ServicioBase
 {
@@ -88,6 +97,7 @@ final class ProgresionService extends ServicioBase
     private EtapaLogradaRepository $etapasLogradas;
     private EspecialidadProtagonistaRepository $especialidadesProtagonista;
     private InsigniaOtorgadaRepository $insigniasOtorgadas;
+    private NomenclaturaRepository $nomenclaturas;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -107,6 +117,7 @@ final class ProgresionService extends ServicioBase
         ?EtapaLogradaRepository $etapasLogradas = null,
         ?EspecialidadProtagonistaRepository $especialidadesProtagonista = null,
         ?InsigniaOtorgadaRepository $insigniasOtorgadas = null,
+        ?NomenclaturaRepository $nomenclaturas = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -126,6 +137,7 @@ final class ProgresionService extends ServicioBase
         $this->etapasLogradas = $etapasLogradas ?? new EtapaLogradaRepository();
         $this->especialidadesProtagonista = $especialidadesProtagonista ?? new EspecialidadProtagonistaRepository();
         $this->insigniasOtorgadas = $insigniasOtorgadas ?? new InsigniaOtorgadaRepository();
+        $this->nomenclaturas = $nomenclaturas ?? new NomenclaturaRepository();
     }
 
     // =================================================================
@@ -140,6 +152,62 @@ final class ProgresionService extends ServicioBase
     public function resumen(int $idUsuario, int $idProtagonista): ResumenProgresion
     {
         $rama = $this->cargar($idUsuario, $idProtagonista, NivelRol::Ayudante);
+        return $this->armarResumen($idProtagonista, $rama);
+    }
+
+    /**
+     * Todo lo que muestra la pantalla de competencias (Ayudante en adelante):
+     * el resumen y, por cada área de la rama, todas sus competencias con su
+     * estado (sin fila = pendiente) y sus acciones con "cumplida sí/no".
+     * Además dice qué botones mostrar según el rol del usuario.
+     */
+    public function pantallaCompetencias(int $idUsuario, int $idProtagonista): PantallaCompetencias
+    {
+        [$rama, $nivel] = $this->cargarConNivel($idUsuario, $idProtagonista, NivelRol::Ayudante);
+        $resumen = $this->armarResumen($idProtagonista, $rama);
+        $elegidas = $this->competenciasPorId($idProtagonista);
+
+        // Acciones de toda la rama agrupadas por competencia, con las cumplidas
+        // marcadas: dos consultas en total, no una por competencia.
+        $accionesPorCompetencia = [];
+        if ($rama->usaAcciones) {
+            $cumplidas = [];
+            foreach ($this->accionesCumplidas->listarPorProtagonista($idProtagonista) as $ac) {
+                $cumplidas[$ac->idAccion] = true;
+            }
+            foreach ($this->acciones->listarPorRama($rama->id) as $accion) {
+                $accionesPorCompetencia[$accion->idCompetencia][] = new AccionEnPantalla($accion, isset($cumplidas[$accion->id]));
+            }
+        }
+
+        $competenciasPorArea = [];
+        foreach ($this->competencias->listarPorRama($rama->id) as $competencia) {
+            $elegida = $elegidas[$competencia->id] ?? null;
+            $competenciasPorArea[$competencia->idArea][] = new CompetenciaEnPantalla(
+                competencia: $competencia,
+                estado: $elegida?->estado,
+                idEtapa: $elegida?->idEtapa,
+                acciones: $accionesPorCompetencia[$competencia->id] ?? [],
+            );
+        }
+
+        $areas = array_map(
+            fn (ContadorArea $contador) => new AreaEnPantalla($contador, $competenciasPorArea[$contador->idArea] ?? []),
+            $resumen->areas,
+        );
+
+        return new PantallaCompetencias(
+            resumen: $resumen,
+            areas: $areas,
+            terminos: array_map(fn ($n) => $n->texto, $this->nomenclaturas->listarPorRama($rama->id)),
+            puedeEditar: $nivel->value >= NivelRol::Responsable->value,
+            puedeQuitar: $nivel->value >= NivelRol::Jefe->value,
+        );
+    }
+
+    /** El resumen, una vez controlado el permiso. */
+    private function armarResumen(int $idProtagonista, Rama $rama): ResumenProgresion
+    {
         [$actual, $enCurso] = $this->situacionEtapas($idProtagonista, $rama);
         $elegidas = $this->competenciasPorId($idProtagonista);
 
@@ -407,11 +475,21 @@ final class ProgresionService extends ServicioBase
     // Insignias (registro manual, con la fecha de la entrega física)
     // =================================================================
 
+    /**
+     * Registra la entrega de una insignia. Tiene que ser de la rama de la
+     * sección del protagonista; las insignias sin rama (id_rama NULL) sirven
+     * para cualquiera.
+     */
     public function otorgarInsignia(int $idUsuario, int $idProtagonista, int $idInsignia, ?string $fecha = null): void
     {
-        $this->cargar($idUsuario, $idProtagonista, NivelRol::Responsable);
+        $rama = $this->cargar($idUsuario, $idProtagonista, NivelRol::Responsable);
         $insignia = $this->insignias->buscarPorId($idInsignia)
             ?? throw new NoEncontradoException('La insignia no existe.');
+
+        if ($insignia->idRama !== null && $insignia->idRama !== $rama->id) {
+            throw new ReglaNegocioException("La insignia {$insignia->titulo} no es de {$rama->titulo}.");
+        }
+
         $fecha = $this->fecha($fecha);
 
         if ($this->insigniasOtorgadas->buscar($idProtagonista, $idInsignia) !== null) {
@@ -697,16 +775,37 @@ final class ProgresionService extends ServicioBase
      */
     private function cargar(int $idUsuario, int $idProtagonista, NivelRol $minimo): Rama
     {
+        return $this->cargarConNivel($idUsuario, $idProtagonista, $minimo)[0];
+    }
+
+    /**
+     * Como cargar(), y además devuelve el rol del usuario en la sección.
+     *
+     * Sin ningún acceso a la sección: 404, igual que si el protagonista no
+     * existiera (no se confirma que existe, como en documentos y eventos).
+     * Con acceso pero sin el rol pedido: 403 (al protagonista ya lo puede ver).
+     *
+     * @return array{0: Rama, 1: NivelRol}
+     */
+    private function cargarConNivel(int $idUsuario, int $idProtagonista, NivelRol $minimo): array
+    {
         $protagonista = $this->protagonistas->buscarPorId($idProtagonista)
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
-        $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, $minimo);
+        $nivel = $this->permisos->nivelEnSeccion($idUsuario, $protagonista->idSeccion)
+            ?? throw new NoEncontradoException('El protagonista no existe.');
+
+        if ($nivel->value < $minimo->value) {
+            throw new AccesoDenegadoException('Necesitás el rol ' . $minimo->etiqueta() . ' en esta sección para hacer esto.');
+        }
 
         $seccion = $this->secciones->buscarPorId($protagonista->idSeccion)
             ?? throw new \LogicException("La sección {$protagonista->idSeccion} no existe.");
 
-        return $this->ramas->buscarPorId($seccion->idRama)
+        $rama = $this->ramas->buscarPorId($seccion->idRama)
             ?? throw new \LogicException("La rama {$seccion->idRama} no existe.");
+
+        return [$rama, $nivel];
     }
 
     /** Si hay avisos y el educador todavía no confirmó, corta sin guardar nada. */
@@ -773,11 +872,21 @@ final class ProgresionService extends ServicioBase
 
     /**
      * La fecha a guardar: la de hoy si no se pasa ninguna. Si se pasa, tiene
-     * que ser una fecha real en formato 'AAAA-MM-DD' (el educador puede cargar
-     * una anterior, ej. una etapa lograda en el campamento del mes pasado).
+     * que ser una fecha real en formato 'AAAA-MM-DD' y no futura (el educador
+     * puede cargar una anterior, ej. una etapa lograda en el campamento del
+     * mes pasado, pero no algo que todavía no pasó). "Hoy" usa ZONA_HORARIA.
      */
     private function fecha(?string $fecha): string
     {
-        return $fecha === null ? date('Y-m-d') : Validacion::fecha($fecha);
+        $hoy = date('Y-m-d');
+        if ($fecha === null) {
+            return $hoy;
+        }
+
+        $fecha = Validacion::fecha($fecha);
+        if ($fecha > $hoy) {
+            throw new ReglaNegocioException('La fecha no puede ser posterior a hoy.');
+        }
+        return $fecha;
     }
 }

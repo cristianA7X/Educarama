@@ -10,6 +10,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/bootstrap.php';
 
 use Educarama\Controller\Api;
+use Educarama\Controller\ProgresionController;
 use Educarama\Controller\UsuarioController;
 
 const ACCIONES = [
@@ -18,6 +19,20 @@ const ACCIONES = [
     'usuario.registrar'          => ['POST', UsuarioController::class, 'registrar'],
     'usuario.cerrarSesion'       => ['POST', UsuarioController::class, 'cerrarSesion'],
     'usuario.cambiarContrasenia' => ['POST', UsuarioController::class, 'cambiarContrasenia'],
+
+    // Progresión (guardado inmediato: un clic = un pedido)
+    'progresion.avanzarCompetencia'     => ['POST', ProgresionController::class, 'avanzarCompetencia'],
+    'progresion.retrocederCompetencia'  => ['POST', ProgresionController::class, 'retrocederCompetencia'],
+    'progresion.marcarAccion'           => ['POST', ProgresionController::class, 'marcarAccion'],
+    'progresion.desmarcarAccion'        => ['POST', ProgresionController::class, 'desmarcarAccion'],
+    'progresion.marcarTarea'            => ['POST', ProgresionController::class, 'marcarTarea'],
+    'progresion.desmarcarTarea'         => ['POST', ProgresionController::class, 'desmarcarTarea'],
+    'progresion.confirmarEtapa'         => ['POST', ProgresionController::class, 'confirmarEtapa'],
+    'progresion.quitarEtapa'            => ['POST', ProgresionController::class, 'quitarEtapa'],
+    'progresion.otorgarInsignia'        => ['POST', ProgresionController::class, 'otorgarInsignia'],
+    'progresion.quitarInsignia'         => ['POST', ProgresionController::class, 'quitarInsignia'],
+    'progresion.avanzarEspecialidad'    => ['POST', ProgresionController::class, 'avanzarEspecialidad'],
+    'progresion.retrocederEspecialidad' => ['POST', ProgresionController::class, 'retrocederEspecialidad'],
 ];
 
 (new Api(ACCIONES))->ejecutar();

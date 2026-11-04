@@ -161,8 +161,10 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - **Competencia desarrollada:** LyL requiere todas sus acciones requeridas (`es_opcional = 0`); Scouts y Caminantes, todas sus acciones; Rovers, nada. Si falta algo, se avisa y se puede saltear. Al cumplir la última acción, se sugiere "¿dar la competencia por desarrollada?".
 - **Confirmar una etapa:** requiere el cupo de competencias desarrolladas y todas sus tareas (`tarea_etapa`); las dos cosas se pueden saltear mostrando lo adeudado. Lo que **bloquea** (no se saltea) es que la etapa anterior no esté lograda. En Caminantes el elemento es **obligatorio**; en las demás ramas el Service lo rechaza.
 - **Quién deshace:** destildar acciones y volver atrás el estado de una competencia, Responsable en adelante. Quitar una etapa lograda o una insignia otorgada, solo Jefe.
+- **Acceso:** leer, Ayudante; sin ningún acceso a la sección del protagonista, **404** (no se confirma que existe); con acceso pero sin el rol, 403.
+- **Fechas:** confirmar una etapa y otorgar una insignia aceptan una fecha (la de la ceremonia o la entrega física): opcional, por defecto hoy, **nunca futura**. Las demás operaciones usan siempre la fecha de hoy.
 - **Casos borde:** si ya logró todas las etapas, una competencia nueva se asigna a la última etapa de la rama, con aviso de cupo excedido. Solo se puede quitar la **última** etapa lograda. Retroceder una competencia a Pendiente conserva sus acciones cumplidas. No se pueden tildar acciones de una competencia Pendiente: primero hay que elegirla.
-- **Insignias: registro aparte y manual.** No están atadas a confirmar una etapa. Se registran a mano en un submenú propio del protagonista, con su propia fecha (la de la entrega física), en `insignia_otorgada`. Según el programa, la insignia de una etapa se entrega cuando la etapa empieza: apenas una etapa pasa a estar en curso, si el protagonista no tiene su insignia se avisa "tiene la etapa X en curso y todavía no recibió su insignia". Nada automático. `etapa_lograda` no tiene relación funcional con la insignia.
+- **Insignias: registro aparte y manual.** No están atadas a confirmar una etapa. Se registran a mano en un submenú propio del protagonista, con su propia fecha (la de la entrega física), en `insignia_otorgada`. La insignia tiene que ser de la rama de la sección del protagonista (las de `id_rama` NULL valen para cualquiera). Según el programa, la insignia de una etapa se entrega cuando la etapa empieza: apenas una etapa pasa a estar en curso, si el protagonista no tiene su insignia se avisa "tiene la etapa X en curso y todavía no recibió su insignia". Nada automático. `etapa_lograda` no tiene relación funcional con la insignia.
 
 ### Protagonistas y patrullas
 
@@ -207,6 +209,8 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - **Filtro** arriba de las pestañas: Todas / Pendientes / En proceso / Desarrolladas.
 - **Guardado inmediato:** cada clic se guarda en el momento por fetch, con operaciones de a una (no hay guardado por lote). Si hay un aviso (cupo excedido, acciones sin cumplir), primero se muestra la confirmación y después se guarda.
 - `ProgresionService::resumen()` (Ayudante en adelante) devuelve una clase vista con: etapa actual, etapa en curso, contadores (etapa, total y por área), lo adeudado para confirmar la etapa en curso y el aviso de insignia pendiente.
+- `ProgresionService::pantallaCompetencias()` (Ayudante en adelante) devuelve `PantallaCompetencias`: el resumen, cada área con todas sus competencias (estado, `id_etapa` y acciones con cumplida sí/no), los términos de `nomenclatura` y `puedeEditar` (Responsable) / `puedeQuitar` (Jefe).
+- Cada clic (`progresion.*` en `api.php`) responde `{sugerencias, resumen}`: el resumen actualizado repinta contadores, adeudado e insignia pendiente sin recargar.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
 
