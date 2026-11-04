@@ -150,6 +150,32 @@ final class PermisoService extends ServicioBase
         return $nivel;
     }
 
+    /**
+     * Como exigirEnSeccion(), pero si el usuario no tiene NINGÚN acceso a la
+     * sección lanza NoEncontradoException (404) con $mensaje404, igual que si
+     * lo pedido no existiera: así un usuario de otro grupo no puede averiguar
+     * qué hay. Con acceso pero sin el rol $minimo, AccesoDenegadoException (403):
+     * lo pedido ya lo puede ver.
+     *
+     * $mensaje404 es el de "no existe" de lo que se buscaba ("El protagonista no existe.").
+     *
+     * @throws NoEncontradoException
+     * @throws AccesoDenegadoException
+     */
+    public function exigirVisibleEnSeccion(int $idUsuario, int $idSeccion, NivelRol $minimo, string $mensaje404): NivelRol
+    {
+        $nivel = $this->nivelEnSeccion($idUsuario, $idSeccion)
+            ?? throw new NoEncontradoException($mensaje404);
+
+        if (!$this->alcanza($nivel, $minimo)) {
+            throw new AccesoDenegadoException(
+                'Necesitás el rol ' . $minimo->etiqueta() . ' en esta sección para hacer esto.'
+            );
+        }
+
+        return $nivel;
+    }
+
     // -----------------------------------------------------------------
     // Admin
     // -----------------------------------------------------------------

@@ -935,3 +935,55 @@ El resumen viene actualizado después de cada clic, así el JS repinta "Etapa en
 - especialidades.
 
 Las 49 pruebas de `ProgresionService` siguen pasando sin cambios.
+
+## ProtagonistaController, PatrullaController y SeccionService
+
+**`SeccionService`, nuevo.** Hasta ahora las secciones se leían solo por dentro de otros Services, y ninguna página podía pedir "los datos de esta sección". Ahora la sección tiene su propio Service, que va a ser la base del futuro perfil de sección. Por ahora hace dos cosas:
+
+- `encabezado($idUsuario, $idSeccion)` devuelve la clase vista `SeccionEnPantalla`: la sección, su rama (para la clase CSS y los nombres), el grupo, los términos de `nomenclatura` y el rol del usuario. Trae además `puedeVerDetalle()` (Ayudante), `puedeEditar()` (Responsable), `puedeEliminar()` (Jefe) y `pequenioEquipo()`, que da "Seisena", "Patrulla", "Equipo" o null en Rovers. Basta cualquier acceso a la sección, incluso Supervisor; sin acceso, 404.
+- `listarPorGrupo($idUsuario, $idGrupo)`: con cualquier rol de grupo, todas las secciones (los roles de grupo valen para "el listado de secciones"); sin rol de grupo, solo aquellas a las que tiene acceso. Cada una trae el rol del usuario, que es null si la ve solo por su rol de grupo.
+
+Las secciones no se crean ni se renombran acá: hoy solo nacen al aprobar una solicitud de alta.
+
+**404 en Protagonista y Patrulla.** Igual que en Progresión: sin ningún acceso a la sección, 404 ("El protagonista no existe.", "La patrulla no existe.", "La sección no existe."); con acceso pero sin el rol, 403. Para no repetir el mismo `if` en cada Service, `PermisoService` suma `exigirVisibleEnSeccion($idUsuario, $idSeccion, $minimo, $mensaje404)`. En el pase de sección, sin acceso al destino, la respuesta es "La sección de destino no existe.". Familiares todavía responde 403: se iguala cuando hagamos su Controller.
+
+**Lo nuevo en los Services.**
+
+- `ProtagonistaService::seccionesDestino()`: las otras secciones del grupo donde el usuario es Responsable, para el select de "Cambiar de sección" del perfil. Vacía si no puede hacer ningún pase.
+- **Rovers sin patrullas:** `PatrullaService::crear` rechaza crear una patrulla en una rama sin pequeño equipo ("Esta rama no tiene pequeños equipos."). Lo decide `nomenclatura`, que no tiene `pequenio_equipo` para Rovers, y no el id de la rama: es el mismo dato que usa la vista para mostrar u ocultar el término.
+- `PatrullaService::quitarIntegrante($idUsuario, $idPatrulla, $idProtagonista)`: saca al protagonista de **esa** patrulla. Si no es integrante, se rechaza. Así, un pedido viejo (otra pestaña abierta) no lo saca de la patrulla a la que se pasó mientras tanto.
+
+**`ProtagonistaController`.**
+
+| Método | Tipo | Qué hace |
+| --- | --- | --- |
+| `paginaListado` | `protagonistas.php?id_seccion=` | Encabezado, protagonistas y patrullas (Ayudante) |
+| `paginaPerfil` | `perfil_protagonista.php?id=` | Ficha, encabezado, resumen de progresión, familiares, documentos y secciones de destino. Todo de lectura |
+| `paginaFormulario` | `protagonista_form.php` | `?id_seccion=` es alta, `?id=` es edición. Trae las patrullas para el select. Responsable |
+| `guardar` | `protagonista.guardar` | Alta si no viene `id`, edición si viene. Redirige al perfil con un Flash |
+| `cambiarSeccion` | `protagonista.cambiarSeccion` | "Pasó a Unidad Aconcagua. Quedó sin patrulla." (en Rovers, sin la segunda parte) |
+| `eliminar` | `protagonista.eliminar` | Jefe. Redirige al listado de la sección |
+
+Al editar, la sección sale de la base y no del formulario: un `id_seccion` adulterado se ignora. El DNI se acepta con puntos y espacios ("12.345.678"), como lo escribe la gente. Un año de ingreso con letras da "El año de ingreso no es válido." y no el genérico "Faltan datos".
+
+**`PatrullaController`.**
+
+| Método | Tipo | Qué hace |
+| --- | --- | --- |
+| `paginaListado` | `patrullas.php?id_seccion=` | Patrullas con sus integrantes y la lista de los que no tienen, armadas con una sola consulta |
+| `paginaPerfil` | `perfil_patrulla.php?id=` | Integrantes y candidatos (el resto de la sección, para "Agregar") |
+| `crear` / `renombrar` / `eliminar` | `patrulla.*` | Crear redirige al perfil de la nueva; eliminar (Jefe), al listado |
+| `asignarIntegrante` / `quitarIntegrante` | `patrulla.*` | Si estaba en otra patrulla, asignar lo pasa a esta |
+
+Los mensajes evitan los adjetivos con género ("Se creó «Equipo Norte».") porque Seisena y Patrulla son femeninos y Equipo es masculino.
+
+**Pruebas.**
+
+- **62 casos nuevos por CLI**, sobre los datos de ejemplo, en una transacción que se deshizo:
+  - lo que ve cada rol en `SeccionService`;
+  - las páginas con sus 403 y 404;
+  - el alta con DNI con puntos, repetido o con letras, y los errores del año y de la fecha;
+  - la edición que ignora la sección del formulario;
+  - el pase con sus mensajes y la baja;
+  - todo el ciclo de las patrullas, incluido el rechazo en Rovers.
+- **Regresión:** se repitieron las pruebas de todos los Services. La única diferencia es la esperada: el pase a una sección sin acceso ahora es 404. Protagonistas 41, familiares 27, progresión 49, eventos 60, accesos 35, usuarios 46 y documentos 25, más las de los Controllers de Progresión (56) y Usuario (37).

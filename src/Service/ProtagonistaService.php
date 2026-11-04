@@ -13,6 +13,7 @@ use Educarama\Repository\PersonaRepository;
 use Educarama\Repository\ProtagonistaRepository;
 use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\Vista\FichaProtagonista;
+use Educarama\Service\Vista\SeccionEnPantalla;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 
@@ -30,6 +31,8 @@ use Educarama\Service\Excepcion\ReglaNegocioException;
  *  - El DNI es único: si ya existe en `persona`, se rechaza (aunque sea un familiar).
  *  - La patrulla tiene que ser de la misma sección.
  *  - La sección se cambia solo con cambiarSeccion(), dentro del mismo grupo.
+ *  - Sin ningún acceso a la sección: 404 (no se confirma que el protagonista
+ *    existe). Con acceso pero sin el rol: 403.
  */
 final class ProtagonistaService extends ServicioBase
 {
@@ -39,6 +42,7 @@ final class ProtagonistaService extends ServicioBase
     private PersonaRepository $personas;
     private SeccionRepository $secciones;
     private AlmacenArchivos $almacen;
+    private SeccionService $seccionService;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -47,6 +51,7 @@ final class ProtagonistaService extends ServicioBase
         ?PersonaRepository $personas = null,
         ?SeccionRepository $secciones = null,
         ?AlmacenArchivos $almacen = null,
+        ?SeccionService $seccionService = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -55,6 +60,7 @@ final class ProtagonistaService extends ServicioBase
         $this->personas = $personas ?? new PersonaRepository();
         $this->secciones = $secciones ?? new SeccionRepository();
         $this->almacen = $almacen ?? new AlmacenArchivos();
+        $this->seccionService = $seccionService ?? new SeccionService($this->permisos);
     }
 
     // -----------------------------------------------------------------
@@ -64,7 +70,7 @@ final class ProtagonistaService extends ServicioBase
     /** @return FichaProtagonista[] Los de la sección, por apellido y nombre. */
     public function listarPorSeccion(int $idUsuario, int $idSeccion): array
     {
-        $this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Ayudante);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Ayudante, 'La sección no existe.');
 
         return $this->protagonistas->listarFichasPorSeccion($idSeccion);
     }
@@ -75,9 +81,35 @@ final class ProtagonistaService extends ServicioBase
         $ficha = $this->protagonistas->buscarFicha($idProtagonista)
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
-        $this->permisos->exigirEnSeccion($idUsuario, $ficha->protagonista->idSeccion, NivelRol::Ayudante);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $ficha->protagonista->idSeccion, NivelRol::Ayudante, 'El protagonista no existe.');
 
         return $ficha;
+    }
+
+    /**
+     * Las secciones a las que se puede pasar al protagonista: las otras de su
+     * grupo donde el usuario es Responsable o más (cambiarSeccion() exige
+     * Responsable en las dos). Vacía si no puede hacer ningún pase.
+     *
+     * @return SeccionEnPantalla[]
+     */
+    public function seccionesDestino(int $idUsuario, int $idProtagonista): array
+    {
+        $protagonista = $this->protagonistas->buscarPorId($idProtagonista)
+            ?? throw new NoEncontradoException('El protagonista no existe.');
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Ayudante, 'El protagonista no existe.');
+
+        if (!$this->permisos->puedeEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Responsable)) {
+            return [];
+        }
+
+        $origen = $this->secciones->buscarPorId($protagonista->idSeccion)
+            ?? throw new \LogicException("La sección {$protagonista->idSeccion} no existe.");
+
+        return array_values(array_filter(
+            $this->seccionService->listarPorGrupo($idUsuario, $origen->idGrupo),
+            fn (SeccionEnPantalla $s) => $s->seccion->id !== $origen->id && $s->puedeEditar(),
+        ));
     }
 
     // -----------------------------------------------------------------
@@ -95,7 +127,7 @@ final class ProtagonistaService extends ServicioBase
      */
     public function alta(int $idUsuario, Persona $persona, Protagonista $protagonista): int
     {
-        $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Responsable);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Responsable, 'La sección no existe.');
 
         $this->validarPersona($persona, null);
         $this->validarProtagonista($protagonista);
@@ -119,7 +151,7 @@ final class ProtagonistaService extends ServicioBase
         $guardado = $this->protagonistas->buscarPorId($this->idDe($protagonista))
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
-        $this->permisos->exigirEnSeccion($idUsuario, $guardado->idSeccion, NivelRol::Responsable);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $guardado->idSeccion, NivelRol::Responsable, 'El protagonista no existe.');
 
         if ($protagonista->idSeccion !== $guardado->idSeccion) {
             throw new ReglaNegocioException('Para pasar al protagonista a otra sección usá "Cambiar de sección".');
@@ -149,12 +181,14 @@ final class ProtagonistaService extends ServicioBase
         $protagonista = $this->protagonistas->buscarPorId($idProtagonista)
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
+        // Primero el permiso en el origen: sin acceso, 404 antes de decir nada más.
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Responsable, 'El protagonista no existe.');
+
         if ($protagonista->idSeccion === $idSeccionDestino) {
             throw new ReglaNegocioException('El protagonista ya está en esa sección.');
         }
 
-        $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Responsable);
-        $this->permisos->exigirEnSeccion($idUsuario, $idSeccionDestino, NivelRol::Responsable);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccionDestino, NivelRol::Responsable, 'La sección de destino no existe.');
 
         $origen = $this->secciones->buscarPorId($protagonista->idSeccion)
             ?? throw new \LogicException("La sección {$protagonista->idSeccion} no existe.");
@@ -184,7 +218,7 @@ final class ProtagonistaService extends ServicioBase
         $protagonista = $this->protagonistas->buscarPorId($idProtagonista)
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
-        $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Jefe);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $protagonista->idSeccion, NivelRol::Jefe, 'El protagonista no existe.');
 
         $this->protagonistas->eliminar($idProtagonista);
 

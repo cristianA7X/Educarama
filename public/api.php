@@ -10,7 +10,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/bootstrap.php';
 
 use Educarama\Controller\Api;
+use Educarama\Controller\PatrullaController;
 use Educarama\Controller\ProgresionController;
+use Educarama\Controller\ProtagonistaController;
 use Educarama\Controller\UsuarioController;
 
 const ACCIONES = [
@@ -33,6 +35,18 @@ const ACCIONES = [
     'progresion.quitarInsignia'         => ['POST', ProgresionController::class, 'quitarInsignia'],
     'progresion.avanzarEspecialidad'    => ['POST', ProgresionController::class, 'avanzarEspecialidad'],
     'progresion.retrocederEspecialidad' => ['POST', ProgresionController::class, 'retrocederEspecialidad'],
+
+    // Protagonistas
+    'protagonista.guardar'        => ['POST', ProtagonistaController::class, 'guardar'],
+    'protagonista.cambiarSeccion' => ['POST', ProtagonistaController::class, 'cambiarSeccion'],
+    'protagonista.eliminar'       => ['POST', ProtagonistaController::class, 'eliminar'],
+
+    // Patrullas (Seisenas, Patrullas, Equipos)
+    'patrulla.crear'             => ['POST', PatrullaController::class, 'crear'],
+    'patrulla.renombrar'         => ['POST', PatrullaController::class, 'renombrar'],
+    'patrulla.eliminar'          => ['POST', PatrullaController::class, 'eliminar'],
+    'patrulla.asignarIntegrante' => ['POST', PatrullaController::class, 'asignarIntegrante'],
+    'patrulla.quitarIntegrante'  => ['POST', PatrullaController::class, 'quitarIntegrante'],
 ];
 
 (new Api(ACCIONES))->ejecutar();

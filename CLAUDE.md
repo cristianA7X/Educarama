@@ -172,7 +172,14 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - El DNI es único en `persona`: si ya existe, el alta se rechaza, aunque sea de un familiar.
 - Pase de sección: método aparte, solo dentro del mismo grupo, con Responsable en las dos secciones. Queda sin patrulla; la progresión de la rama anterior queda como historial.
 - Eliminar un protagonista (Jefe) borra en cascada su progresión, documentos y vínculos; su `persona` queda.
-- Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla).
+- Pase de sección: el perfil ofrece solo las otras secciones del grupo donde el usuario es Responsable (`ProtagonistaService::seccionesDestino`).
+- Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla). Se asignan desde el formulario del protagonista o desde el perfil de la patrulla; "quitar" desde la patrulla solo vale si es integrante de ESA patrulla. Solo hay patrullas en las ramas con `pequenio_equipo` en `nomenclatura` (Rovers no).
+- Sin ningún acceso a la sección: **404** (no se confirma que existe); con acceso pero sin el rol, 403 (`PermisoService::exigirVisibleEnSeccion`). Familiares todavía da 403: se iguala con su Controller.
+
+### Secciones
+
+- `SeccionService`: `encabezado()` (cualquier acceso a la sección; sin acceso, 404) devuelve `SeccionEnPantalla` (sección, rama, grupo, términos, rol del usuario y `puedeVerDetalle` / `puedeEditar` / `puedeEliminar`). `listarPorGrupo()`: con cualquier rol de grupo, todas las secciones; sin rol de grupo, solo aquellas a las que tiene acceso; sin nada, 404.
+- Las secciones no se crean, renombran ni borran desde la aplicación: hoy solo nacen al aprobar una solicitud de alta.
 
 ### Familiares
 
