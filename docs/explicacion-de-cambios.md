@@ -778,3 +778,47 @@ Los listados son dos: `listarPorGrupo` es la pantalla del grupo y pide un rol de
 - lo que ve el Supervisor, los inactivos y el 404;
 - reemplazar la lista de secciones al editar;
 - los próximos eventos (terminados, en curso, que terminan hoy, inactivos).
+
+## Controllers: infraestructura y UsuarioController
+
+Empieza el paso 4. Antes de los Controllers de cada tema hacía falta decidir cómo entra un pedido y cómo sale la respuesta. Las reglas cortas quedaron en CLAUDE.md, en "Controllers y pedidos".
+
+**Dos puertas de entrada.**
+
+- **Páginas** (`views/pages/*.php`): solo muestran (GET). Cada una llama a su Controller a través de `Pagina::cargar()` y usa los datos que vuelven para armar el HTML. Si no hay sesión, `Pagina` manda al login con `?volver=` la página pedida; si el Service dice 403 o 404, muestra `views/includes/error.php`.
+- **`public/api.php`**: todo lo que guarda (también el login y el registro) va por fetch a `api.php?accion=tema.metodo`. El archivo tiene la **lista fija** de acciones: el navegador elige una de esas, nunca el nombre de un método. `Educarama\Controller\Api` busca la acción, controla el método HTTP y el token CSRF, llama al Controller y traduce las excepciones.
+
+**`Respuesta`.** Un Controller no hace `echo` ni manda headers: devuelve una `Respuesta` (página con datos, JSON, redirección o archivo del almacén) y la emite `Api` o `Pagina`. Así se puede probar por CLI llamando al método con arrays armados a mano y mirando lo que devuelve.
+
+**El JSON** tiene siempre la misma forma:
+
+| Caso | Cuerpo | HTTP |
+| --- | --- | --- |
+| Salió bien | `{ok: true, datos: {...}, mensaje?, redireccion?}` | 200 |
+| Error del usuario | `{ok: false, mensaje}` | 401, 403, 404, 422 |
+| Requisitos salteables | `{ok: false, confirmar: true, mensaje, avisos: [{tipo, mensaje}]}` | 409 |
+| Error interno | `{ok: false, mensaje: "Ocurrió un error inesperado..."}` | 500 |
+
+La tabla excepción → código está en un solo lugar, `Respuesta::desdeExcepcion()`. Solo el mensaje de una `ServicioException` llega al usuario; cualquier otra (una `PDOException`, un `TypeError`) va al `error_log` con archivo y línea, y el usuario ve el mensaje genérico. El token CSRF inválido devuelve **403**: se probó 419 (el código que usan algunos frameworks), pero Apache cambia los códigos que no conoce por 500.
+
+**`Controlador`** es la base de todos. Trae el `UsuarioService` (para sacar el id del usuario logueado) y tres lectores de datos del pedido: `texto()`, `entero()` y `booleano()`. Hacen falta porque con `strict_types` un campo que llega como array (`nombre[]=x`) haría saltar un `TypeError` en el Service; acá se convierte en texto vacío o en "Faltan datos".
+
+**`Flash`** (en `src/Helper/`) guarda mensajes de una sola vez para mostrar después de una redirección ("Cuenta creada..."). Es un Helper como `Csrf`, así que la regla de que `UsuarioService` es el único Service que toca `$_SESSION` sigue en pie.
+
+**`volver` seguro.** El login acepta `?volver=` para regresar a la página pedida, pero solo si es una ruta `views/pages/*.php` (`Controlador::rutaInterna`). Un link armado con `volver=https://otro-sitio` o con `../` termina en el inicio.
+
+**`UsuarioController`.**
+
+| Método | Tipo | Qué hace |
+| --- | --- | --- |
+| `paginaLogin` | página | Con sesión, va directo al destino |
+| `paginaRegistro` | página | Con sesión, va al inicio |
+| `paginaMiCuenta` | página | Nombre y email (solo lectura) |
+| `iniciarSesion` | `usuario.iniciarSesion` | Redirige a `volver` o al inicio |
+| `registrar` | `usuario.registrar` | Pide la contraseña dos veces; redirige a `solicitud_alta.php` con un Flash |
+| `cerrarSesion` | `usuario.cerrarSesion` | POST con CSRF (un link GET lo podría disparar otra página) |
+| `cambiarContrasenia` | `usuario.cambiarContrasenia` | Actual + nueva dos veces |
+
+Las páginas `login.php`, `registro.php`, `mi_cuenta.php`, `inicio.php` y `solicitud_alta.php` se hacen en el paso de Views; las redirecciones ya apuntan ahí.
+
+**Pruebas.** 37 casos por CLI, en una transacción que después se deshizo: acciones inexistentes, método equivocado, CSRF faltante, falso y de una sesión anterior, campos que llegan como array, registro, login, logout, cambio de contraseña, seis formas de `volver` malicioso, el 500 sin detalles y el 409 con avisos. Además se probó `api.php` por HTTP en el Apache de XAMPP (422 del login, 403 sin token).

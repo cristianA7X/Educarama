@@ -30,9 +30,9 @@ Educarama/
 │   ├── Model/     una clase por tabla + Enum/
 │   ├── Repository/  + Vista/ (clases vista de consultas con JOIN)
 │   ├── Service/     + Vista/ (avisos y resúmenes) + Excepcion/
-│   ├── Controller/
-│   └── Helper/    Csrf
-├── public/        index.php, css, fuentes
+│   ├── Controller/  Controlador (base), Respuesta, Api, Pagina + un Controller por tema
+│   └── Helper/    Csrf, Sesion, Flash
+├── public/        api.php (todos los fetch), index.php, css, fuentes
 ├── storage/       archivos subidos (gitignored salvo su .htaccess "Require all denied")
 ├── views/         páginas, includes, assets
 └── _legacy/       código viejo, solo lectura
@@ -45,9 +45,18 @@ Educarama/
 
 Nunca un link directo a un archivo: la descarga pasa por un Controller que llama al Service (permisos) y después a `AlmacenArchivos::enviar()`.
 
+### Controllers y pedidos
+
+- **Páginas** (`views/pages/*.php`): solo GET, para mostrar. Empiezan con `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`. Sin sesión → login con `?volver=`; 403/404/500 → `views/includes/error.php`.
+- **Todo lo que guarda va por fetch** a `public/api.php?accion=tema.metodo`, que solo acepta las acciones de su lista fija (método HTTP, Controller y método). Respuesta siempre JSON: `{ok, datos, mensaje?, redireccion?}` o `{ok: false, mensaje}`; si faltan requisitos salteables, `{ok: false, confirmar: true, avisos}` (409) y el JS repite con `confirmarIgual=1`.
+- Códigos (`Respuesta::desdeExcepcion`): sesión 401, `AccesoDenegado` 403, CSRF 403, `NoEncontrado` 404, `RequisitosPendientes` 409, `ReglaNegocio` 422, cualquier otra 500 con mensaje genérico y el detalle a `error_log`. (No usar códigos raros como 419: Apache los cambia por 500.)
+- Un Controller recibe arrays (`$get`, `$post`, `$files`) y devuelve una `Respuesta` (página, JSON, redirect o archivo): no lee superglobales, no manda headers, no aplica reglas de negocio. Lee los datos con `texto()`, `entero()`, `booleano()` de `Controlador`. Se prueba por CLI.
+- Mensajes después de un redirect: `Educarama\Helper\Flash` (`guardar` / `tomar`).
+- Redirecciones con datos del navegador (`volver`): solo rutas `views/pages/*.php` (`Controlador::rutaInterna`).
+
 ### Formularios POST
 
-- **Todo formulario POST usa `Educarama\Helper\Csrf`**: `<?= Csrf::campo() ?>` en la vista y `Csrf::esValido($_POST[Csrf::CAMPO] ?? null)` en el Controller antes de procesar.
+- **Todo formulario POST usa `Educarama\Helper\Csrf`**: `<?= Csrf::campo() ?>` en la vista (el fetch manda el FormData con ese campo); `Api` lo valida antes de llamar al Controller.
 - Los mensajes de error al usuario nunca muestran rutas del disco ni detalles internos: solo los de `ServicioException`.
 
 ### Sesión
