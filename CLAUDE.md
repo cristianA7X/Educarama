@@ -23,7 +23,8 @@ PHP 8.1+ con POO, MySQL/MariaDB con PDO, HTML/CSS/JS, Bootstrap 5, todo sobre XA
 Educarama/
 ├── config/        config.php (BASE_URL, ZONA_HORARIA, DB_*, ALMACEN_*), config.local.php (gitignored),
 │                  bootstrap.php (autoload propio + url()), Database.php
-├── database/      educarama.sql (base educarama_v2)
+├── database/      educarama.sql (base educarama_v2), seeds/catalogo_competencias.sql,
+│                  datos_ejemplo.sql (solo desarrollo: usuarios de prueba y progresión variada)
 ├── docs/          explicacion-de-cambios.md
 ├── src/
 │   ├── Almacen/   componente genérico de archivos subidos (no depende de nada del proyecto)
@@ -37,6 +38,10 @@ Educarama/
 ├── views/         páginas, includes, assets
 └── _legacy/       código viejo, solo lectura
 ```
+
+### Datos de ejemplo
+
+`database/datos_ejemplo.sql` es **solo para desarrollo**: borra los datos dinámicos y de progresión, reinicia sus AUTO_INCREMENT y carga dos grupos, 60 protagonistas, familiares, eventos y un usuario por caso de permisos (contraseña `educarama123`). No toca las tablas estáticas. Se importa después de `educarama.sql` y del catálogo. **Si cambia el esquema, hay que mantenerlo al día** y verificar que importa sin errores sobre una base recién creada. Las acciones, tareas, insignias y especialidades se referencian por su clave natural, no por id.
 
 ### Archivos subidos: dos capas
 

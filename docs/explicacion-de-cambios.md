@@ -822,3 +822,77 @@ La tabla excepción → código está en un solo lugar, `Respuesta::desdeExcepci
 Las páginas `login.php`, `registro.php`, `mi_cuenta.php`, `inicio.php` y `solicitud_alta.php` se hacen en el paso de Views; las redirecciones ya apuntan ahí.
 
 **Pruebas.** 37 casos por CLI, en una transacción que después se deshizo: acciones inexistentes, método equivocado, CSRF faltante, falso y de una sesión anterior, campos que llegan como array, registro, login, logout, cambio de contraseña, seis formas de `volver` malicioso, el 500 sin detalles y el 409 con avisos. Además se probó `api.php` por HTTP en el Apache de XAMPP (422 del login, 403 sin token).
+
+## Datos de ejemplo para desarrollo
+
+`database/datos_ejemplo.sql` carga datos inventados para probar la aplicación sin pasar por el alta. **Es solo para desarrollo:** al importarlo borra todos los datos dinámicos y de progresión (grupos, secciones, protagonistas, familiares, documentos, usuarios, accesos, solicitudes, eventos) y reinicia sus AUTO_INCREMENT. No toca las tablas estáticas. Se puede reimportar cuantas veces haga falta para volver al punto de partida.
+
+**Cómo usarlo.** En phpMyAdmin, importar en este orden:
+
+1. `database/educarama.sql`
+2. `database/seeds/catalogo_competencias.sql`
+3. `database/datos_ejemplo.sql`
+
+Para volver a empezar después de probar, alcanza con reimportar el tercero.
+
+**Usuarios de prueba** (contraseña de todos: `educarama123`):
+
+| Email | Caso |
+| --- | --- |
+| `jefe.grupo1@ejemplo.test` | Jefe del grupo 1: Jefe de todas sus secciones por derivación, sin filas en `acceso_seccion` |
+| `responsable.manada@ejemplo.test` | Responsable de la Manada Luna Llena |
+| `ayudante.unidad@ejemplo.test` | Ayudante de la Unidad Aconcagua (solo lectura) |
+| `supervisor.grupo1@ejemplo.test` | Supervisor del grupo 1: rol de grupo, sin acceso a ninguna sección |
+| `supervisor.caminantes@ejemplo.test` | Supervisor del grupo 1 y Responsable de la Comunidad Caminante Horizonte |
+| `jefe.grupo2@ejemplo.test` | Jefe del grupo 2 (no ve nada del grupo 1) |
+| `admin@ejemplo.test` | Admin (`es_admin = 1`), sin accesos |
+| `nuevo@ejemplo.test` | Recién registrado, sin accesos, con una solicitud rechazada (con motivo) y otra pendiente |
+
+**Qué hay.**
+
+- **Grupo 1** "Los Aromos" (código 901): Manada, Unidad, Caminantes y Rovers, con seisenas, patrullas y equipos (Rovers sin pequeño equipo).
+- **Grupo 2** "Cerro Azul" (902): Manada y Unidad.
+- **Protagonistas:** 10 por sección. Algunos están sin patrulla. Hay hermanos que comparten familiares, y un Rover que además está cargado como familiar de su hermano de la Manada. Hay contactos de emergencia, y algunos chicos no tienen ninguno.
+- **Eventos:**
+  - del grupo entero y de algunas secciones;
+  - públicos y privados;
+  - uno pasado, uno en curso y uno desactivado.
+
+**Casos de progresión.** La cabecera del archivo lista cada protagonista con su caso. En todas las ramas hay:
+
+- recién ingresados, sin progresión;
+- etapas intermedias;
+- alguno en la última etapa;
+- alguno con la última etapa lista para confirmar.
+
+Para probar los avisos hay:
+
+- uno que llegó justo al cupo de su etapa en curso;
+- uno que se pasó del cupo;
+- uno con el cupo completo pero con una tarea pendiente;
+- uno con una competencia en proceso que ya tiene todas sus acciones y no recibió la insignia de su etapa en curso.
+
+En la Unidad hay además uno que logró todas las etapas. Los Caminantes tienen su `elemento` en cada etapa lograda, sin repetir, y los Rovers no tienen acciones. LyL y Scouts tienen especialidades.
+
+**Coherencia con las reglas.**
+
+- Las etapas logradas van siempre en orden y con fechas crecientes, cada una con su cupo desarrollado y todas sus tareas.
+- Cada competencia tiene el `id_etapa` de la etapa en que se eligió.
+- Una desarrollada tiene todas sus acciones requeridas (todas, en Scouts y Caminantes). Una en proceso tiene solo algunas, salvo el caso a propósito.
+- Las insignias se entregan con fecha al empezar cada etapa.
+- La edad crece con las etapas logradas.
+
+**Sin ids del catálogo para lo que no los tiene fijos.** Las competencias tienen id fijo en el catálogo. Las acciones no: el catálogo las borra y las vuelve a insertar sin reiniciar el AUTO_INCREMENT, así que sus ids cambian en cada importación. Por eso el archivo carga acciones, tareas, insignias y especialidades en tablas temporales con su clave natural (competencia y número, etapa y número...) y las inserta con un JOIN.
+
+**Documentos:** no hay. El archivo vive en `storage/` y no en la base. Si había documentos subidos, al reimportar sus archivos quedan huérfanos y se pueden borrar a mano.
+
+**Verificado:**
+
+- Importa sin errores sobre una base recién creada con `educarama.sql` y el catálogo, y se puede reimportar sobre sí mismo.
+- 24 consultas de reglas dan 0 violaciones: etapas en orden, cupos, tareas, acciones, ramas, patrullas, fechas, insignias, accesos.
+- Se pasó por los Services reales, en 42 casos:
+  - login de los 8 usuarios;
+  - el resumen de cada caso de aviso;
+  - lo que ve cada rol en protagonistas, eventos, solicitudes y accesos.
+
+**Mantenerlo al día:** si cambia el esquema, hay que actualizar este archivo y volver a verificar que importa (está anotado en CLAUDE.md).
