@@ -10,6 +10,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/bootstrap.php';
 
 use Educarama\Controller\Api;
+use Educarama\Controller\DocumentoController;
 use Educarama\Controller\PatrullaController;
 use Educarama\Controller\ProgresionController;
 use Educarama\Controller\ProtagonistaController;
@@ -47,6 +48,11 @@ const ACCIONES = [
     'patrulla.eliminar'          => ['POST', PatrullaController::class, 'eliminar'],
     'patrulla.asignarIntegrante' => ['POST', PatrullaController::class, 'asignarIntegrante'],
     'patrulla.quitarIntegrante'  => ['POST', PatrullaController::class, 'quitarIntegrante'],
+
+    // Documentos (la descarga es GET por public/descargar.php)
+    'documento.subir'      => ['POST', DocumentoController::class, 'subir'],
+    'documento.actualizar' => ['POST', DocumentoController::class, 'actualizar'],
+    'documento.eliminar'   => ['POST', DocumentoController::class, 'eliminar'],
 ];
 
 (new Api(ACCIONES))->ejecutar();

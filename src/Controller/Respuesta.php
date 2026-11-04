@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Educarama\Controller;
 
 use Educarama\Almacen\AlmacenArchivos;
+use Educarama\Almacen\ArchivoInvalidoException;
 use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\RequisitosPendientesException;
@@ -184,11 +185,16 @@ final class Respuesta
                 exit;
 
             case self::ARCHIVO:
-                (new AlmacenArchivos())->enviar(
-                    $this->archivo['ruta'],
-                    $this->archivo['nombre'],
-                    $this->archivo['enLinea'],
-                );
+                try {
+                    (new AlmacenArchivos())->enviar(
+                        $this->archivo['ruta'],
+                        $this->archivo['nombre'],
+                        $this->archivo['enLinea'],
+                    );
+                } catch (ArchivoInvalidoException) {
+                    // La fila existe pero el archivo no está en el disco: para el usuario, 404.
+                    throw new NoEncontradoException('El archivo no está disponible.');
+                }
 
             default:
                 throw new \LogicException('Una respuesta de tipo página no se emite: la usa la vista.');

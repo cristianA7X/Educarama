@@ -44,18 +44,24 @@ final class Pagina
 
         try {
             $respuesta = $controlador();
+
+            // Redirecciones y archivos se emiten acá adentro: si enviar un
+            // archivo falla (no está en el disco), cae en el mismo catch.
+            if ($respuesta->tipo !== Respuesta::PAGINA) {
+                $respuesta->emitir();
+            }
+
+            return $respuesta->datos;
         } catch (SesionRequeridaException) {
             self::alLogin()->emitir();
         } catch (\Throwable $e) {
             $error = Respuesta::desdeExcepcion($e);
+            if (headers_sent()) {
+                // Ya salió parte de la respuesta (ej. un archivo a medias): no se puede mostrar otra página.
+                exit;
+            }
             self::mostrarError($error->codigo, (string) $error->datos['mensaje']);
         }
-
-        if ($respuesta->tipo !== Respuesta::PAGINA) {
-            $respuesta->emitir();
-        }
-
-        return $respuesta->datos;
     }
 
     /**

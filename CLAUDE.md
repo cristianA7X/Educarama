@@ -33,7 +33,7 @@ Educarama/
 │   ├── Service/     + Vista/ (avisos y resúmenes) + Excepcion/
 │   ├── Controller/  Controlador (base), Respuesta, Api, Pagina + un Controller por tema
 │   └── Helper/    Csrf, Sesion, Flash
-├── public/        api.php (todos los fetch), index.php, css, fuentes
+├── public/        api.php (todos los fetch), descargar.php (documentos), index.php, css, fuentes
 ├── storage/       archivos subidos (gitignored salvo su .htaccess "Require all denied")
 ├── views/         páginas, includes, assets
 └── _legacy/       código viejo, solo lectura
@@ -48,13 +48,13 @@ Educarama/
 1. **`src/Almacen/` (`Educarama\Almacen`)**: componente genérico y reutilizable en otros proyectos. **No depende de ninguna otra clase del proyecto** (ni Models, ni Repositories, ni Services, ni la base): solo PHP y las constantes `ALMACEN_*`. Guarda (valida tamaño y tipo real con `finfo`, nombre aleatorio), envía (headers seguros) y borra. No sabe qué es un protagonista. No agregarle nada específico de Educarama.
 2. **El Service de cada caso** (ej. `DocumentoService`): permisos, pertenencia, tabla y en qué subcarpeta va cada cosa. Traduce `ArchivoInvalidoException` a `ReglaNegocioException`.
 
-Nunca un link directo a un archivo: la descarga pasa por un Controller que llama al Service (permisos) y después a `AlmacenArchivos::enviar()`.
+Nunca un link directo a un archivo: la descarga pasa por un Controller que llama al Service (permisos) y después a `AlmacenArchivos::enviar()`. Es `public/descargar.php?id=` (GET; `&ver=1` muestra imágenes en línea); un archivo que falta en el disco es 404 "El archivo no está disponible.".
 
 ### Controllers y pedidos
 
 - **Páginas** (`views/pages/*.php`): solo GET, para mostrar. Empiezan con `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`. Sin sesión → login con `?volver=`; 403/404/500 → `views/includes/error.php`.
 - **Todo lo que guarda va por fetch** a `public/api.php?accion=tema.metodo`, que solo acepta las acciones de su lista fija (método HTTP, Controller y método). Respuesta siempre JSON: `{ok, datos, mensaje?, redireccion?}` o `{ok: false, mensaje}`; si faltan requisitos salteables, `{ok: false, confirmar: true, avisos}` (409) y el JS repite con `confirmarIgual=1`.
-- Códigos (`Respuesta::desdeExcepcion`): sesión 401, `AccesoDenegado` 403, CSRF 403, `NoEncontrado` 404, `RequisitosPendientes` 409, `ReglaNegocio` 422, cualquier otra 500 con mensaje genérico y el detalle a `error_log`. (No usar códigos raros como 419: Apache los cambia por 500.)
+- Códigos (`Respuesta::desdeExcepcion`): sesión 401, `AccesoDenegado` 403, CSRF 403, pedido más grande que `post_max_size` 413 (lo detecta `Api` antes del CSRF), `NoEncontrado` 404, `RequisitosPendientes` 409, `ReglaNegocio` 422, cualquier otra 500 con mensaje genérico y el detalle a `error_log`. (No usar códigos raros como 419: Apache los cambia por 500.)
 - Un Controller recibe arrays (`$get`, `$post`, `$files`) y devuelve una `Respuesta` (página, JSON, redirect o archivo): no lee superglobales, no manda headers, no aplica reglas de negocio. Lee los datos con `texto()`, `entero()`, `booleano()` de `Controlador`. Se prueba por CLI.
 - Mensajes después de un redirect: `Educarama\Helper\Flash` (`guardar` / `tomar`).
 - Redirecciones con datos del navegador (`volver`): solo rutas `views/pages/*.php` (`Controlador::rutaInterna`).

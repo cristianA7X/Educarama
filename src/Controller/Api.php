@@ -5,6 +5,8 @@ declare(strict_types=1);
 
 namespace Educarama\Controller;
 
+use Educarama\Almacen\AlmacenArchivos;
+use Educarama\Almacen\ArchivoInvalidoException;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Sesion;
 
@@ -20,7 +22,8 @@ use Educarama\Helper\Sesion;
  * Qué hace con cada pedido:
  *  1. Busca la acción; si no existe, 404.
  *  2. Controla el método HTTP; si no coincide, 405.
- *  3. Si es POST, controla el token CSRF (campo csrf_token del FormData); si no sirve, 403 (Apache cambia los códigos que no conoce, como 419, por 500).
+ *  3. Si es POST y llegó vacío porque superó post_max_size, 413 con el mensaje de tamaño máximo.
+ *  4. Si es POST, controla el token CSRF (campo csrf_token del FormData); si no sirve, 403 (Apache cambia los códigos que no conoce, como 419, por 500).
  *  4. Llama al Controller: los GET reciben ($get), los POST reciben ($post, $files).
  *  5. Traduce cualquier excepción con Respuesta::desdeExcepcion().
  *
@@ -52,6 +55,16 @@ final class Api
             [$metodoEsperado, $clase, $metodo] = $accion;
             if (strtoupper($metodoHttp) !== $metodoEsperado) {
                 return Respuesta::error('Método no permitido.', 405);
+            }
+
+            // Si el pedido superó post_max_size, PHP lo descarta entero y llega
+            // vacío: sin esto, se vería como CSRF faltante ("La sesión expiró").
+            if ($metodoEsperado === 'POST' && $post === [] && $files === []) {
+                try {
+                    (new AlmacenArchivos())->verificarLimiteDelServidor();
+                } catch (ArchivoInvalidoException $e) {
+                    return Respuesta::error($e->getMessage(), 413);
+                }
             }
 
             if ($metodoEsperado === 'POST' && !Csrf::esValido($post[Csrf::CAMPO] ?? null)) {

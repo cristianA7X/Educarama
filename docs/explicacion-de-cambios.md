@@ -987,3 +987,38 @@ Los mensajes evitan los adjetivos con género ("Se creó «Equipo Norte».") por
   - el pase con sus mensajes y la baja;
   - todo el ciclo de las patrullas, incluido el rechazo en Rovers.
 - **Regresión:** se repitieron las pruebas de todos los Services. La única diferencia es la esperada: el pase a una sección sin acceso ahora es 404. Protagonistas 41, familiares 27, progresión 49, eventos 60, accesos 35, usuarios 46 y documentos 25, más las de los Controllers de Progresión (56) y Usuario (37).
+
+## DocumentoController
+
+Los documentos se ven y se suben desde el perfil del protagonista: no tienen página propia.
+
+**La descarga tiene su propia puerta: `public/descargar.php?id=`.** Es un GET que responde un archivo, no un JSON, y se abre desde un link o un `<img src>`, así que no pasa por `api.php`. Llama a `Pagina::cargar()` igual que una página: sin sesión, va al login; sin acceso a la sección, 404 en la página de error, y no se confirma que el documento existe. `DocumentoController::descargar` pide el documento al Service, que controla toda la pertenencia, y devuelve `Respuesta::archivo`. Recién entonces el almacén lo envía.
+
+- `&ver=1` muestra una imagen en el navegador (`inline`). Un PDF baja siempre como adjunto, aunque venga `ver=1`: lo decide el almacén mirando el tipo real del archivo.
+- No lleva CSRF: es solo lectura.
+
+**Archivo que falta en el disco → 404, no 500.** Si la fila existe pero el archivo no está (alguien lo borró a mano), el almacén lanza `ArchivoInvalidoException`, que no es una `ServicioException`. `Respuesta::emitir()` la traduce a 404 "El archivo no está disponible.". `Pagina::cargar()` ahora también atrapa los errores al **emitir** una respuesta, no solo al armarla. Si ya salió parte del archivo, no intenta mostrar otra página.
+
+**Archivo más grande que `post_max_size`: 413.** Cuando un pedido supera `post_max_size`, PHP lo descarta entero y `$_POST` y `$_FILES` llegan vacíos, sin ningún aviso. Sin el token, `Api` respondía "La sesión expiró", que confunde. Ahora, ante un POST vacío, `Api` pregunta primero al almacén (`verificarLimiteDelServidor`) y, si fue por tamaño, responde 413 con el mismo mensaje de "supera los 5 MB". El 413 es un código estándar, así que Apache no lo cambia.
+
+**Acciones** (`api.php`):
+
+| Acción | Quién | Qué hace |
+| --- | --- | --- |
+| `documento.subir` | Responsable | `id_protagonista`, `archivo` (FormData), `tipo_documento`, `descripcion`. Redirige al perfil con "Documento subido." |
+| `documento.actualizar` | Responsable | Tipo y descripción; responde "Cambios guardados." y el JS actualiza la fila |
+| `documento.eliminar` | Jefe | Redirige al perfil con "Documento eliminado." |
+
+El tipo de documento sigue siendo texto libre, sin sugerencias.
+
+**Pruebas.** La subida no se puede probar por CLI: `move_uploaded_file` solo acepta archivos subidos de verdad por HTTP. Por eso se probó con un servidor `php -S` que corre los `api.php` y `descargar.php` reales sobre una base temporal con los datos de ejemplo, y `curl` subiendo archivos de verdad. Fueron 29 casos:
+
+- subir un PDF y una PNG;
+- sin archivo, tipo real no permitido, más de 5 MB y más que `post_max_size` (413);
+- sin token, otra sección (404) y Ayudante (403);
+- descargar como adjunto y en línea, con los headers `nosniff` y `no-store`;
+- Jefe de grupo por derivación;
+- sin acceso (404 en HTML, sin el archivo), sin sesión (al login) y archivo faltante en el disco (404);
+- editar, eliminar (Jefe) y eliminar dos veces.
+
+Además se repitieron las pruebas de los otros Controllers (Usuario 37, Progresión 56, Protagonista 62) y las 25 de `DocumentoService`.
