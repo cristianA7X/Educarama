@@ -174,7 +174,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Eliminar un protagonista (Jefe) borra en cascada su progresión, documentos y vínculos; su `persona` queda.
 - Pase de sección: el perfil ofrece solo las otras secciones del grupo donde el usuario es Responsable (`ProtagonistaService::seccionesDestino`).
 - Patrullas: el nombre no se repite dentro de la sección. Crear, renombrar y asignar integrantes, Responsable; eliminar, Jefe (los integrantes quedan sin patrulla). Se asignan desde el formulario del protagonista o desde el perfil de la patrulla; "quitar" desde la patrulla solo vale si es integrante de ESA patrulla. Solo hay patrullas en las ramas con `pequenio_equipo` en `nomenclatura` (Rovers no).
-- Sin ningún acceso a la sección: **404** (no se confirma que existe); con acceso pero sin el rol, 403 (`PermisoService::exigirVisibleEnSeccion`). Familiares todavía da 403: se iguala con su Controller.
+- Sin ningún acceso a la sección: **404** (no se confirma que existe); con acceso pero sin el rol, 403 (`PermisoService::exigirVisibleEnSeccion`). Vale también para familiares.
 
 ### Secciones
 
@@ -186,7 +186,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Se gestionan siempre desde un protagonista: permiso en su sección y el familiar tiene que estar vinculado a él. Leer, Ayudante; alta, edición y desvincular, Responsable.
 - Obligatorios: DNI, nombre y apellido. Teléfono (texto libre) y email (validado) opcionales. Contactos de emergencia libres (varios o ninguno); los listados los muestran primero.
 - Alta con un DNI ya cargado: aviso con solo el nombre (nunca a quién más está vinculado) y, si se confirma, solo se crea el vínculo; no se pisan datos guardados. Si la persona existe pero no es familiar (ej. un hermano Rover), se crea su ficha de familiar sobre esa persona.
-- Editar un familiar compartido cambia sus datos para todos sus protagonistas; el vínculo (`es_familia`) es de cada protagonista.
+- Editar un familiar compartido cambia sus datos para todos sus protagonistas; el vínculo (`es_familia`) es de cada protagonista. El formulario avisa si está vinculado a otros (`FamiliarService::vinculadoAOtros`: solo sí o no, nunca cuántos ni cuáles).
 - Desvincular: si queda sin protagonistas, aviso con su nombre y, solo si se confirma, se borra su ficha de `familiar` (la `persona` queda).
 
 ### Documentos

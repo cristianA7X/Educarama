@@ -37,6 +37,8 @@ use Educarama\Service\Vista\TipoAviso;
  *    está vinculado) y, si se confirma, solo crea el vínculo. No pisa los datos guardados.
  *  - Desvincular: si el familiar queda sin protagonistas, avisa con su nombre
  *    y, si se confirma, borra su ficha de familiar. Su persona queda.
+ *  - Sin ningún acceso a la sección del protagonista: 404 (no se confirma que
+ *    existe). Con acceso pero sin el rol: 403.
  */
 final class FamiliarService extends ServicioBase
 {
@@ -80,6 +82,18 @@ final class FamiliarService extends ServicioBase
 
         return $this->familiares->buscarFicha($idProtagonista, $idFamiliar)
             ?? throw new NoEncontradoException('El familiar no está vinculado a este protagonista.');
+    }
+
+    /**
+     * Si el familiar también está vinculado a otros protagonistas, para avisar
+     * en el formulario que los cambios de datos y contacto se ven en todos.
+     * Solo dice sí o no: nunca cuántos ni cuáles (pueden ser de otro grupo).
+     */
+    public function vinculadoAOtros(int $idUsuario, int $idProtagonista, int $idFamiliar): bool
+    {
+        $this->buscarFicha($idUsuario, $idProtagonista, $idFamiliar);  // Permiso y pertenencia
+
+        return count($this->vinculos->listarPorFamiliar($idFamiliar)) > 1;
     }
 
     // -----------------------------------------------------------------
@@ -212,9 +226,10 @@ final class FamiliarService extends ServicioBase
      * $confirmarIgual avisa con su nombre; con $confirmarIgual borra su ficha
      * de familiar (la base borra el vínculo en cascada). Su persona queda.
      *
+     * @return bool true si además se borró su ficha de familiar (quedaba sin protagonistas)
      * @throws RequisitosPendientesException
      */
-    public function desvincular(int $idUsuario, int $idProtagonista, int $idFamiliar, bool $confirmarIgual = false): void
+    public function desvincular(int $idUsuario, int $idProtagonista, int $idFamiliar, bool $confirmarIgual = false): bool
     {
         $this->cargarProtagonista($idUsuario, $idProtagonista, NivelRol::Responsable);
 
@@ -225,7 +240,7 @@ final class FamiliarService extends ServicioBase
 
         if (!$quedariaSuelto) {
             $this->vinculos->eliminar($idProtagonista, $idFamiliar);
-            return;
+            return false;
         }
 
         if (!$confirmarIgual) {
@@ -236,19 +251,20 @@ final class FamiliarService extends ServicioBase
         }
 
         $this->familiares->eliminar($idFamiliar);
+        return true;
     }
 
     // -----------------------------------------------------------------
     // Auxiliares
     // -----------------------------------------------------------------
 
-    /** Busca el protagonista y controla el permiso en su sección. */
+    /** Busca el protagonista y controla el permiso en su sección (sin acceso, 404). */
     private function cargarProtagonista(int $idUsuario, int $idProtagonista, NivelRol $minimo): Protagonista
     {
         $protagonista = $this->protagonistas->buscarPorId($idProtagonista)
             ?? throw new NoEncontradoException('El protagonista no existe.');
 
-        $this->permisos->exigirEnSeccion($idUsuario, $protagonista->idSeccion, $minimo);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $protagonista->idSeccion, $minimo, 'El protagonista no existe.');
 
         return $protagonista;
     }

@@ -152,7 +152,7 @@ final class ProgresionController extends Controlador
             self::entero($post, 'id_etapa'),
             self::elemento($post),
             self::booleano($post, 'confirmarIgual'),
-            self::fechaOpcional($post),
+            self::fechaOpcional($post, 'fecha'),
         ));
     }
 
@@ -168,7 +168,7 @@ final class ProgresionController extends Controlador
     public function otorgarInsignia(array $post): Respuesta
     {
         return $this->operar($post, fn (int $u, int $p) => $this->progresion->otorgarInsignia(
-            $u, $p, self::entero($post, 'id_insignia'), self::fechaOpcional($post),
+            $u, $p, self::entero($post, 'id_insignia'), self::fechaOpcional($post, 'fecha'),
         ));
     }
 
@@ -209,7 +209,7 @@ final class ProgresionController extends Controlador
      * la operación y responde con sus sugerencias más el resumen actualizado.
      *
      * @param array<string, mixed> $post
-     * @param callable(int $idUsuario, int $idProtagonista): (ResultadoProgresion|null) $operacion
+     * @param callable(int $idUsuario, int $idProtagonista): mixed $operacion Devuelve un ResultadoProgresion, o nada si la operación no da sugerencias
      */
     private function operar(array $post, callable $operacion): Respuesta
     {
@@ -278,12 +278,5 @@ final class ProgresionController extends Controlador
         }
         return Elemento::tryFrom($texto)
             ?? throw new ReglaNegocioException('El elemento elegido no es válido.');
-    }
-
-    /** Fecha 'AAAA-MM-DD' o null (= hoy). La valida el Service (formato y no futura). */
-    private static function fechaOpcional(array $post): ?string
-    {
-        $texto = trim(self::texto($post, 'fecha'));
-        return $texto === '' ? null : $texto;
     }
 }

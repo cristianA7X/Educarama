@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/bootstrap.php';
 
 use Educarama\Controller\Api;
 use Educarama\Controller\DocumentoController;
+use Educarama\Controller\FamiliarController;
 use Educarama\Controller\PatrullaController;
 use Educarama\Controller\ProgresionController;
 use Educarama\Controller\ProtagonistaController;
@@ -53,6 +54,10 @@ const ACCIONES = [
     'documento.subir'      => ['POST', DocumentoController::class, 'subir'],
     'documento.actualizar' => ['POST', DocumentoController::class, 'actualizar'],
     'documento.eliminar'   => ['POST', DocumentoController::class, 'eliminar'],
+
+    // Familiares (siempre desde un protagonista)
+    'familiar.guardar'     => ['POST', FamiliarController::class, 'guardar'],
+    'familiar.desvincular' => ['POST', FamiliarController::class, 'desvincular'],
 ];
 
 (new Api(ACCIONES))->ejecutar();

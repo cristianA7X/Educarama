@@ -1022,3 +1022,40 @@ El tipo de documento sigue siendo texto libre, sin sugerencias.
 - editar, eliminar (Jefe) y eliminar dos veces.
 
 Además se repitieron las pruebas de los otros Controllers (Usuario 37, Progresión 56, Protagonista 62) y las 25 de `DocumentoService`.
+
+## FamiliarController
+
+Los familiares se gestionan siempre desde un protagonista. La lista ya se ve en su perfil; este Controller suma el formulario y las acciones.
+
+**Lo que cambió en `FamiliarService`.**
+
+- **404 sin acceso:** igual que Protagonista y Patrulla. Sin ningún acceso a la sección del protagonista responde "El protagonista no existe." (404); con acceso pero sin el rol, 403. Con esto, todos los Services de sección responden igual.
+- **`vinculadoAOtros()`:** dice si el familiar también está vinculado a otros protagonistas, para avisar en el formulario que los cambios de datos y contacto se ven en todos. Solo dice sí o no, nunca cuántos ni cuáles, porque pueden ser de otro grupo (la misma idea que el aviso de DNI ya cargado, que muestra solo el nombre).
+- **`desvincular()` devuelve un booleano:** `true` si además se borró la ficha de familiar, porque era su último protagonista. Así el Controller sabe qué mensaje mostrar.
+
+**`FamiliarController`.**
+
+| Método | Tipo | Qué hace |
+| --- | --- | --- |
+| `paginaFormulario` | `familiar_form.php?id_protagonista=` (alta) o `&id_familiar=` (edición) | Ficha del protagonista, encabezado de la sección, ficha del familiar y `compartido`. Responsable |
+| `guardar` | `familiar.guardar` | Alta si no viene `id_familiar`, edición si viene. Vuelve al perfil: "Familiar agregado." / "Cambios guardados." |
+| `desvincular` | `familiar.desvincular` | Vuelve al perfil: "Se desvinculó a Ana Pérez." o "...y se borró su ficha de familiar." |
+
+Los dos avisos salteables viajan como siempre, en un 409 que el JS confirma y repite con `confirmarIgual=1`:
+
+- en el alta, un DNI ya cargado: "Ana Pérez ya está cargada con ese DNI. ¿Vincularla...?";
+- al desvincular, un familiar que queda sin protagonistas.
+
+**`dni()` y `fechaOpcional()` pasaron a `Controlador`.** Los usaban `ProtagonistaController` y `ProgresionController`, y ahora también `FamiliarController`.
+
+**Pruebas.** 31 casos por CLI, sobre los datos de ejemplo, en una transacción que se deshizo:
+
+- el formulario según cada rol, con 404 y 403;
+- `compartido` con los hermanos Ledesma;
+- alta con DNI con puntos, email y teléfono inválidos, y el DNI del propio protagonista;
+- DNI ya cargado: el 409 trae solo el nombre y no pisa los datos guardados;
+- un Rover que pasa a ser familiar;
+- la edición;
+- desvincular un familiar compartido (sin preguntar) y el último protagonista (409 y borrado de la ficha; la persona queda).
+
+Se repitió toda la batería: los Controllers de Usuario (37), Progresión (56), Protagonista (62) y Documento (29), y los Services. En familiares, la única diferencia es la esperada: un Responsable de otra sección ahora recibe 404.

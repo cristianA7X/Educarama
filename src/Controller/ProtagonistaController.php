@@ -225,16 +225,6 @@ final class ProtagonistaController extends Controlador
     // Lectura del formulario
     // -----------------------------------------------------------------
 
-    /**
-     * DNI tal como lo escribe la gente: acepta puntos y espacios ("12.345.678").
-     * Si no es un número, 0: el Service lo rechaza con "El DNI tiene que ser un número positivo."
-     */
-    private static function dni(array $post): int
-    {
-        $texto = str_replace(['.', ' '], '', self::texto($post, 'dni'));
-        return ctype_digit($texto) && strlen($texto) <= 9 ? (int) $texto : 0;
-    }
-
     /** Año opcional (vacío = null). Si no es un número, error para el usuario (no "Faltan datos"). */
     private static function anio(array $post, string $clave): ?int
     {
@@ -246,12 +236,5 @@ final class ProtagonistaController extends Controlador
             throw new ReglaNegocioException('El año de ingreso no es válido.');
         }
         return (int) $texto;
-    }
-
-    /** Fecha opcional 'AAAA-MM-DD' (la del <input type="date">); la valida el Service. */
-    private static function fechaOpcional(array $post, string $clave): ?string
-    {
-        $texto = trim(self::texto($post, $clave));
-        return $texto === '' ? null : $texto;
     }
 }

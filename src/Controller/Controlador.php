@@ -82,6 +82,23 @@ abstract class Controlador
         throw new ReglaNegocioException('Faltan datos o no son válidos. Volvé a cargar la página.');
     }
 
+    /**
+     * DNI tal como lo escribe la gente: acepta puntos y espacios ("12.345.678").
+     * Si no es un número, 0: el Service lo rechaza con "El DNI tiene que ser un número positivo."
+     */
+    protected static function dni(array $datos, string $clave = 'dni'): int
+    {
+        $texto = str_replace(['.', ' '], '', self::texto($datos, $clave));
+        return ctype_digit($texto) && strlen($texto) <= 9 ? (int) $texto : 0;
+    }
+
+    /** Fecha opcional 'AAAA-MM-DD' (la del <input type="date">); vacía = null. La valida el Service. */
+    protected static function fechaOpcional(array $datos, string $clave): ?string
+    {
+        $texto = trim(self::texto($datos, $clave));
+        return $texto === '' ? null : $texto;
+    }
+
     /** Casilla o bandera: "1", "true", "on" → true; cualquier otra cosa → false. */
     protected static function booleano(array $datos, string $clave): bool
     {
