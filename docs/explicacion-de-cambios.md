@@ -1231,3 +1231,68 @@ Las pantallas que hacen falta para entrar a la aplicación y probar lo demás:
   - Las filas de la solicitud de alta.
   - El flujo del 409 (el aviso de DNI ya cargado, al cancelar y al aceptar).
 - **Capturas** de escritorio y móvil para revisar el aspecto y el contraste. La ventana mínima de Edge sin interfaz es de 500 px, así que las capturas "de móvil" se tomaron a 500 px de ancho.
+
+## Views: perfil del protagonista, competencias y etapas e insignias
+
+Las dos pantallas prioritarias de CLAUDE.md, más una tercera que hacía falta: la de etapas e insignias.
+
+**Perfil del protagonista** (`perfil_protagonista.php`). Tiene dos pestañas:
+
+- **Perfil:**
+  - el banner con nombre, edad y sección, con los colores de la rama;
+  - los datos (DNI, nacimiento, patrulla, año de ingreso, Promesa);
+  - la progresión: etapa actual y en curso, la barra con el total real (en el legacy era un 60 % fijo), el aviso de insignia pendiente y el de etapa lista, y los botones a Competencias y a Etapas e insignias;
+  - los familiares, con los contactos de emergencia primero, teléfono y correo clicables, y Editar y Desvincular.
+- **Documentos:** ver (las imágenes, en el navegador), descargar, subir en un modal, editar el tipo y la descripción en línea, y eliminar. Todo pasa por `descargar.php`: el legacy enlazaba directo al archivo.
+
+El ⋮ del banner ofrece Editar datos, Cambiar de sección (un modal con las secciones de destino que permite el Service) y Eliminar (con una confirmación que dice qué se borra), cada uno solo para el rol que lo puede hacer.
+
+**La pestaña por el `#`.** `educarama.js` abre la pestaña que indica el `#` de la URL y lo actualiza al cambiar de pestaña. Sirve para cualquier página con pestañas. Subir o eliminar un documento redirige a `perfil_protagonista.php?id=N#documentos`, así el usuario vuelve a la lista que estaba mirando.
+
+**Competencias** (`gestionar_competencias.php` + `public/js/competencias.js`). Se hizo como la describe CLAUDE.md:
+
+- una pestaña por área, con todas las competencias de la rama;
+- un botón que solo avanza ("Elegir", "Desarrollada");
+- ⋮ → Corregir, que muestra "Volver atrás" en cada una;
+- las acciones en un desplegable (en LyL, las opcionales marcadas; en Rovers no hay);
+- el filtro por estado y los contadores arriba y en cada pestaña.
+
+PHP arma todo el HTML inicial; el JS solo cambia lo que corresponde después de cada clic, con el resumen que devuelve el servidor. Cada competencia elegida dice en qué etapa se eligió: para eso `PantallaCompetencias` suma `nombresEtapas`. Si la operación falla, la casilla vuelve a como estaba.
+
+Las sugerencias del servidor se ofrecen **con un botón que hace lo sugerido**:
+
+- "Cumplió todas las acciones requeridas. ¿Dar la competencia por desarrollada?" la avanza ahí mismo.
+- "¿Confirmar la etapa?" lleva a Etapas e insignias.
+
+**Etapas e insignias** (`progresion.php`). CLAUDE.md pide que las insignias tengan "un submenú propio del protagonista", y las tareas de etapa y "Confirmar etapa" no tenían pantalla. Esta página junta las tres cosas:
+
+- **Etapas:**
+  - las logradas, con su fecha y, en Caminantes, su elemento. "Quitar" aparece solo en la última y solo para el Jefe.
+  - la en curso, con sus tareas tildables, lo que le falta para confirmarla y el formulario "Confirmar etapa": fecha (hasta hoy) y, en Caminantes, el elemento. Si falta algo, `educarama.js` muestra lo adeudado y se puede confirmar igual.
+  - las que vienen, de solo lectura.
+- **Insignias:** las de la rama y las generales (`id_rama` NULL, que el repositorio ahora también trae con `listarParaRama()`). Las entregadas tienen su fecha y las puede quitar el Jefe; la que le corresponde por la etapa en curso aparece resaltada, con el formulario para registrar la entrega.
+- **Especialidades** (solo LyL y Scouts): arriba las suyas, con su estado; abajo, el resto por área, en un acordeón, para empezar una.
+
+Cada acción recarga la página (`data-recargar`). Los datos los arma un método nuevo, `ProgresionService::pantallaEtapas()` (Ayudante en adelante), con las clases vista `PantallaEtapas`, `EtapaEnPantalla`, `TareaEnPantalla`, `InsigniaEnPantalla` y `EspecialidadEnPantalla`. Si la rama pide elemento sale del Service (`pideElemento`), no de un id escrito en la vista.
+
+**Insignias sin imágenes.** Como dice "Para más adelante", las rutas de imágenes no están definidas: por ahora cada insignia es un ícono con su nombre. La Promesa es un dato del protagonista y no las dos imágenes fijas del legacy.
+
+**Pruebas.** Sobre los datos de ejemplo:
+
+- **HTTP (34 casos):**
+  - Lo que genera cada rol en las tres pantallas: los botones según Responsable, Ayudante o Jefe, y el 404 para otro grupo, para el Supervisor y para el Ayudante de otra sección.
+  - Que las competencias, sus estados y las acciones coincidan con la base.
+  - Rovers sin acciones ni especialidades.
+  - Caminantes con el elemento.
+- **En el navegador (10 casos):**
+  - Elegir una competencia (estado, etapa y contador).
+  - El aviso de cupo, que no guarda hasta aceptar.
+  - La sugerencia al cumplir la última acción requerida.
+  - El filtro y Corregir.
+  - La pestaña por `#`.
+  - Tildar una tarea.
+  - Confirmar una etapa con una tarea pendiente.
+  - Registrar una insignia.
+- **Capturas** de escritorio y móvil.
+
+Se repitió toda la batería de Controllers y Services.

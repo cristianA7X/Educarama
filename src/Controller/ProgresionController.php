@@ -20,6 +20,7 @@ use Educarama\Service\Vista\ResumenProgresion;
  *
  * Página (GET):
  *   paginaCompetencias   gestionar_competencias.php?id=...   Ayudante en adelante
+ *   paginaEtapas         progresion.php?id=...               Ayudante en adelante ("Etapas e insignias")
  *
  * Acciones (POST por fetch a public/api.php). Todas reciben id_protagonista y
  * devuelven {sugerencias, resumen}: el resumen actualizado sirve para repintar
@@ -77,6 +78,25 @@ final class ProgresionController extends Controlador
 
         // Primero la pantalla: si no tiene acceso, el 404 sale de acá.
         $pantalla = $this->progresion->pantallaCompetencias($idUsuario, $idProtagonista);
+
+        return Respuesta::pagina([
+            'ficha'    => $this->protagonistas->buscarFicha($idUsuario, $idProtagonista),
+            'pantalla' => $pantalla,
+        ]);
+    }
+
+    /**
+     * "Etapas e insignias": etapas con sus tareas, insignias y especialidades.
+     * Datos: 'ficha' (FichaProtagonista) y 'pantalla' (PantallaEtapas).
+     *
+     * @param array<string, mixed> $get id
+     */
+    public function paginaEtapas(array $get): Respuesta
+    {
+        $idUsuario = $this->usuario()->id;
+        $idProtagonista = self::entero($get, 'id');
+
+        $pantalla = $this->progresion->pantallaEtapas($idUsuario, $idProtagonista);  // 404 si no tiene acceso
 
         return Respuesta::pagina([
             'ficha'    => $this->protagonistas->buscarFicha($idUsuario, $idProtagonista),

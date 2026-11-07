@@ -226,6 +226,25 @@
     });
 
     // ------------------------------------------------------------------
+    // Pestañas: la del # de la URL se abre sola (ej. perfil_protagonista.php?id=8#documentos),
+    // y al cambiar de pestaña se actualiza el #, así recargar o volver deja la misma.
+    // ------------------------------------------------------------------
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const pestanias = document.querySelectorAll('[data-bs-toggle="tab"][data-bs-target^="#"]');
+        if (pestanias.length === 0 || !window.bootstrap) { return; }
+
+        const elegida = window.location.hash
+            ? document.querySelector('[data-bs-toggle="tab"][data-bs-target="' + CSS.escape(window.location.hash) + '"]')
+            : null;
+        if (elegida) { window.bootstrap.Tab.getOrCreateInstance(elegida).show(); }
+
+        pestanias.forEach((p) => p.addEventListener('shown.bs.tab', () => {
+            window.history.replaceState(null, '', p.dataset.bsTarget);
+        }));
+    });
+
+    // ------------------------------------------------------------------
     // Menú lateral (drawer)
     //
     // Desde 992 px está a la vista y se oculta con la clase html.menu-oculto

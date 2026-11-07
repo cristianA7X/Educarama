@@ -29,6 +29,23 @@ final class InsigniaRepository extends RepositorioEstatico
     }
 
     /**
+     * Las que puede recibir un protagonista de esa rama: las de la rama y las
+     * generales (id_rama NULL). Primero las de etapa, en orden de etapa.
+     *
+     * @return Insignia[]
+     */
+    public function listarParaRama(int $idRama): array
+    {
+        return $this->listar(
+            'SELECT * FROM insignia
+              WHERE id_rama = ? OR id_rama IS NULL
+              ORDER BY id_etapa IS NULL, id_etapa, id',
+            [$idRama],
+            Insignia::class,
+        );
+    }
+
+    /**
      * La insignia que corresponde a una etapa, o null si no tiene.
      * Se usa al confirmar una etapa, para ofrecer otorgarla en la misma operación.
      */

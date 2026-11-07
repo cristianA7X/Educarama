@@ -22,6 +22,7 @@ use Educarama\Model\TareaEtapaCumplida;
 use Educarama\Repository\AccionCumplidaRepository;
 use Educarama\Repository\AccionRepository;
 use Educarama\Repository\AreaRamaRepository;
+use Educarama\Repository\AreaRepository;
 use Educarama\Repository\CompetenciaProtagonistaRepository;
 use Educarama\Repository\CompetenciaRepository;
 use Educarama\Repository\EspecialidadProtagonistaRepository;
@@ -44,10 +45,15 @@ use Educarama\Service\Vista\AccionEnPantalla;
 use Educarama\Service\Vista\AreaEnPantalla;
 use Educarama\Service\Vista\Aviso;
 use Educarama\Service\Vista\CompetenciaEnPantalla;
+use Educarama\Service\Vista\EspecialidadEnPantalla;
+use Educarama\Service\Vista\EtapaEnPantalla;
+use Educarama\Service\Vista\InsigniaEnPantalla;
 use Educarama\Service\Vista\ContadorArea;
 use Educarama\Service\Vista\PantallaCompetencias;
+use Educarama\Service\Vista\PantallaEtapas;
 use Educarama\Service\Vista\ResultadoProgresion;
 use Educarama\Service\Vista\ResumenProgresion;
+use Educarama\Service\Vista\TareaEnPantalla;
 use Educarama\Service\Vista\TipoAviso;
 
 /**
@@ -98,6 +104,7 @@ final class ProgresionService extends ServicioBase
     private EspecialidadProtagonistaRepository $especialidadesProtagonista;
     private InsigniaOtorgadaRepository $insigniasOtorgadas;
     private NomenclaturaRepository $nomenclaturas;
+    private AreaRepository $areas;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -118,6 +125,7 @@ final class ProgresionService extends ServicioBase
         ?EspecialidadProtagonistaRepository $especialidadesProtagonista = null,
         ?InsigniaOtorgadaRepository $insigniasOtorgadas = null,
         ?NomenclaturaRepository $nomenclaturas = null,
+        ?AreaRepository $areas = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -138,6 +146,7 @@ final class ProgresionService extends ServicioBase
         $this->especialidadesProtagonista = $especialidadesProtagonista ?? new EspecialidadProtagonistaRepository();
         $this->insigniasOtorgadas = $insigniasOtorgadas ?? new InsigniaOtorgadaRepository();
         $this->nomenclaturas = $nomenclaturas ?? new NomenclaturaRepository();
+        $this->areas = $areas ?? new AreaRepository();
     }
 
     // =================================================================
@@ -196,10 +205,85 @@ final class ProgresionService extends ServicioBase
             $resumen->areas,
         );
 
+        $nombresEtapas = [];
+        foreach ($this->etapas->listarPorRama($rama->id) as $etapa) {
+            $nombresEtapas[(int) $etapa->id] = $etapa->titulo;
+        }
+
         return new PantallaCompetencias(
             resumen: $resumen,
             areas: $areas,
+            nombresEtapas: $nombresEtapas,
             terminos: array_map(fn ($n) => $n->texto, $this->nomenclaturas->listarPorRama($rama->id)),
+            puedeEditar: $nivel->value >= NivelRol::Responsable->value,
+            puedeQuitar: $nivel->value >= NivelRol::Jefe->value,
+        );
+    }
+
+    /**
+     * Lo que muestra la pantalla "Etapas e insignias" (Ayudante en adelante):
+     * las etapas de la rama (logradas con su fecha y elemento, la en curso con
+     * sus tareas), las insignias que puede recibir (de la rama y generales) con
+     * su fecha de entrega y, si la rama las usa, las especialidades por área.
+     */
+    public function pantallaEtapas(int $idUsuario, int $idProtagonista): PantallaEtapas
+    {
+        [$rama, $nivel] = $this->cargarConNivel($idUsuario, $idProtagonista, NivelRol::Ayudante);
+        [$actual, $enCurso, $todas] = $this->situacionEtapas($idProtagonista, $rama);
+
+        $logradas = [];
+        foreach ($this->etapasLogradas->listarPorProtagonista($idProtagonista) as $lograda) {
+            $logradas[$lograda->idEtapa] = $lograda;
+        }
+        $tareasCumplidas = [];
+        foreach ($this->tareasCumplidas->listarPorProtagonista($idProtagonista) as $cumplida) {
+            $tareasCumplidas[$cumplida->idTareaEtapa] = $cumplida->fecha;
+        }
+
+        $etapas = array_map(fn (Etapa $etapa) => new EtapaEnPantalla(
+            etapa: $etapa,
+            lograda: $logradas[$etapa->id] ?? null,
+            enCurso: $enCurso?->id === $etapa->id,
+            esLaActual: $actual?->id === $etapa->id,
+            tareas: array_map(
+                fn ($tarea) => new TareaEnPantalla($tarea, $tareasCumplidas[$tarea->id] ?? null),
+                $this->tareas->listarPorEtapa((int) $etapa->id),
+            ),
+        ), $todas);
+
+        $otorgadas = [];
+        foreach ($this->insigniasOtorgadas->listarPorProtagonista($idProtagonista) as $otorgada) {
+            $otorgadas[$otorgada->idInsignia] = $otorgada->fecha;
+        }
+        $insignias = array_map(
+            fn ($insignia) => new InsigniaEnPantalla($insignia, $otorgadas[$insignia->id] ?? null),
+            $this->insignias->listarParaRama($rama->id),
+        );
+
+        $especialidades = [];
+        if ($rama->usaEspecialidades) {
+            $suyas = [];
+            foreach ($this->especialidadesProtagonista->listarPorProtagonista($idProtagonista) as $ep) {
+                $suyas[$ep->idEspecialidad] = $ep;
+            }
+            $porArea = [];
+            foreach ($this->especialidades->listarTodas() as $especialidad) {
+                $suya = $suyas[$especialidad->id] ?? null;
+                $porArea[$especialidad->idArea][] = new EspecialidadEnPantalla($especialidad, $suya?->estado, $suya?->fecha);
+            }
+            foreach ($this->areas->listarTodas() as $area) {
+                if (isset($porArea[$area->id])) {
+                    $especialidades[] = ['area' => $area, 'especialidades' => $porArea[$area->id]];
+                }
+            }
+        }
+
+        return new PantallaEtapas(
+            resumen: $this->armarResumen($idProtagonista, $rama),
+            etapas: $etapas,
+            insignias: $insignias,
+            especialidades: $especialidades,
+            pideElemento: $rama->id === self::ID_RAMA_CAMINANTES,
             puedeEditar: $nivel->value >= NivelRol::Responsable->value,
             puedeQuitar: $nivel->value >= NivelRol::Jefe->value,
         );

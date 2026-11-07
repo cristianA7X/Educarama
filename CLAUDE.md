@@ -227,7 +227,9 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - **Guardado inmediato:** cada clic se guarda en el momento por fetch, con operaciones de a una (no hay guardado por lote). Si hay un aviso (cupo excedido, acciones sin cumplir), primero se muestra la confirmación y después se guarda.
 - `ProgresionService::resumen()` (Ayudante en adelante) devuelve una clase vista con: etapa actual, etapa en curso, contadores (etapa, total y por área), lo adeudado para confirmar la etapa en curso y el aviso de insignia pendiente.
 - `ProgresionService::pantallaCompetencias()` (Ayudante en adelante) devuelve `PantallaCompetencias`: el resumen, cada área con todas sus competencias (estado, `id_etapa` y acciones con cumplida sí/no), los términos de `nomenclatura` y `puedeEditar` (Responsable) / `puedeQuitar` (Jefe).
-- Cada clic (`progresion.*` en `api.php`) responde `{sugerencias, resumen}`: el resumen actualizado repinta contadores, adeudado e insignia pendiente sin recargar.
+- Cada clic (`progresion.*` en `api.php`) responde `{sugerencias, resumen}`: el resumen actualizado repinta contadores, adeudado e insignia pendiente sin recargar (`public/js/competencias.js`).
+- **Sugerencias con botón:** "¿Dar la competencia por desarrollada?" la avanza ahí mismo si se acepta; "¿Confirmar la etapa?" lleva a Etapas e insignias. Si no se acepta, no pasa nada.
+- Cada competencia elegida muestra en qué etapa se eligió (`PantallaCompetencias::nombresEtapas`).
 
 ## Views (paso 5)
 
@@ -237,7 +239,10 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - **Menú lateral = drawer** (un offcanvas de Bootstrap). Desde 992 px está a la vista, empuja el contenido y se oculta con el botón de la barra superior (se recuerda en `localStorage`); por debajo es un cajón que se abre encima del contenido, con fondo oscuro. Es **contextual**: por cada grupo del usuario, sus links y sus secciones con los links que su rol permite (un link que no puede usar no se muestra); al final Mi cuenta, Solicitar alta, Solicitudes (admin) y Cerrar sesión.
 - **JavaScript:** `public/js/educarama.js` hace los pedidos a `api.php` (token CSRF, flujo del 409 con `confirmarIgual`, redirecciones, error genérico) y conecta formularios y botones declarados con `data-accion`, `data-datos`, `data-confirmar`, `data-texto`, `data-boton`, `data-peligro`, `data-reiniciar`, `data-recargar`: la mayoría de las páginas no necesita JS propio. Las pantallas complejas tienen su archivo en `public/js/` (se declara con `$scriptsPagina`). Sin SweetAlert2 (sin internet) usa los cuadros nativos.
 - **Cosas del legacy ya corregidas:** texto amarillo sobre blanco en el menú de Manada; el banner violeta con texto oscuro (ahora `--banner-*`, con texto blanco o oscuro según la rama, y el banner de Rovers termina en rojo oscuro); links `/Educarama/...` a mano; Ubuntu cargada dos veces; `<h1>` duplicado (la barra superior no lo es); menú móvil de íconos de 68 px (ahora es el drawer); `.sidebar` con `!important` en un `<style>` del include.
-- **Pantallas hechas:** login, registro, inicio, mi cuenta, solicitud de alta y la página de error. Faltan (los links del menú ya apuntan a ellas): `perfil_protagonista`, `gestionar_competencias` (las dos prioritarias), `protagonistas`, `protagonista_form`, `patrullas`, `perfil_patrulla`, `familiar_form`, `perfil_seccion`, `grupo`, `eventos`, `evento_form`, `accesos` y `solicitudes`.
+- **Perfil del protagonista** (`perfil_protagonista.php`): dos pestañas. **Perfil** (datos, resumen de progresión con los links a Competencias y a Etapas e insignias, familiares) y **Documentos** (ver, descargar, subir en un modal, editar tipo y descripción, eliminar). El ⋮ del encabezado: Editar datos, Cambiar de sección, Eliminar, según el rol. `#documentos` en la URL abre esa pestaña (`educarama.js` lo hace con cualquier página de pestañas); subir y eliminar un documento vuelven ahí.
+- **Etapas e insignias** (`progresion.php?id=`, el submenú propio del protagonista): las etapas de la rama (logradas con fecha y elemento; la última se quita, solo Jefe; la en curso con sus tareas tildables, lo que le falta y "Confirmar etapa" con fecha y, en Caminantes, elemento), las insignias de la rama y generales (registrar la entrega con fecha; quitar, solo Jefe) y las especialidades (LyL y Scouts). Lo arma `ProgresionService::pantallaEtapas()`. Cada acción recarga la página.
+- **Insignias sin imágenes por ahora:** un ícono y el nombre (las rutas de imágenes siguen en "Para más adelante"). La Promesa es un dato del protagonista, no una imagen.
+- **Pantallas hechas:** login, registro, inicio, mi cuenta, solicitud de alta, error, `perfil_protagonista`, `gestionar_competencias` y `progresion`. Faltan (los links ya apuntan a ellas): `protagonista_form`, `familiar_form`, `protagonistas`, `patrullas`, `perfil_patrulla`, `perfil_seccion`, `grupo`, `eventos`, `evento_form`, `accesos` y `solicitudes`.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
 
@@ -262,4 +267,4 @@ Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorC
 2. ~~Repositories~~ ✅
 3. ~~Services~~ ✅
 4. ~~Controllers~~ ✅
-5. Views (en curso): hecho el layout base y las pantallas de cuenta; siguen `perfil_protagonista.php` y `gestionar_competencias.php`, y después el resto.
+5. Views (en curso): hechos el layout base, las pantallas de cuenta, el perfil del protagonista, las competencias y las etapas e insignias; siguen los formularios de protagonista y familiar, y después el resto.

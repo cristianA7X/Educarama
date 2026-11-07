@@ -96,8 +96,9 @@ final class DocumentoController extends Controlador
         return Respuesta::exito(redireccion: self::perfil($documento->idProtagonista));
     }
 
+    /** El perfil del protagonista, abierto en la pestaña Documentos (educarama.js la abre por el #). */
     private static function perfil(int $idProtagonista): string
     {
-        return url('views/pages/perfil_protagonista.php?id=' . $idProtagonista);
+        return url('views/pages/perfil_protagonista.php?id=' . $idProtagonista) . '#documentos';
     }
 }

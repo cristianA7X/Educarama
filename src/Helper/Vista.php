@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Educarama\Helper;
 
+use Educarama\Model\Enum\EstadoProgresion;
 use Educarama\Model\Enum\EstadoSolicitud;
 use Educarama\Model\Enum\Prioridad;
 
@@ -43,6 +44,64 @@ final class Vista
             4       => 'bi-globe-americas',
             default => 'bi-flag',
         };
+    }
+
+    /** Ícono de cada área (las 4 de LyL, Scouts y Caminantes, y las 6 de Rovers), para las pestañas. */
+    public static function iconoArea(int $idArea): string
+    {
+        return match ($idArea) {
+            1       => 'bi-heart-pulse',   // Salud y Bienestar
+            2       => 'bi-people',        // Paz y Desarrollo
+            3       => 'bi-tree',          // Ambiente
+            4       => 'bi-lightbulb',     // Habilidades para la Vida
+            5       => 'bi-person-arms-up',// Corporalidad
+            6       => 'bi-palette',       // Creatividad
+            7       => 'bi-shield-check',  // Carácter
+            8       => 'bi-heart',         // Afectividad
+            9       => 'bi-chat-dots',     // Sociabilidad
+            10      => 'bi-sun',           // Espiritualidad
+            default => 'bi-award',
+        };
+    }
+
+    /** Etiqueta de un estado de progresión; null = pendiente (sin fila). */
+    public static function estado(?EstadoProgresion $estado): string
+    {
+        return $estado?->etiqueta() ?? 'Pendiente';
+    }
+
+    /** Color de la etiqueta de un estado de progresión: pendiente gris, en proceso amarillo, desarrollada verde. */
+    public static function colorEstadoProgresion(?EstadoProgresion $estado): string
+    {
+        return match ($estado) {
+            null                           => 'secondary',
+            EstadoProgresion::EnProceso    => 'warning',
+            EstadoProgresion::Desarrollada => 'success',
+        };
+    }
+
+    /** Edad en años cumplidos a hoy, o null si no hay fecha de nacimiento. */
+    public static function edad(?string $fechaNacimiento): ?int
+    {
+        if ($fechaNacimiento === null) {
+            return null;
+        }
+        $nacimiento = \DateTimeImmutable::createFromFormat('!Y-m-d', $fechaNacimiento);
+
+        return $nacimiento === false ? null : $nacimiento->diff(new \DateTimeImmutable('today'))->y;
+    }
+
+    /** 1536 → '1,5 KB'; 2621440 → '2,5 MB'. */
+    public static function tamanio(int $bytes): string
+    {
+        if ($bytes < 1024) {
+            return $bytes . ' B';
+        }
+        $kb = $bytes / 1024;
+
+        return $kb < 1024
+            ? number_format($kb, 1, ',', '.') . ' KB'
+            : number_format($kb / 1024, 1, ',', '.') . ' MB';
     }
 
     /** Color (de Bootstrap) de la etiqueta de la prioridad de un evento: alta roja, media amarilla, baja gris. */
