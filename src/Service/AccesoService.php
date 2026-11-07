@@ -20,6 +20,8 @@ use Educarama\Repository\Vista\UsuarioConAcceso;
 use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use Educarama\Service\Vista\AccesoEnPantalla;
+use Educarama\Service\Vista\AccesosEnPantalla;
 
 /**
  * Gestión de roles: quién tiene acceso a un grupo o a una sección, y con qué rol.
@@ -34,6 +36,8 @@ use Educarama\Service\Excepcion\ReglaNegocioException;
  *  - El último Jefe de un grupo no se puede quitar ni bajar de rol (ni él mismo).
  *  - Ver la lista: la del grupo, el Jefe de grupo; la de una sección, su Jefe
  *    (y el Jefe de grupo, que es Jefe de todas sus secciones).
+ *  - Sin ningún acceso al grupo o a la sección: 404 (no se confirma que
+ *    existen). Con acceso pero sin ser Jefe: 403.
  */
 final class AccesoService extends ServicioBase
 {
@@ -74,6 +78,25 @@ final class AccesoService extends ServicioBase
         $this->exigirJefeDeGrupo($idUsuario, $idGrupo);
 
         return $this->accesosGrupo->listarUsuariosPorGrupo($idGrupo);
+    }
+
+    /**
+     * La lista del grupo con lo que se puede hacer en cada fila (solo el Jefe
+     * de grupo). Al último Jefe no se le ofrece cambiar el rol ni quitarlo:
+     * el Service lo rechazaría.
+     */
+    public function pantallaGrupo(int $idUsuario, int $idGrupo): AccesosEnPantalla
+    {
+        $lista = $this->listarAccesosGrupo($idUsuario, $idGrupo);
+        $jefes = count(array_filter($lista, fn (UsuarioConAcceso $u) => $u->nivel === NivelRol::Jefe));
+
+        $filas = array_map(function (UsuarioConAcceso $u) use ($jefes): AccesoEnPantalla {
+            $ultimoJefe = $u->nivel === NivelRol::Jefe && $jefes <= 1;
+
+            return new AccesoEnPantalla($u, $ultimoJefe ? [] : NivelRol::cases(), !$ultimoJefe);
+        }, $lista);
+
+        return new AccesosEnPantalla($filas, NivelRol::cases());
     }
 
     /**
@@ -133,9 +156,30 @@ final class AccesoService extends ServicioBase
      */
     public function listarAccesosSeccion(int $idUsuario, int $idSeccion): array
     {
-        $this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Jefe);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Jefe, 'La sección no existe.');
 
         return $this->accesosSeccion->listarUsuariosPorSeccion($idSeccion);
+    }
+
+    /**
+     * La lista de la sección con lo que se puede hacer en cada fila.
+     *  - Jefe de grupo: todo, con cualquier rol.
+     *  - Jefe de sección: solo cambiar el rol, hasta Responsable, y no el de otro
+     *    Jefe (tampoco el suyo); no agrega ni quita.
+     */
+    public function pantallaSeccion(int $idUsuario, int $idSeccion): AccesosEnPantalla
+    {
+        $lista = $this->listarAccesosSeccion($idUsuario, $idSeccion);
+        $esJefeDeGrupo = $this->permisos->esJefeDeGrupo($idUsuario, $this->seccion($idSeccion)->idGrupo);
+        $hastaResponsable = [NivelRol::Supervisor, NivelRol::Ayudante, NivelRol::Responsable];
+
+        $filas = array_map(fn (UsuarioConAcceso $u) => new AccesoEnPantalla(
+            $u,
+            $esJefeDeGrupo ? NivelRol::cases() : ($u->nivel === NivelRol::Jefe ? [] : $hastaResponsable),
+            $esJefeDeGrupo,
+        ), $lista);
+
+        return new AccesosEnPantalla($filas, $esJefeDeGrupo ? NivelRol::cases() : []);
     }
 
     /** Asigna una cuenta ya registrada a la sección (solo el Jefe de grupo). */
@@ -161,7 +205,7 @@ final class AccesoService extends ServicioBase
     public function cambiarRolSeccion(int $idUsuario, int $idSeccion, int $idDestino, NivelRol $nivel): void
     {
         $seccion = $this->seccion($idSeccion);
-        $this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Jefe);
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Jefe, 'La sección no existe.');
 
         $acceso = $this->accesosSeccion->buscar($idDestino, $idSeccion)
             ?? throw new NoEncontradoException('Ese usuario no está asignado a la sección.');
@@ -196,10 +240,13 @@ final class AccesoService extends ServicioBase
     // Auxiliares
     // =================================================================
 
-    /** @throws NoEncontradoException si el grupo no existe; AccesoDenegadoException si no es su Jefe */
+    /**
+     * @throws NoEncontradoException si el grupo no existe o el usuario no tiene ningún acceso a él
+     * @throws AccesoDenegadoException si tiene acceso pero no es su Jefe
+     */
     private function exigirJefeDeGrupo(int $idUsuario, int $idGrupo): void
     {
-        if ($this->grupos->buscarPorId($idGrupo) === null) {
+        if ($this->grupos->buscarPorId($idGrupo) === null || !$this->permisos->tieneAccesoAlGrupo($idUsuario, $idGrupo)) {
             throw new NoEncontradoException('El grupo no existe.');
         }
 

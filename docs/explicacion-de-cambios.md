@@ -1110,3 +1110,38 @@ Todas las acciones vuelven con un Flash al listado que mandó la página (`volve
 - el inicio de cada tipo de usuario.
 
 Además se repitió toda la batería: los Controllers de Usuario (37), Progresión (56), Protagonista (62), Familiar (31) y Documento (29), y los Services.
+
+## AccesoController y SolicitudAltaController
+
+Son los dos últimos Controllers: con ellos queda cubierta toda la funcionalidad de los Services.
+
+**404 en accesos.** Igual que en el resto: sin ningún acceso al grupo o a la sección, 404 (antes, un Jefe de otro grupo recibía 403 y se enteraba de que existían); con acceso pero sin ser Jefe, 403. Para decidirlo se sumó `PermisoService::tieneAccesoAlGrupo()` (un rol de grupo o un rol en alguna de sus secciones), que también usa ahora `EventoService`. Cambiaron dos casos de las pruebas viejas, de 403 a 404: el Jefe de otro grupo que pide la lista o que agrega un acceso.
+
+**Gestión de accesos.**
+
+- **La pantalla ya viene con los botones.** `AccesoService::pantallaGrupo()` y `pantallaSeccion()` devuelven, por cada fila, los roles que se le pueden asignar y si se puede quitar (`AccesoEnPantalla`), y arriba los roles con que se puede agregar. Así la vista no repite las reglas ni ofrece botones que el Service rechazaría:
+  - Al **único Jefe del grupo** no se le ofrece cambiar el rol ni quitarlo.
+  - El **Jefe de grupo** puede todo en la sección, con cualquier rol.
+  - El **Jefe de sección** solo cambia el rol hasta Responsable de quien no es Jefe. No agrega, no quita y no toca a otro Jefe ni a sí mismo.
+- **`accesos.php`** tiene dos modos como la de eventos: `?id_grupo=` y `?id_seccion=`.
+- **Acciones:** `acceso.dar` (email y rol), `acceso.cambiarRol` y `acceso.quitar`. Llevan el `ambito` explícito (`grupo` o `seccion`) con su id, y vuelven a la lista con un Flash.
+- **Casos de borde:**
+  - Si el Jefe de grupo se **baja el rol** a sí mismo (había otro Jefe), ya no puede ver la lista de accesos: vuelve a la pantalla del grupo.
+  - Si se **quita** a sí mismo, vuelve al inicio.
+
+**Alta de un grupo.**
+
+- **Para el solicitante:** `SolicitudAltaService` suma `ramas()` (para el select de cada sección), `misSolicitudesEnPantalla()` y `detalle()`. Todas devuelven `SolicitudEnPantalla`: la solicitud con el nombre oficial de la rama de cada sección ("Lobatos y Lobeznas") y, solo para un admin, el nombre y el email de quien la envió. El hash de contraseña del solicitante no llega a la vista.
+- **Para el admin:** `pendientesEnPantalla()`.
+- **`solicitud_alta.php`** (cualquier usuario con sesión) tiene el formulario y debajo mis solicitudes con su estado y, si se rechazó, el motivo. Con una solicitud pendiente se oculta el formulario. Las secciones son filas con nombre y rama; llegan como `seccion_nombre[]` y `seccion_rama[]`. Una fila completamente vacía se descarta; una a medias la rechaza el Service con su mensaje.
+- **`solicitudes.php`** (solo admin, 403 al resto) lista las pendientes de la más vieja a la más nueva.
+  - **Aprobar:** deja el Flash "Grupo 910 «Grupo Scout Nuevo» creado. Pablo Ortiz quedó como Jefe del grupo.".
+  - **Rechazar:** pide el motivo, que ve el solicitante.
+- **Acciones:** `solicitud_alta.enviar` (vuelve al inicio), `solicitud_alta.aprobar` y `solicitud_alta.rechazar` (vuelven a la revisión).
+
+**Pruebas.** 66 casos por CLI sobre los datos de ejemplo, en una transacción que se deshizo:
+
+- *Accesos:* la lista y los botones de cada rol (Jefe de grupo, Responsable, Supervisor, Jefe de otro grupo, admin); agregar, cambiar y quitar; email sin cuenta, repetido o con rol inválido; el último Jefe; el Jefe que se baja o se quita a sí mismo; el Jefe de sección con todos sus límites.
+- *Solicitudes:* mis solicitudes con el motivo; enviar (código usado, sin secciones, secciones a medias, repetidas, listas desparejas o anidadas); el 403 a cualquier no admin; rechazar con y sin motivo; aprobar (se crean el grupo, las secciones y el Jefe) y aprobar dos veces; el inicio del nuevo Jefe.
+
+Se repitió toda la batería de Controllers y Services.

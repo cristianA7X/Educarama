@@ -9,6 +9,7 @@ use Educarama\Model\AccesoGrupo;
 use Educarama\Model\Enum\EstadoSolicitud;
 use Educarama\Model\Enum\NivelRol;
 use Educarama\Model\Grupo;
+use Educarama\Model\Rama;
 use Educarama\Model\Seccion;
 use Educarama\Model\SolicitudAlta;
 use Educarama\Repository\AccesoGrupoRepository;
@@ -17,9 +18,11 @@ use Educarama\Repository\RamaRepository;
 use Educarama\Repository\RolRepository;
 use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\SolicitudAltaRepository;
+use Educarama\Repository\UsuarioRepository;
 use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use Educarama\Service\Vista\SolicitudEnPantalla;
 
 /**
  * Alta de un grupo nuevo (CLAUDE.md, "Reglas de negocio"):
@@ -52,6 +55,7 @@ final class SolicitudAltaService extends ServicioBase
     private AccesoGrupoRepository $accesosGrupo;
     private RolRepository $roles;
     private RamaRepository $ramas;
+    private UsuarioRepository $usuarios;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -61,6 +65,7 @@ final class SolicitudAltaService extends ServicioBase
         ?AccesoGrupoRepository $accesosGrupo = null,
         ?RolRepository $roles = null,
         ?RamaRepository $ramas = null,
+        ?UsuarioRepository $usuarios = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -70,6 +75,7 @@ final class SolicitudAltaService extends ServicioBase
         $this->accesosGrupo = $accesosGrupo ?? new AccesoGrupoRepository();
         $this->roles = $roles ?? new RolRepository();
         $this->ramas = $ramas ?? new RamaRepository();
+        $this->usuarios = $usuarios ?? new UsuarioRepository();
     }
 
     // -----------------------------------------------------------------
@@ -117,6 +123,32 @@ final class SolicitudAltaService extends ServicioBase
     }
 
     /**
+     * Las ramas entre las que se elige al armar las secciones de la solicitud
+     * (el select del formulario). Son datos fijos: no hace falta permiso.
+     *
+     * @return Rama[]
+     */
+    public function ramas(): array
+    {
+        return $this->ramas->listarTodas();
+    }
+
+    /** @return SolicitudEnPantalla[] Las del usuario, de la más nueva a la más vieja. */
+    public function misSolicitudesEnPantalla(int $idUsuario): array
+    {
+        return array_map(fn (SolicitudAlta $s) => $this->enPantalla($s, false), $this->solicitudes->listarPorUsuario($idUsuario));
+    }
+
+    /**
+     * Una solicitud lista para mostrar, para su dueño o para un admin (el
+     * admin la ve con el nombre y el email de quien la envió).
+     */
+    public function detalle(int $idUsuario, int $idSolicitud): SolicitudEnPantalla
+    {
+        return $this->enPantalla($this->buscar($idUsuario, $idSolicitud), $this->esAdmin($idUsuario));
+    }
+
+    /**
      * Una solicitud, para su dueño o para un admin. A cualquier otro le
      * responde que no existe (no confirma que hay una solicitud con ese id).
      */
@@ -141,6 +173,17 @@ final class SolicitudAltaService extends ServicioBase
         $this->permisos->exigirAdmin($idAdmin);
 
         return $this->solicitudes->listarPorEstado(EstadoSolicitud::Pendiente);
+    }
+
+    /**
+     * Las pendientes para la pantalla de revisión, de la más vieja a la más
+     * nueva, cada una con quién la envió. (Solo admin.)
+     *
+     * @return SolicitudEnPantalla[]
+     */
+    public function pendientesEnPantalla(int $idAdmin): array
+    {
+        return array_map(fn (SolicitudAlta $s) => $this->enPantalla($s, true), $this->listarPendientes($idAdmin));
     }
 
     /**
@@ -229,6 +272,28 @@ final class SolicitudAltaService extends ServicioBase
         }
 
         return $solicitud;
+    }
+
+    /**
+     * Arma la solicitud para mostrar: la rama de cada sección con su nombre
+     * oficial y, si se pide, el nombre y el email de quien la envió. Del
+     * usuario sale solo eso: el hash de su contraseña no llega a la vista.
+     */
+    private function enPantalla(SolicitudAlta $solicitud, bool $conSolicitante): SolicitudEnPantalla
+    {
+        $ramas = [];
+        foreach ($this->ramas->listarTodas() as $rama) {
+            $ramas[$rama->id] = $rama->titulo;
+        }
+
+        $secciones = array_map(fn (array $d) => [
+            'nombre' => (string) ($d['nombre'] ?? ''),
+            'rama'   => $ramas[$d['id_rama'] ?? 0] ?? 'Rama desconocida',
+        ], $solicitud->datosSecciones);
+
+        $solicitante = $conSolicitante ? $this->usuarios->buscarPorId($solicitud->idUsuario) : null;
+
+        return new SolicitudEnPantalla($solicitud, $solicitante?->nombre, $solicitante?->email, $secciones);
     }
 
     private function esAdmin(int $idUsuario): bool

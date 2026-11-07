@@ -74,6 +74,26 @@ final class PermisoService extends ServicioBase
         return $this->nivelEnGrupo($idUsuario, $idGrupo) === NivelRol::Jefe;
     }
 
+    /**
+     * Si el usuario tiene algún acceso al grupo: un rol de grupo, o un rol en
+     * alguna de sus secciones. Sirve para decidir entre 404 (ningún acceso: no
+     * se confirma que el grupo existe) y 403 (tiene acceso pero no el rol).
+     */
+    public function tieneAccesoAlGrupo(int $idUsuario, int $idGrupo): bool
+    {
+        if ($this->nivelEnGrupo($idUsuario, $idGrupo) !== null) {
+            return true;
+        }
+
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            if ($this->nivelEnSeccion($idUsuario, (int) $seccion->id) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** Para mostrar u ocultar botones en las pantallas del grupo. */
     public function puedeEnGrupo(int $idUsuario, int $idGrupo, NivelRol $minimo): bool
     {

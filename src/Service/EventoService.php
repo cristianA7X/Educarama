@@ -370,18 +370,11 @@ final class EventoService extends ServicioBase
         $noEncontrado = new NoEncontradoException('El grupo no existe.');
         $this->grupos->buscarPorId($idGrupo) ?? throw $noEncontrado;
 
-        $nivelGrupo = $this->permisos->nivelEnGrupo($idUsuario, $idGrupo);
-        if ($nivelGrupo !== null) {
-            return $nivelGrupo;
+        if (!$this->permisos->tieneAccesoAlGrupo($idUsuario, $idGrupo)) {
+            throw $noEncontrado;
         }
 
-        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
-            if ($this->permisos->nivelEnSeccion($idUsuario, (int) $seccion->id) !== null) {
-                return null;
-            }
-        }
-
-        throw $noEncontrado;
+        return $this->permisos->nivelEnGrupo($idUsuario, $idGrupo);
     }
 
     /** La pantalla de eventos del grupo pide un rol de grupo; quien entra solo por secciones recibe 403. */

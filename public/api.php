@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/bootstrap.php';
 
+use Educarama\Controller\AccesoController;
 use Educarama\Controller\Api;
 use Educarama\Controller\DocumentoController;
 use Educarama\Controller\EventoController;
@@ -16,6 +17,7 @@ use Educarama\Controller\FamiliarController;
 use Educarama\Controller\PatrullaController;
 use Educarama\Controller\ProgresionController;
 use Educarama\Controller\ProtagonistaController;
+use Educarama\Controller\SolicitudAltaController;
 use Educarama\Controller\UsuarioController;
 
 const ACCIONES = [
@@ -65,6 +67,16 @@ const ACCIONES = [
     'evento.desactivar' => ['POST', EventoController::class, 'desactivar'],
     'evento.reactivar'  => ['POST', EventoController::class, 'reactivar'],
     'evento.eliminar'   => ['POST', EventoController::class, 'eliminar'],
+
+    // Accesos (gestión de roles de un grupo o una sección)
+    'acceso.dar'        => ['POST', AccesoController::class, 'dar'],
+    'acceso.cambiarRol' => ['POST', AccesoController::class, 'cambiarRol'],
+    'acceso.quitar'     => ['POST', AccesoController::class, 'quitar'],
+
+    // Alta de un grupo (el usuario envía, un admin revisa)
+    'solicitud_alta.enviar'   => ['POST', SolicitudAltaController::class, 'enviar'],
+    'solicitud_alta.aprobar'  => ['POST', SolicitudAltaController::class, 'aprobar'],
+    'solicitud_alta.rechazar' => ['POST', SolicitudAltaController::class, 'rechazar'],
 ];
 
 (new Api(ACCIONES))->ejecutar();

@@ -143,6 +143,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Roles (`NivelRol`): Supervisor 1 (estadísticas, sin datos personales), Ayudante 2 (lectura), Responsable 3 (crear/modificar y confirmar logros), Jefe 4 (eliminar y gestionar roles). En sección, el Jefe solo cambia el rol de usuarios ya asignados. El Jefe de grupo es Jefe de todas sus secciones **por derivación en código**, sin filas en `acceso_seccion`.
 - Herencia de accesos: **solo** el Jefe de grupo hereda el rol Jefe en todas las secciones de su grupo. Los demás roles de grupo (Supervisor, Ayudante, Responsable) valen solo para las pantallas del grupo (estadísticas agregadas, listado de secciones, eventos grupales) y no dan acceso al detalle de ninguna sección: para eso hace falta una fila en `acceso_seccion`. Si un usuario tiene rol de grupo y de sección, en la sección vale el de sección (salvo que sea Jefe de grupo, que siempre es Jefe).
 - Admin (`usuario.es_admin`): solo aprueba o rechaza solicitudes de alta. No ve datos de ningún grupo por ser admin; si necesita entrar a uno, se le da un acceso como a cualquier usuario.
+- Pantallas de la solicitud de alta: `solicitud_alta.php` (cualquier usuario con sesión: el formulario con secciones como filas nombre + rama, y mis solicitudes con el motivo si se rechazaron; con una pendiente, sin formulario) y `solicitudes.php` (solo admin, 403 al resto: las pendientes, de la más vieja a la más nueva, con quién las envió; aprobar o rechazar con motivo).
 
 ### Accesos (gestión de roles)
 
@@ -150,7 +151,8 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - Jefe de grupo: agrega, cambia y quita accesos del grupo y de cualquier sección de su grupo, con cualquier rol.
 - Jefe de sección: solo cambia el rol de los ya asignados a su sección, **hasta Responsable**. No agrega, no quita y no toca a otro Jefe (ni a sí mismo). Nombrar Jefes de sección es del Jefe de grupo.
 - El **último Jefe de un grupo** no se puede quitar ni bajar de rol, ni siquiera él mismo.
-- Ver la lista (nombre, email, rol): la del grupo, el Jefe de grupo; la de una sección, su Jefe y el Jefe de grupo.
+- Ver la lista (nombre, email, rol): la del grupo, el Jefe de grupo; la de una sección, su Jefe y el Jefe de grupo. Sin ningún acceso al grupo o a la sección, 404; con acceso pero sin ser Jefe, 403.
+- Pantalla: `accesos.php?id_grupo=` / `?id_seccion=`. Cada fila trae los roles que se le pueden asignar y si se puede quitar (`AccesoEnPantalla`): al único Jefe del grupo no se le ofrece nada, y al Jefe de sección solo cambiar el rol hasta Responsable de quien no sea Jefe. Si el Jefe de grupo se baja el rol o se quita a sí mismo, vuelve a la pantalla del grupo o al inicio (ya no ve la lista).
 
 ### Progresión
 
