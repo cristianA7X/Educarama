@@ -17,6 +17,9 @@ use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Vista\EventoConSecciones;
+use Educarama\Service\Vista\EventoEnPantalla;
+use Educarama\Service\Vista\EventosEnPantalla;
+use Educarama\Service\Vista\OpcionesEvento;
 
 /**
  * Eventos de un grupo: de todo el grupo (sin filas en evento_seccion) o de
@@ -30,7 +33,8 @@ use Educarama\Service\Vista\EventoConSecciones;
  *    alguna de sus secciones; los de algunas secciones, quien tiene acceso a
  *    una de ellas, más los roles de grupo. El Supervisor ve solo los que
  *    tienen es_publico. Los inactivos, solo Responsable en adelante.
- *  - Si no lo puede ver, 404: no se confirma que existe.
+ *  - Si no lo puede ver, 404: no se confirma que existe. Lo mismo con un
+ *    grupo o una sección a los que el usuario no tiene ningún acceso.
  *  - Título y descripción obligatorios. No se crea un evento que empieza antes
  *    de hoy; fecha_fin, si viene, no es anterior a fecha_inicio.
  *  - Las secciones tienen que ser del grupo del evento. Al editar se reemplaza
@@ -79,8 +83,7 @@ final class EventoService extends ServicioBase
      */
     public function listarPorGrupo(int $idUsuario, int $idGrupo, bool $incluirInactivos = false): array
     {
-        $this->exigirGrupo($idGrupo);
-        $nivel = $this->permisos->exigirEnGrupo($idUsuario, $idGrupo, NivelRol::Supervisor);
+        $nivel = $this->exigirRolDeGrupo($idUsuario, $idGrupo);
         $this->exigirPuedeVerInactivos($nivel, $incluirInactivos);
 
         return $this->armarListado($this->eventos->listarPorGrupo($idGrupo), $idGrupo, $nivel, $incluirInactivos, false);
@@ -95,7 +98,7 @@ final class EventoService extends ServicioBase
      */
     public function listarPorSeccion(int $idUsuario, int $idSeccion, bool $incluirInactivos = false): array
     {
-        $nivel = $this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Supervisor);
+        $nivel = $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Supervisor, 'La sección no existe.');
         $this->exigirPuedeVerInactivos($nivel, $incluirInactivos);
         $idGrupo = $this->seccion($idSeccion)->idGrupo;
 
@@ -106,20 +109,44 @@ final class EventoService extends ServicioBase
      * Próximos eventos del grupo: activos y que todavía no terminaron
      * (fecha_fin, o fecha_inicio si no tiene fin, de hoy en adelante).
      *
+     * Con un rol de grupo, todos los que ve en el grupo. Sin rol de grupo pero
+     * con acceso a alguna sección, los de esas secciones (los de todo el grupo
+     * y los de cada una, sin repetir): así el inicio y la pantalla del grupo
+     * le muestran algo a quien entra solo por su sección.
+     *
      * @return EventoConSecciones[]
      */
     public function proximosPorGrupo(int $idUsuario, int $idGrupo): array
     {
-        $this->exigirGrupo($idGrupo);
-        $nivel = $this->permisos->exigirEnGrupo($idUsuario, $idGrupo, NivelRol::Supervisor);
+        $nivelGrupo = $this->exigirConocerGrupo($idUsuario, $idGrupo);
 
-        return $this->armarListado($this->eventos->listarPorGrupo($idGrupo), $idGrupo, $nivel, false, true);
+        if ($nivelGrupo !== null) {
+            return $this->armarListado($this->eventos->listarPorGrupo($idGrupo), $idGrupo, $nivelGrupo, false, true);
+        }
+
+        $porId = [];
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            $nivel = $this->permisos->nivelEnSeccion($idUsuario, (int) $seccion->id);
+            if ($nivel === null) {
+                continue;
+            }
+            $lista = $this->armarListado($this->eventos->listarPorSeccion((int) $seccion->id), $idGrupo, $nivel, false, true);
+            foreach ($lista as $e) {
+                $porId[$e->evento->id] = $e;
+            }
+        }
+
+        $proximos = array_values($porId);
+        usort($proximos, fn (EventoConSecciones $a, EventoConSecciones $b) =>
+            [$a->evento->fechaInicio, $a->evento->id] <=> [$b->evento->fechaInicio, $b->evento->id]);
+
+        return $proximos;
     }
 
     /** @return EventoConSecciones[] Próximos eventos de la sección (mismo criterio que proximosPorGrupo). */
     public function proximosPorSeccion(int $idUsuario, int $idSeccion): array
     {
-        $nivel = $this->permisos->exigirEnSeccion($idUsuario, $idSeccion, NivelRol::Supervisor);
+        $nivel = $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Supervisor, 'La sección no existe.');
         $idGrupo = $this->seccion($idSeccion)->idGrupo;
 
         return $this->armarListado($this->eventos->listarPorSeccion($idSeccion), $idGrupo, $nivel, false, true);
@@ -129,6 +156,61 @@ final class EventoService extends ServicioBase
     public function buscar(int $idUsuario, int $idEvento): EventoConSecciones
     {
         return $this->cargarVisible($idUsuario, $idEvento);
+    }
+
+    /**
+     * El evento para el formulario de edición: además de verlo, el usuario
+     * tiene que poder editarlo tal como está (si no, 403 antes de mostrar el formulario).
+     */
+    public function paraEditar(int $idUsuario, int $idEvento): EventoConSecciones
+    {
+        $actual = $this->cargarVisible($idUsuario, $idEvento);
+        $this->exigirParaEscribir($idUsuario, $actual->evento->idGrupo, $actual->idSecciones, NivelRol::Responsable);
+
+        return $actual;
+    }
+
+    /**
+     * Pantalla de eventos del grupo: el listado de listarPorGrupo() más los
+     * nombres de las secciones y qué botones puede usar el usuario.
+     */
+    public function pantallaGrupo(int $idUsuario, int $idGrupo, bool $incluirInactivos = false): EventosEnPantalla
+    {
+        $lista = $this->listarPorGrupo($idUsuario, $idGrupo, $incluirInactivos);
+        $nivel = $this->permisos->nivelEnGrupo($idUsuario, $idGrupo)
+            ?? throw new \LogicException('listarPorGrupo ya exigió un rol de grupo.');
+
+        return $this->armarPantalla($idUsuario, $idGrupo, $lista, $nivel, $incluirInactivos);
+    }
+
+    /** Pantalla de eventos de una sección (los de todo su grupo y los suyos). */
+    public function pantallaSeccion(int $idUsuario, int $idSeccion, bool $incluirInactivos = false): EventosEnPantalla
+    {
+        $lista = $this->listarPorSeccion($idUsuario, $idSeccion, $incluirInactivos);
+        $nivel = $this->permisos->nivelEnSeccion($idUsuario, $idSeccion)
+            ?? throw new \LogicException('listarPorSeccion ya exigió acceso a la sección.');
+
+        return $this->armarPantalla($idUsuario, $this->seccion($idSeccion)->idGrupo, $lista, $nivel, $incluirInactivos);
+    }
+
+    /**
+     * Qué puede elegir el usuario en el formulario de un evento del grupo:
+     * las secciones donde es Responsable o más, y "todo el grupo" si es
+     * Responsable de grupo. Si no puede ninguna de las dos, 403.
+     *
+     * @throws NoEncontradoException si el grupo no existe o no tiene ningún acceso a él
+     * @throws AccesoDenegadoException si no puede crear eventos en ninguna parte del grupo
+     */
+    public function opcionesFormulario(int $idUsuario, int $idGrupo): OpcionesEvento
+    {
+        $this->exigirConocerGrupo($idUsuario, $idGrupo);
+        $opciones = $this->calcularOpciones($idUsuario, $idGrupo);
+
+        if (!$opciones->hayAlgunaOpcion()) {
+            throw new AccesoDenegadoException('Necesitás el rol Responsable en el grupo o en alguna de sus secciones para cargar eventos.');
+        }
+
+        return $opciones;
     }
 
     // -----------------------------------------------------------------
@@ -143,7 +225,7 @@ final class EventoService extends ServicioBase
      */
     public function crear(int $idUsuario, Evento $evento, array $idSecciones): int
     {
-        $this->exigirGrupo($evento->idGrupo);
+        $this->exigirConocerGrupo($idUsuario, $evento->idGrupo);
         $idSecciones = $this->normalizarSecciones($evento->idGrupo, $idSecciones);
         $this->exigirParaEscribir($idUsuario, $evento->idGrupo, $idSecciones, NivelRol::Responsable);
 
@@ -276,6 +358,102 @@ final class EventoService extends ServicioBase
         }
 
         return true;
+    }
+
+    /**
+     * El grupo existe y el usuario tiene algún acceso a él: un rol de grupo o
+     * acceso a alguna de sus secciones. Si no, 404 (no se confirma que existe).
+     * Devuelve su rol de grupo, o null si entra solo por secciones.
+     */
+    private function exigirConocerGrupo(int $idUsuario, int $idGrupo): ?NivelRol
+    {
+        $noEncontrado = new NoEncontradoException('El grupo no existe.');
+        $this->grupos->buscarPorId($idGrupo) ?? throw $noEncontrado;
+
+        $nivelGrupo = $this->permisos->nivelEnGrupo($idUsuario, $idGrupo);
+        if ($nivelGrupo !== null) {
+            return $nivelGrupo;
+        }
+
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            if ($this->permisos->nivelEnSeccion($idUsuario, (int) $seccion->id) !== null) {
+                return null;
+            }
+        }
+
+        throw $noEncontrado;
+    }
+
+    /** La pantalla de eventos del grupo pide un rol de grupo; quien entra solo por secciones recibe 403. */
+    private function exigirRolDeGrupo(int $idUsuario, int $idGrupo): NivelRol
+    {
+        return $this->exigirConocerGrupo($idUsuario, $idGrupo)
+            ?? throw new AccesoDenegadoException('Necesitás un rol en el grupo para ver sus eventos. Los de tu sección están en la pantalla de la sección.');
+    }
+
+    /**
+     * Como exigirParaEscribir(), pero responde sí o no (para mostrar botones).
+     *
+     * @param int[] $idSecciones
+     */
+    private function puedeEscribir(int $idUsuario, int $idGrupo, array $idSecciones, NivelRol $minimo): bool
+    {
+        if ($idSecciones === []) {
+            return $this->permisos->puedeEnGrupo($idUsuario, $idGrupo, $minimo);
+        }
+
+        foreach ($idSecciones as $idSeccion) {
+            if (!$this->permisos->puedeEnSeccion($idUsuario, $idSeccion, $minimo)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function calcularOpciones(int $idUsuario, int $idGrupo): OpcionesEvento
+    {
+        $grupo = $this->grupos->buscarPorId($idGrupo)
+            ?? throw new NoEncontradoException('El grupo no existe.');
+
+        $secciones = array_values(array_filter(
+            $this->secciones->listarPorGrupo($idGrupo),
+            fn ($s) => $this->permisos->puedeEnSeccion($idUsuario, (int) $s->id, NivelRol::Responsable),
+        ));
+
+        return new OpcionesEvento(
+            grupo: $grupo,
+            secciones: $secciones,
+            puedeTodoElGrupo: $this->permisos->puedeEnGrupo($idUsuario, $idGrupo, NivelRol::Responsable),
+        );
+    }
+
+    /**
+     * Suma a un listado los nombres de las secciones del grupo y los botones
+     * de cada evento.
+     *
+     * @param EventoConSecciones[] $lista
+     */
+    private function armarPantalla(int $idUsuario, int $idGrupo, array $lista, NivelRol $nivel, bool $incluirInactivos): EventosEnPantalla
+    {
+        $nombres = [];
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            $nombres[(int) $seccion->id] = $seccion->nombre;
+        }
+
+        $eventos = array_map(fn (EventoConSecciones $e) => new EventoEnPantalla(
+            evento: $e,
+            puedeEditar: $this->puedeEscribir($idUsuario, $idGrupo, $e->idSecciones, NivelRol::Responsable),
+            puedeEliminar: $this->puedeEscribir($idUsuario, $idGrupo, $e->idSecciones, NivelRol::Jefe),
+        ), $lista);
+
+        return new EventosEnPantalla(
+            eventos: $eventos,
+            nombresSecciones: $nombres,
+            puedeCrear: $this->calcularOpciones($idUsuario, $idGrupo)->hayAlgunaOpcion(),
+            puedeVerInactivos: $nivel->value >= NivelRol::Responsable->value,
+            incluyeInactivos: $incluirInactivos,
+        );
     }
 
     /** Pedir los inactivos en un listado es de Responsable en adelante. */
@@ -422,13 +600,6 @@ final class EventoService extends ServicioBase
     private function hoy(): string
     {
         return date('Y-m-d');
-    }
-
-    private function exigirGrupo(int $idGrupo): void
-    {
-        if ($this->grupos->buscarPorId($idGrupo) === null) {
-            throw new NoEncontradoException('El grupo no existe.');
-        }
     }
 
     private function seccion(int $idSeccion): Seccion

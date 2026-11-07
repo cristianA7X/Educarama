@@ -1059,3 +1059,54 @@ Los dos avisos salteables viajan como siempre, en un 409 que el JS confirma y re
 - desvincular un familiar compartido (sin preguntar) y el último protagonista (409 y borrado de la ficha; la persona queda).
 
 Se repitió toda la batería: los Controllers de Usuario (37), Progresión (56), Protagonista (62) y Documento (29), y los Services. En familiares, la única diferencia es la esperada: un Responsable de otra sección ahora recibe 404.
+
+## EventoController, SeccionController e InicioController
+
+Con estos tres Controllers quedan cubiertas las pantallas que faltaban para navegar: la de inicio (adonde ya mandaba el login), la del grupo, el perfil de sección y los eventos.
+
+**`EventoService`: pantallas y opciones del formulario.**
+
+- `pantallaGrupo()` y `pantallaSeccion()` devuelven `EventosEnPantalla`: el listado de siempre más los nombres de las secciones del grupo, si el usuario puede crear y ver inactivos, y, por cada evento (`EventoEnPantalla`), si puede editarlo (y desactivarlo o reactivarlo) y si puede eliminarlo. Así la vista no repite reglas de permisos.
+- `opcionesFormulario()` devuelve `OpcionesEvento`: las secciones del grupo donde el usuario es Responsable o más, y si puede elegir "todo el grupo" (Responsable de grupo). Si no tiene ninguna opción, 403. Así el formulario no ofrece algo que después el Service rechazaría.
+- `paraEditar()` controla, antes de mostrar el formulario de edición, que el usuario pueda editar el evento tal como está.
+
+**404 también en eventos.** Un grupo o una sección a los que el usuario no tiene ningún acceso responden 404. La pantalla de eventos del grupo sigue pidiendo un rol de grupo: quien entra solo por una sección recibe 403, con un mensaje que lo manda a la pantalla de su sección. En las pruebas viejas cambiaron dos casos, los dos de 403 a 404: el Jefe de otro grupo que intenta crear un evento y el Responsable de grupo que pide los eventos de una sección (los roles de grupo no dan acceso al detalle de una sección).
+
+**Próximos eventos para quien entra solo por una sección.** `proximosPorGrupo()` pedía un rol de grupo. Ahora, a quien entra solo por secciones le junta los próximos de esas secciones, sin repetir y por fecha. Así el inicio y la pantalla del grupo no le quedan vacíos.
+
+**`SeccionService` suma:**
+
+- `grupo()`: el grupo, el rol de grupo del usuario (null si entra solo por secciones) y las secciones que ve (`GrupoEnPantalla`);
+- `misGrupos()`: los grupos donde tiene un rol de grupo o alguna sección, por nombre. Vacío para el recién registrado y para el admin;
+- `conteos()`: cantidad de protagonistas, cantidad por patrulla y cuántos no tienen patrulla (`ConteoSeccion`). Como no tiene datos personales, alcanza con cualquier acceso a la sección, incluso Supervisor.
+
+**`EventoController`.**
+
+| Método | Tipo | Qué hace |
+| --- | --- | --- |
+| `paginaListado` | `eventos.php?id_grupo=` o `?id_seccion=` (`&inactivos=1`) | Modo grupo o modo sección, con la pantalla de eventos |
+| `paginaFormulario` | `evento_form.php?id_grupo=` (alta) o `?id=` (edición) | Opciones y, si es edición, el evento |
+| `guardar` | `evento.guardar` | Alta o edición; el grupo de una edición sale de la base |
+| `desactivar` / `reactivar` / `eliminar` | `evento.*` | Recargan el listado de donde se vino |
+
+Todas las acciones vuelven con un Flash al listado que mandó la página (`volver`, validado con `rutaInterna`; si no sirve, el listado del grupo). El formulario manda `alcance` (`grupo` o `secciones`) explícito: si no, destildar todas las casillas convertiría el evento en uno de todo el grupo sin querer. Las casillas llegan como `secciones[]` y las lee el nuevo `Controlador::listaDeEnteros()`.
+
+**`SeccionController`.** Reemplaza a `perfil_rama.php` y `ramas.php` del legacy, donde "rama" era la instancia.
+
+- `paginaPerfil` (`perfil_seccion.php?id=`): encabezado, números y próximos eventos. La ve cualquiera con acceso a la sección, incluso un Supervisor.
+- `paginaGrupo` (`grupo.php?id=`): las secciones que ve el usuario y los próximos eventos.
+
+**`InicioController`** (`inicio.php`): mis grupos, cada uno con sus próximos eventos. Si el usuario no tiene ningún grupo, muestra su solicitud de alta más reciente (pendiente, o rechazada con su motivo), o nada si nunca envió una: la vista ofrece el link para pedir el alta. Trae también el `UsuarioSesion`, para mostrarle al admin el link a las solicitudes pendientes.
+
+**Pruebas.** 54 casos por CLI, sobre los datos de ejemplo, en una transacción que se deshizo:
+
+- qué eventos y qué botones ve cada rol (Jefe, Responsable de sección, Supervisor de grupo, Supervisor y Responsable a la vez, Jefe de otro grupo, admin);
+- las opciones del formulario;
+- guardar con alcance faltante, sin secciones, con secciones ajenas o con basura, y con prioridad inválida o fecha pasada;
+- el `volver` malicioso;
+- desactivar, reactivar y eliminar;
+- el perfil de sección con sus números (Rovers sin patrullas);
+- la pantalla del grupo;
+- el inicio de cada tipo de usuario.
+
+Además se repitió toda la batería: los Controllers de Usuario (37), Progresión (56), Protagonista (62), Familiar (31) y Documento (29), y los Services.

@@ -83,6 +83,27 @@ abstract class Controlador
     }
 
     /**
+     * Lista de ids de casillas con el mismo nombre (name="secciones[]").
+     * Si falta, lista vacía. Si algún valor no es un entero positivo, es un
+     * pedido mal armado: mensaje genérico.
+     *
+     * @return int[]
+     * @throws ReglaNegocioException
+     */
+    protected static function listaDeEnteros(array $datos, string $clave): array
+    {
+        $valores = $datos[$clave] ?? [];
+        if (!is_array($valores)) {
+            throw new ReglaNegocioException('Faltan datos o no son válidos. Volvé a cargar la página.');
+        }
+
+        return array_values(array_map(
+            fn ($v) => self::entero(['v' => $v], 'v'),
+            $valores,
+        ));
+    }
+
+    /**
      * DNI tal como lo escribe la gente: acepta puntos y espacios ("12.345.678").
      * Si no es un número, 0: el Service lo rechaza con "El DNI tiene que ser un número positivo."
      */

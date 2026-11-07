@@ -179,7 +179,9 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 ### Secciones
 
 - `SeccionService`: `encabezado()` (cualquier acceso a la sección; sin acceso, 404) devuelve `SeccionEnPantalla` (sección, rama, grupo, términos, rol del usuario y `puedeVerDetalle` / `puedeEditar` / `puedeEliminar`). `listarPorGrupo()`: con cualquier rol de grupo, todas las secciones; sin rol de grupo, solo aquellas a las que tiene acceso; sin nada, 404.
+- `grupo()` (pantalla del grupo: el grupo, el rol de grupo y las secciones que ve), `misGrupos()` (para el inicio: los grupos donde tiene rol de grupo o alguna sección) y `conteos()` (cantidad de protagonistas y por patrulla; sin datos personales, así que desde Supervisor).
 - Las secciones no se crean, renombran ni borran desde la aplicación: hoy solo nacen al aprobar una solicitud de alta.
+- Páginas: `perfil_seccion.php?id=` (encabezado, números, próximos eventos), `grupo.php?id=` (secciones y próximos eventos) e `inicio.php` (mis grupos con sus próximos eventos; sin accesos, el estado de mi solicitud de alta).
 
 ### Familiares
 
@@ -202,6 +204,9 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - De todo el grupo (sin filas en `evento_seccion`) o de algunas secciones del mismo grupo. Al crear o editar se pasa la lista completa de secciones (vacía = todo el grupo) y se reemplaza en una transacción.
 - Crear, editar, desactivar y reactivar: evento de todo el grupo, Responsable de grupo (o Jefe de grupo); de algunas secciones, Responsable en **cada una**. Eliminar: lo mismo, con Jefe. Editar pide el permiso sobre el evento como está y como queda.
 - Ver: los de todo el grupo, cualquiera con acceso al grupo o a alguna de sus secciones; los de algunas secciones, quien tiene acceso a una de ellas, más los roles de grupo. El Supervisor ve solo los `es_publico`. Si no lo puede ver, 404.
+- Pantallas: `eventos.php?id_grupo=` pide un rol de grupo (sin ningún acceso al grupo, 404; solo con secciones, 403) y `eventos.php?id_seccion=` pide acceso a la sección (sin acceso, 404). Cada evento trae si el usuario puede editarlo y eliminarlo.
+- Formulario: ofrece solo las secciones donde el usuario es Responsable y "todo el grupo" solo si es Responsable de grupo (`EventoService::opcionesFormulario`). El alcance se elige explícito (`grupo` o `secciones` con al menos una).
+- `proximosPorGrupo()` a quien entra solo por secciones le da los de esas secciones (para el inicio y la pantalla del grupo).
 - Desactivar (`activo`) los oculta: los listados traen solo los activos y el Responsable puede pedir también los inactivos.
 - Título (hasta 200) y descripción obligatorios. No se crea un evento que empieza antes de hoy; al editar, el inicio puede quedar en el pasado solo si no cambia. `fecha_fin` opcional, no anterior al inicio.
 - Próximos eventos (home y perfil de sección): activos que no terminaron (`fecha_fin`, o `fecha_inicio` si no tiene fin, de hoy en adelante). "Hoy" usa `ZONA_HORARIA`. `id_tipo_evento` queda siempre en NULL.
@@ -218,6 +223,11 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 - `ProgresionService::resumen()` (Ayudante en adelante) devuelve una clase vista con: etapa actual, etapa en curso, contadores (etapa, total y por área), lo adeudado para confirmar la etapa en curso y el aviso de insignia pendiente.
 - `ProgresionService::pantallaCompetencias()` (Ayudante en adelante) devuelve `PantallaCompetencias`: el resumen, cada área con todas sus competencias (estado, `id_etapa` y acciones con cumplida sí/no), los términos de `nomenclatura` y `puedeEditar` (Responsable) / `puedeQuitar` (Jefe).
 - Cada clic (`progresion.*` en `api.php`) responde `{sugerencias, resumen}`: el resumen actualizado repinta contadores, adeudado e insignia pendiente sin recargar.
+
+## Views (paso 5)
+
+- **Estilos:** mantener en general los del legacy (`_legacy/views/`, `_legacy/public/css`), corrigiendo lo que esté mal. No es un rediseño.
+- **Sidebar:** pasa a ser un **drawer** que se puede ocultar. En la versión responsive (móviles) también es un drawer, adaptado a la pantalla chica.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
 

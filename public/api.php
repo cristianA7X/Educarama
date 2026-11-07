@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/bootstrap.php';
 
 use Educarama\Controller\Api;
 use Educarama\Controller\DocumentoController;
+use Educarama\Controller\EventoController;
 use Educarama\Controller\FamiliarController;
 use Educarama\Controller\PatrullaController;
 use Educarama\Controller\ProgresionController;
@@ -58,6 +59,12 @@ const ACCIONES = [
     // Familiares (siempre desde un protagonista)
     'familiar.guardar'     => ['POST', FamiliarController::class, 'guardar'],
     'familiar.desvincular' => ['POST', FamiliarController::class, 'desvincular'],
+
+    // Eventos
+    'evento.guardar'    => ['POST', EventoController::class, 'guardar'],
+    'evento.desactivar' => ['POST', EventoController::class, 'desactivar'],
+    'evento.reactivar'  => ['POST', EventoController::class, 'reactivar'],
+    'evento.eliminar'   => ['POST', EventoController::class, 'eliminar'],
 ];
 
 (new Api(ACCIONES))->ejecutar();
