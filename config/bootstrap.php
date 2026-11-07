@@ -69,3 +69,16 @@ function url(string $ruta = ''): string
 {
     return rtrim(BASE_URL, '/') . '/' . ltrim($ruta, '/');
 }
+
+/**
+ * Escapa un texto para imprimirlo en HTML (htmlspecialchars con UTF-8 y comillas).
+ *
+ *   <p><?= e($protagonista->persona->nombre) ?></p>
+ *
+ * Todo dato que viene de la base o del usuario se imprime con e(): evita que
+ * un nombre como "<script>" se ejecute en la página (XSS).
+ */
+function e(?string $texto): string
+{
+    return htmlspecialchars($texto ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}

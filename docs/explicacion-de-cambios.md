@@ -1145,3 +1145,61 @@ Son los dos últimos Controllers: con ellos queda cubierta toda la funcionalidad
 - *Solicitudes:* mis solicitudes con el motivo; enviar (código usado, sin secciones, secciones a medias, repetidas, listas desparejas o anidadas); el 403 a cualquier no admin; rechazar con y sin motivo; aprobar (se crean el grupo, las secciones y el Jefe) y aprobar dos veces; el inicio del nuevo Jefe.
 
 Se repitió toda la batería de Controllers y Services.
+
+## Views: layout base, estilos, JavaScript y menú lateral
+
+Arranca el paso 5. Antes de la primera pantalla se armó lo que todas comparten. Las reglas cortas quedaron en CLAUDE.md, en "Views".
+
+**Cómo se arma una página.** Cada una de `views/pages/` carga sus datos con `Pagina::cargar()` y después se envuelve con dos includes:
+
+- `views/includes/cabecera.php` abre `<html>`, el `<head>`, la barra superior, el menú lateral y el contenedor, y muestra los mensajes Flash que dejó la acción anterior;
+- `views/includes/pie.php` cierra el contenedor, pone el pie y los scripts.
+
+La página define antes `$tituloPagina` y, si hace falta, `$claseRama` (colores de la rama), `$sinMenu` (login, registro, error), `$contenedorAngosto` y `$scriptsPagina`. La cabecera pide los datos del menú **antes de imprimir nada**, así que sin sesión redirige al login sin haber mandado HTML.
+
+**Menú lateral: un drawer.** Es un offcanvas de Bootstrap, un solo elemento para los dos tamaños:
+
+| Pantalla | Comportamiento |
+| --- | --- |
+| Desde 992 px | Está a la vista y empuja el contenido. El botón de la barra superior lo oculta o lo muestra, y recuerda la elección en `localStorage`. Un script en el `<head>` aplica lo recordado antes de dibujar, para que no parpadee |
+| Menos de 992 px | Cerrado. Se abre encima del contenido con fondo oscuro y se cierra con la X, con el fondo o con Esc. Si se agranda la ventana con el cajón abierto, se cierra |
+
+Las animaciones se activan después del primer dibujo: si no, el menú "se deslizaría" en cada página que se abre.
+
+**El menú es contextual.** Ya no hay un solo grupo implícito como en el legacy. `MenuController` pide `SeccionService::misGrupos()` y la vista arma, por cada grupo, "Resumen del grupo", "Eventos del grupo" (con rol de grupo) y "Accesos del grupo" (Jefe de grupo); y por cada sección a la que entra, un bloque desplegable (se abre solo el de la página actual) con Perfil, Protagonistas, Seisenas, Patrullas o Equipos (según la rama; en Rovers no hay), Eventos y Accesos (Jefe), según su rol. **Un link que el usuario no puede usar no se muestra.** Una sección que ve solo por su rol de grupo no tiene links propios. Al final: Mi cuenta, Solicitar el alta de un grupo, Solicitudes de alta (admin) y Cerrar sesión.
+
+**`public/js/educarama.js`.** Hace tres cosas:
+
+- **Habla con `api.php`:**
+  - `llamar()` manda el POST con el token CSRF.
+  - `ejecutar()` agrega el flujo completo: si la respuesta es 409 muestra los avisos y, si el usuario acepta, repite con `confirmarIgual=1`; si trae `redireccion`, va ahí; sin sesión (401), va al login; cualquier otro error se muestra en un aviso.
+- **Conecta formularios y botones declarados con atributos**, así la mayoría de las páginas no necesita JavaScript propio:
+  - `<form data-accion="usuario.iniciarSesion">`;
+  - un botón con `data-accion`, `data-datos` (JSON con sus campos), `data-confirmar` y `data-peligro`;
+  - también `data-texto`, `data-boton`, `data-reiniciar` y `data-recargar`.
+- **Maneja el menú** y el botón de mostrar u ocultar contraseña.
+
+Las pantallas complejas (competencias, por ejemplo) tienen su propio archivo en `public/js/`, que declaran con `$scriptsPagina`. Las confirmaciones usan SweetAlert2 (decisión del equipo; queda por CDN con versión fija). Si no carga, se usan los cuadros nativos del navegador.
+
+**Estilos: los del legacy, corregidos.** `public/css/styles.css` sale del legacy. La paleta, la fuente Ubuntu (local) y las clases por rama se mantienen. Lo que estaba mal:
+
+| Problema del legacy | Corrección |
+| --- | --- |
+| El menú usaba `--rama-primario` como color de texto: en Manada, letras **amarillas sobre blanco**. El `<style>` del include intentaba arreglarlo con variables que el CSS no usaba | El texto del menú es siempre violeta; el color de la rama queda en un circulito al lado de cada sección |
+| El banner de título era violeta con texto oscuro (ilegible) | Variables `--banner-inicio`, `--banner-fin` y `--banner-texto` por rama: texto blanco sobre violeta y rojo, oscuro sobre amarillo, verde y celeste. **El banner de Rovers termina en rojo oscuro y no en rosa**, para que el texto blanco se lea hasta el final |
+| Menú móvil: una tira de íconos de 68 px | Ahora es el drawer |
+| Links `/Educarama/...` escritos a mano | `url()` |
+| Ubuntu cargada dos veces (Google y local) | Solo la local |
+| Un `<h1>` en la barra superior de cada página, más el de la página | La barra superior no es un `<h1>` |
+| El pie no era fijo pero el contenido reservaba espacio como si lo fuera | El pie queda al final del contenido y se corre con el menú |
+| Un número de versión fijo en el CSS para que el navegador lo recargue | La versión es la fecha del archivo |
+
+Al portarlo apareció un detalle de Bootstrap 5.3.3: su regla es `.offcanvas.offcanvas-start { top: 0 }`, más específica que una clase sola, por eso el menú arrancaba pegado arriba, debajo de la barra superior. Se resolvió subiendo la especificidad de la regla propia.
+
+**Otras piezas.**
+
+- `e()` (en `config/bootstrap.php`, junto a `url()`): escapa HTML. Todo dato que viene de la base o del usuario se imprime con ella.
+- `Helper\Vista`: `claseRama()` (por **id** de rama, nunca por el nombre de la sección, que era un bug del legacy), `iconoRama()`, `colorPrioridad()`, `colorEstado()`, `periodo()` y `fecha()`.
+- `MenuController`: los datos del menú.
+- `public/index.php`: manda a `inicio.php` (que, sin sesión, redirige al login con `volver`).
+- La página de error (`views/includes/error.php`) usa este layout, **sin menú** a propósito: si el error fuera justamente al cargar el menú, pedirlo de nuevo volvería a fallar en un círculo.

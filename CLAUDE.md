@@ -17,6 +17,8 @@ Estamos en la rama `refactor/v2`, rehaciendo el proyecto de adentro hacia afuera
 
 PHP 8.1+ con POO, MySQL/MariaDB con PDO, HTML/CSS/JS, Bootstrap 5, todo sobre XAMPP. **No sumes herramientas ni gestores externos** (Composer, npm, frameworks, librerías) sin que te lo pida.
 
+Librerías de front ya aprobadas, todas por CDN con versión fija (en `views/includes/cabecera.php` y `pie.php`): Bootstrap 5.3.3, Bootstrap Icons 1.10.5 y SweetAlert2 11 (confirmaciones y avisos; decisión del equipo, mantenida del legacy). No sumar otras.
+
 ## Estructura
 
 ```
@@ -33,9 +35,10 @@ Educarama/
 │   ├── Service/     + Vista/ (avisos y resúmenes) + Excepcion/
 │   ├── Controller/  Controlador (base), Respuesta, Api, Pagina + un Controller por tema
 │   └── Helper/    Csrf, Sesion, Flash
-├── public/        api.php (todos los fetch), descargar.php (documentos), index.php, css, fuentes
+├── public/        api.php (todos los fetch), descargar.php (documentos), index.php,
+│                  css/styles.css, js/ (educarama.js + uno por pantalla compleja), fonts/ubuntu
 ├── storage/       archivos subidos (gitignored salvo su .htaccess "Require all denied")
-├── views/         páginas, includes, assets
+├── views/         pages/ (una por pantalla), includes/ (cabecera, pie, menu, error), assets/images
 └── _legacy/       código viejo, solo lectura
 ```
 
@@ -61,7 +64,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ### Formularios POST
 
-- **Todo formulario POST usa `Educarama\Helper\Csrf`**: `<?= Csrf::campo() ?>` en la vista (el fetch manda el FormData con ese campo); `Api` lo valida antes de llamar al Controller.
+- **Todo formulario POST usa `Educarama\Helper\Csrf`**: `<?= Csrf::campo() ?>` en la vista (el fetch manda el FormData con ese campo; un botón suelto usa el token de la `<meta name="csrf-token">` de la cabecera); `Api` lo valida antes de llamar al Controller.
 - Los mensajes de error al usuario nunca muestran rutas del disco ni detalles internos: solo los de `ServicioException`.
 
 ### Sesión
@@ -228,8 +231,13 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ## Views (paso 5)
 
-- **Estilos:** mantener en general los del legacy (`_legacy/views/`, `_legacy/public/css`), corrigiendo lo que esté mal. No es un rediseño.
-- **Sidebar:** pasa a ser un **drawer** que se puede ocultar. En la versión responsive (móviles) también es un drawer, adaptado a la pantalla chica.
+- **Estilos:** son los del legacy (`public/css/styles.css`, portado de `_legacy/public/css`) con lo que estaba mal corregido. No es un rediseño. Paleta, fuente Ubuntu (local, `public/fonts/ubuntu`) y clases por rama (`rama-manada`, `rama-unidad`, `rama-caminantes`, `rama-rover`, que definen `--rama-primario` / `--rama-secundario`) se mantienen; `Vista::claseRama($idRama)` las elige **por id de rama**, nunca por el nombre de la sección.
+- **Cada página** hace: `require_once` de `config/bootstrap.php`, `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`, define `$tituloPagina` (y opcionalmente `$claseRama`, `$sinMenu`, `$contenedorAngosto`, `$scriptsPagina`) y envuelve su contenido con `views/includes/cabecera.php` y `pie.php`. La cabecera pide el menú (`MenuController`) antes de imprimir nada y muestra los mensajes Flash. Login, registro y la página de error van con `$sinMenu = true`.
+- **Todo dato impreso con `e()`** (escapa HTML; vive en `config/bootstrap.php`). Links con `url()`. Fechas con `Vista::fecha()` / `Vista::periodo()`.
+- **Menú lateral = drawer** (un offcanvas de Bootstrap). Desde 992 px está a la vista, empuja el contenido y se oculta con el botón de la barra superior (se recuerda en `localStorage`); por debajo es un cajón que se abre encima del contenido, con fondo oscuro. Es **contextual**: por cada grupo del usuario, sus links y sus secciones con los links que su rol permite (un link que no puede usar no se muestra); al final Mi cuenta, Solicitar alta, Solicitudes (admin) y Cerrar sesión.
+- **JavaScript:** `public/js/educarama.js` hace los pedidos a `api.php` (token CSRF, flujo del 409 con `confirmarIgual`, redirecciones, error genérico) y conecta formularios y botones declarados con `data-accion`, `data-datos`, `data-confirmar`, `data-texto`, `data-boton`, `data-peligro`, `data-reiniciar`, `data-recargar`: la mayoría de las páginas no necesita JS propio. Las pantallas complejas tienen su archivo en `public/js/` (se declara con `$scriptsPagina`). Sin SweetAlert2 (sin internet) usa los cuadros nativos.
+- **Cosas del legacy ya corregidas:** texto amarillo sobre blanco en el menú de Manada; el banner violeta con texto oscuro (ahora `--banner-*`, con texto blanco o oscuro según la rama, y el banner de Rovers termina en rojo oscuro); links `/Educarama/...` a mano; Ubuntu cargada dos veces; `<h1>` duplicado (la barra superior no lo es); menú móvil de íconos de 68 px (ahora es el drawer); `.sidebar` con `!important` en un `<style>` del include.
+- **Pantallas hechas:** login, registro, inicio, mi cuenta, solicitud de alta y la página de error. Faltan (los links del menú ya apuntan a ellas): `perfil_protagonista`, `gestionar_competencias` (las dos prioritarias), `protagonistas`, `protagonista_form`, `patrullas`, `perfil_patrulla`, `familiar_form`, `perfil_seccion`, `grupo`, `eventos`, `evento_form`, `accesos` y `solicitudes`.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
 
@@ -251,7 +259,7 @@ Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorC
 ## Orden de trabajo
 
 1. ~~Diagrama ER, `educarama.sql`, config, autoload y Models~~ ✅
-2. Repositories (empezando por los de tablas estáticas).
-3. Services.
-4. Controllers.
-5. Views, empezando por `gestionar_competencias.php` y el perfil del protagonista.
+2. ~~Repositories~~ ✅
+3. ~~Services~~ ✅
+4. ~~Controllers~~ ✅
+5. Views (en curso): hecho el layout base y las pantallas de cuenta; siguen `perfil_protagonista.php` y `gestionar_competencias.php`, y después el resto.
