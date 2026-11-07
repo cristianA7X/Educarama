@@ -1203,3 +1203,31 @@ Al portarlo apareció un detalle de Bootstrap 5.3.3: su regla es `.offcanvas.off
 - `MenuController`: los datos del menú.
 - `public/index.php`: manda a `inicio.php` (que, sin sesión, redirige al login con `volver`).
 - La página de error (`views/includes/error.php`) usa este layout, **sin menú** a propósito: si el error fuera justamente al cargar el menú, pedirlo de nuevo volvería a fallar en un círculo.
+
+## Views: login, registro, inicio, Mi cuenta y solicitud de alta
+
+Las pantallas que hacen falta para entrar a la aplicación y probar lo demás:
+
+| Página | Qué hace |
+| --- | --- |
+| `login.php` | Iniciar sesión. Con sesión abierta redirige al destino. `?volver=` solo acepta páginas del proyecto |
+| `registro.php` | Crear la cuenta (repite la contraseña). Después lleva a la solicitud de alta |
+| `inicio.php` | Con accesos: cada grupo con sus secciones (tarjetas con el color de la rama; las que se ven solo por el rol de grupo, atenuadas y sin link) y los próximos eventos. Sin accesos: el estado de la solicitud de alta (pendiente, o rechazada con su motivo) y cómo seguir |
+| `mi_cuenta.php` | Nombre y correo (solo lectura) y cambio de contraseña |
+| `solicitud_alta.php` | El formulario (grupo y secciones como filas que se agregan y quitan, con `public/js/solicitud_alta.js`) y mis solicitudes con su estado y motivo. Con una pendiente, sin formulario |
+
+**Pruebas.** Se probaron de tres maneras, sobre los datos de ejemplo:
+
+- **HTTP (40 casos):**
+  - Las páginas generadas para cada rol: el menú de un Jefe de grupo, de un Responsable de sección, de un Supervisor, del admin y de un recién registrado.
+  - Que un link no permitido no aparezca.
+  - Que un nombre con HTML se escape en el inicio y en el menú.
+  - Que el hash de la contraseña nunca se imprima.
+  - Las redirecciones, los archivos estáticos y que el 404 use el layout.
+- **En un navegador real (Edge sin ventana, 9 casos):**
+  - Login con contraseña incorrecta y correcta.
+  - El menú: abrir, ocultar, recordar y volver a mostrar en escritorio, y abrir y cerrar con la X en móvil.
+  - El cierre de sesión con su confirmación.
+  - Las filas de la solicitud de alta.
+  - El flujo del 409 (el aviso de DNI ya cargado, al cancelar y al aceptar).
+- **Capturas** de escritorio y móvil para revisar el aspecto y el contraste. La ventana mínima de Edge sin interfaz es de 500 px, así que las capturas "de móvil" se tomaron a 500 px de ancho.
