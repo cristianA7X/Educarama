@@ -1,94 +1,134 @@
 /* ==========================================================================
    public/css/styles.css
-EDUCARAMA - ESTILO GENERAL 
+EDUCARAMA - ESTILO GENERAL
 
+   Todos los colores salen de las variables de :root y de las clases de rama.
+   No se escribe ningún hex suelto más abajo: si hace falta un color nuevo,
+   se agrega acá como variable.
    ========================================================================== */
 :root {
-  /* Paleta institucional */
-  --celeste-inst: #00aaf2;
-  --violeta-primario: #45009e;
-  --violeta-secundario: #a068d4;
-  --violeta-oscuro: #320071;
-  --orquidea-bordes: #6110ad;
-  --lila-cards: #b85bee;
+  /* ----- Marca propia de Educarama -------------------------------------
+     Violetas del círculo cromático oficial de Scouts de Argentina. */
+  --violeta: #791fbf; /* Violeta */
+  --orquidea: #874dbd; /* Orquídea oscura */
+  --purpura: #a539b6; /* Púrpura */
+  --lila: #b85bee; /* Lila */
+  --violeta-oscuro: #5a1690; /* derivado de --violeta: degradados, hover, estado activo */
+
+  /* ----- Resto de la paleta oficial ----- */
+  --celeste: #00aaf2; /* Celeste */
+  --amarillo: #fdd617; /* Amarillo tráfico */
+  --verde-logro: #60b134; /* Verde amarillento: estados "logrado / desarrollada" */
+
+  /* Solo para el imagotipo oficial de Scouts de Argentina; nunca para la interfaz. */
+  --celeste-imagotipo: #0081c8;
+  --amarillo-imagotipo: #f7cf00;
+
+  /* Fondo general. No es del círculo cromático: viene del legacy. */
   --beige-fondo: #e0dfb6;
 
-  /* Neutros */
+  /* ----- Neutros ----- */
   --blanco: #ffffff;
   --texto-principal: #2f2440;
   --texto-suave: #6f647c;
-  --borde-suave: rgba(97, 16, 173, 0.18);
-  --sombra-suave: 0 10px 30px rgba(50, 0, 113, 0.12);
-  --sombra-card: 0 8px 20px rgba(50, 0, 113, 0.1);
+  --texto-tenue: #9a90a8;
+  /* Texto oscuro para los fondos claros de rama (amarillos y verdes). */
+  --texto-sobre-claro: #22003f;
 
-  /* Colores Primarios  */
-  --scout-amarillo: hsl(50, 98%, 54%);
-  --scout-verde: #00a651;
-  --scout-celeste: #00aaf2;
-  --scout-rojo: #e30613;
+  /* Tintes derivados del violeta, para bordes, líneas y fondos suaves. */
+  --violeta-borde: #dfc9ff;
+  --violeta-linea: #eadcff;
+  --violeta-fondo: #f1eef5;
+  --gris-linea: #d9d2e3;
+  --gris-pista: #ece7f4; /* fondo de la barra de progreso */
 
-  /* Colores Secundarios (Más claros / pasteles para fondos o detalles) */
-  --scout-amarillo-claro: #fef4b8;
-  --scout-verde-claro: #b3e8cb;
-  --scout-celeste-claro: #b3e6fa;
-  --scout-rojo-claro: #f9b2b6;
+  --borde-suave: rgba(121, 31, 191, 0.18);
+  --sombra-suave: 0 10px 30px rgba(90, 22, 144, 0.12);
+  --sombra-card: 0 8px 20px rgba(90, 22, 144, 0.1);
 
-  /* Variables de Interfaz Dinámicas*/
-  --rama-primario: var(--violeta-primario);
-  --rama-secundario: var(--violeta-secundario);
+  /* ----- Variables de rama (sin rama: la marca propia) -------------------
+     --rama-primario   tono vivo: puntos, íconos, acentos.
+     --rama-secundario tono medio: degradados.
+     --rama-oscuro     tono profundo: bordes gruesos y fin del degradado.
+     --rama-contraste  el único legible como texto sobre blanco (4,5:1). */
+  --rama-primario: var(--violeta);
+  --rama-secundario: var(--orquidea);
+  --rama-oscuro: var(--violeta-oscuro);
+  --rama-contraste: var(--violeta);
 
   /* Banner de título de cada página (.barra-superior-inst): su degradado y el
-     color del texto, elegidos para que se lea bien (contraste mínimo 4.5:1). */
-  --banner-inicio: var(--violeta-primario);
-  --banner-fin: var(--orquidea-bordes);
-  --banner-texto: #ffffff;
+     color del texto. El par está elegido para que el texto pase 4,5:1 en el
+     extremo más desfavorable del degradado. */
+  --banner-inicio: var(--violeta);
+  --banner-fin: var(--violeta-oscuro);
+  --banner-texto: var(--blanco);
 
   /* Medidas */
   --sidebar-width: 270px;
   --navbar-height: 72px;
   --footer-height: 50px;
-  --foco: 3px solid var(--scout-amarillo);
-}
-.rama-manada {
-  --rama-primario: var(--scout-amarillo);
-  --rama-secundario: var(--scout-amarillo-claro);
-  --banner-inicio: var(--scout-amarillo);
-  --banner-fin: var(--scout-amarillo-claro);
-  --banner-texto: #22003f;
-}
-.rama-unidad {
-  --rama-primario: var(--scout-verde);
-  --rama-secundario: var(--scout-verde-claro);
-  --banner-inicio: var(--scout-verde);
-  --banner-fin: var(--scout-verde-claro);
-  --banner-texto: #22003f;
-}
-.rama-caminantes {
-  --rama-primario: var(--scout-celeste);
-  --rama-secundario: var(--scout-celeste-claro);
-  --banner-inicio: var(--scout-celeste);
-  --banner-fin: var(--scout-celeste-claro);
-  --banner-texto: #22003f;
-}
-.rama-rover {
-  --rama-primario: var(--scout-rojo);
-  --rama-secundario: var(--scout-rojo-claro);
-  /* El rojo termina en un rojo oscuro (y no en el rosa claro) para que el texto blanco se lea hasta el final. */
-  --banner-inicio: var(--scout-rojo);
-  --banner-fin: #a6000f;
-  --banner-texto: #ffffff;
+  --foco: 3px solid var(--amarillo);
 }
 
-/* Acento de color en las cards */
+/* Colores de rama: los tres tonos oficiales de cada bandera de Scouts de
+   Argentina. El contraste anotado es el del texto del banner contra el
+   extremo más desfavorable de su degradado. */
+
+/* Lobatos y Lobeznas — amarillo (Pantone 7406 C, 124 C, 1375 C). 7,3:1 */
+.rama-lobatos {
+  --rama-primario: #f5c600;
+  --rama-secundario: #ec9d00;
+  --rama-oscuro: #ea8e11;
+  --rama-contraste: #a06a00; /* derivado: el amarillo oficial no llega a 4,5:1 sobre blanco */
+  --banner-inicio: var(--rama-primario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--texto-sobre-claro);
+}
+
+/* Scouts — verde (Pantone 7489 C, 370 C, 7743 C). 4,6:1 */
+.rama-scouts {
+  --rama-primario: #65ac46;
+  --rama-secundario: #588d3c;
+  --rama-oscuro: #406f33;
+  --rama-contraste: #406f33;
+  --banner-inicio: var(--rama-primario);
+  --banner-fin: var(--rama-secundario);
+  --banner-texto: var(--texto-sobre-claro);
+}
+
+/* Caminantes — azul celeste (Pantone 3125 C, 3145 C, 2392 C). 4,9:1 */
+.rama-caminantes {
+  --rama-primario: #08a2c7;
+  --rama-secundario: #0a7b96;
+  --rama-oscuro: #116483;
+  --rama-contraste: #116483;
+  --banner-inicio: var(--rama-secundario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--blanco);
+}
+
+/* Rovers — rojo (Pantone 1788 C, 2350 C, 7623 C). 6,5:1 */
+.rama-rovers {
+  --rama-primario: #e73333;
+  --rama-secundario: #b81d1b;
+  --rama-oscuro: #931b25;
+  --rama-contraste: #931b25;
+  --banner-inicio: var(--rama-secundario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--blanco);
+}
+
+/* Acento de color en las cards. Usa el tono oscuro: el amarillo de Manada no
+   se distinguiría del blanco. */
 .protagonista-card,
 .rama-card,
 .patrulla-card {
-  border-left: 8px solid var(--rama-primario);
+  border-left: 8px solid var(--rama-oscuro);
 }
 .protagonista-card:hover,
 .rama-card:hover,
 .patrulla-card:hover {
-  border-color: var(--rama-primario);
+  border-color: var(--rama-oscuro);
 }
 /* =========================================================
    UBUNTU
@@ -203,7 +243,7 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(69, 0, 158, 0.35);
+  background: rgba(121, 31, 191, 0.35);
   border-radius: 999px;
 }
 
@@ -216,18 +256,14 @@ h6 {
   left: 0;
   width: 100%;
   height: var(--navbar-height);
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
+  color: var(--blanco);
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 24px;
-  box-shadow: 0 8px 24px rgba(50, 0, 113, 0.1);
-  border-bottom: 1px solid rgba(97, 16, 173, 0.12);
+  box-shadow: 0 8px 24px rgba(90, 22, 144, 0.1);
+  border-bottom: 1px solid rgba(121, 31, 191, 0.12);
   z-index: 1100;
 }
 
@@ -240,12 +276,12 @@ h6 {
   align-items: center;
   gap: 10px;
   min-width: 0;
-  color: #ffffff;
+  color: var(--blanco);
   text-decoration: none;
 }
 
 .header-inst .marca:hover {
-  color: #ffffff;
+  color: var(--blanco);
 }
 
 .header-inst .marca-logo {
@@ -272,7 +308,7 @@ h6 {
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  color: #ffffff;
+  color: var(--blanco);
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
@@ -292,24 +328,20 @@ h6 {
 .footer-inst {
   min-height: var(--footer-height);
   padding: 8px 16px;
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
+  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 -8px 24px rgba(50, 0, 113, 0.18);
+  box-shadow: 0 -8px 24px rgba(90, 22, 144, 0.18);
   font-size: 0.9rem;
 }
 
 .texto-violeta {
-  color: var(--violeta-primario);
+  color: var(--violeta);
 }
 .texto-blanco {
-  color: #ffffff;
+  color: var(--blanco);
 }
 
 /* ==========================================================================
@@ -323,7 +355,7 @@ h6 {
 .sidebar {
   --bs-offcanvas-width: min(var(--sidebar-width), 86vw);
   --bs-offcanvas-bg: rgba(255, 255, 255, 0.97);
-  box-shadow: 8px 0 24px rgba(50, 0, 113, 0.18);
+  box-shadow: 8px 0 24px rgba(90, 22, 144, 0.18);
 }
 
 /* Bootstrap fija top: 0 con .offcanvas.offcanvas-start: hace falta la misma especificidad para ganarle. */
@@ -348,7 +380,7 @@ h6 {
   width: 100%;
   min-height: 44px;
   padding: 10px 14px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   background: transparent;
   border: 0;
   border-radius: 14px;
@@ -360,7 +392,7 @@ h6 {
 }
 
 .sidebar .nav-link:hover {
-  background-color: rgba(69, 0, 158, 0.07);
+  background-color: rgba(121, 31, 191, 0.07);
   color: var(--violeta-oscuro);
   transform: translateX(3px);
 }
@@ -371,7 +403,7 @@ h6 {
 }
 
 .sidebar .nav-link.active {
-  background-color: rgba(69, 0, 158, 0.12);
+  background-color: rgba(121, 31, 191, 0.12);
   color: var(--violeta-oscuro);
   font-weight: 700;
 }
@@ -384,7 +416,7 @@ h6 {
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: rgba(69, 0, 158, 0.08);
+  background: rgba(121, 31, 191, 0.08);
 }
 
 .sidebar .nav-link .caret {
@@ -425,6 +457,14 @@ h6 {
   color: var(--texto-suave);
 }
 
+.menu-detalle {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--texto-suave);
+  line-height: 1.2;
+}
+
 .menu-separador {
   margin: 14px 8px;
   border-top: 1px solid var(--borde-suave);
@@ -438,7 +478,7 @@ h6 {
   margin: 6px;
   border-radius: 50%;
   background: var(--rama-primario);
-  border: 2px solid rgba(50, 0, 113, 0.28);
+  border: 2px solid rgba(90, 22, 144, 0.28);
 }
 
 /* Desde 992 px: el menú está a la vista y empuja el contenido. */
@@ -518,19 +558,33 @@ h6 {
   box-shadow: var(--borde-suave);
 }
 
+/* El subtítulo del banner hereda el color del texto con opacidad reducida.
+   Sobreescribe .text-muted y cualquier inline que pise el color. */
+.barra-superior-inst p {
+  color: inherit;
+  opacity: .85;
+}
+.barra-superior-inst a.text-reset {
+  color: inherit;
+}
+.barra-superior-inst .text-muted {
+  color: inherit !important;
+  opacity: .7;
+}
+
 .borde-orquidea {
   border: 1px solid var(--borde-suave);
 }
 
 .tarjeta-lila {
-  background: white;
+  background: var(--blanco);
   border-radius: 20px;
   box-shadow: var(--sombra-card);
-  border: 1px solid var(--orquidea-bordes);
+  border: 1px solid var(--orquidea);
 }
 
 .tarjeta-blanca-borde {
-  background-color: #ffffff;
+  background-color: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 20px;
   box-shadow: var(--sombra-card);
@@ -538,13 +592,13 @@ h6 {
 
 .circulo-logo,
 .insignia-pequena {
-  background: white;
+  background: var(--blanco);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 14px rgba(50, 0, 113, 0.16);
-  border: 2px solid var(--rama-primario);
+  box-shadow: 0 6px 14px rgba(90, 22, 144, 0.16);
+  border: 2px solid var(--rama-oscuro);
   overflow: hidden;
 }
 
@@ -567,10 +621,10 @@ h6 {
 
 .barra-progreso {
   height: 16px;
-  background-color: #ece7f4;
+  background-color: var(--gris-pista);
   border-radius: 999px;
   overflow: hidden;
-  border: 1px solid rgba(97, 16, 173, 0.12);
+  border: 1px solid rgba(121, 31, 191, 0.14);
 }
 
 .progreso-actual {
@@ -584,31 +638,24 @@ h6 {
 }
 
 .pieza-insignia {
-  box-shadow: 0px 10px 25px 10px rgba(50, 0, 113, 0.14);
+  box-shadow: 0px 10px 25px 10px rgba(90, 22, 144, 0.14);
   max-width: 200px;
 }
 
 .boton-primario {
-  background: linear-gradient(
-    135deg,
-    var(--violeta-primario),
-    var(--orquidea-bordes)
-  );
-  color: white;
+  background: linear-gradient(135deg, var(--violeta), var(--violeta-oscuro));
+  color: var(--blanco);
   border: none;
   border-radius: 16px;
   transition: all 0.22s ease;
-  box-shadow: 0 8px 18px rgba(69, 0, 158, 0.22);
+  box-shadow: 0 8px 18px rgba(121, 31, 191, 0.22);
 }
 
 .boton-primario:hover {
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
+  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
+  color: var(--blanco);
   transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(69, 0, 158, 0.3);
+  box-shadow: 0 12px 24px rgba(121, 31, 191, 0.3);
 }
 
 .boton-primario:active {
@@ -645,43 +692,47 @@ h6 {
   margin: 0 auto;
 }
 
+/* Usa el par del banner (y no primario/secundario) para que --banner-texto,
+   que está medido contra ese par, se lea en las cuatro ramas. */
 .home-welcome {
-  background: linear-gradient(
-    180deg,
-    var(--rama-primario),
-    var(--rama-secundario)
-  );
+  background: linear-gradient(180deg, var(--banner-inicio), var(--banner-fin));
+  color: var(--banner-texto);
   border-radius: 22px;
   padding: 32px 36px;
   margin-bottom: 24px;
-  box-shadow: 0 8px 22px rgba(88, 0, 168, 0.12);
+  box-shadow: 0 8px 22px rgba(90, 22, 144, 0.12);
 }
 
 .home-welcome h2 {
   margin: 0 0 8px;
   font-size: 30px;
-  color: #22003f;
+  color: inherit;
 }
 
 .home-welcome p {
   margin: 0;
   font-weight: 500;
-  color: #2b1746;
+  color: inherit;
 }
 
 .home-section-title {
-  color: #4b00a8;
+  color: var(--violeta);
   font-size: 24px;
   margin: 24px 0 14px;
+}
+
+.encabezado-grupo {
+  background: rgba(121, 31, 191, 0.06);
+  border-left: 4px solid var(--violeta);
 }
 
 .home-alerts,
 .home-card,
 .home-stat-card {
-  background: #ffffff;
-  border: 1px solid #dfc9ff;
+  background: var(--blanco);
+  border: 1px solid var(--violeta-borde);
   border-radius: 18px;
-  box-shadow: 0 8px 18px rgba(88, 0, 168, 0.1);
+  box-shadow: 0 8px 18px rgba(90, 22, 144, 0.1);
 }
 
 .home-alerts {
@@ -718,13 +769,13 @@ h6 {
 .home-stat-card h3 {
   margin: 0;
   font-size: 30px;
-  color: #4b00a8;
+  color: var(--violeta);
 }
 
 .home-stat-card p {
   margin: 6px 0 0;
   font-weight: bold;
-  color: #2b1746;
+  color: var(--texto-principal);
 }
 
 .home-grid {
@@ -739,7 +790,7 @@ h6 {
 
 .home-card h3 {
   margin-top: 0;
-  color: #4b00a8;
+  color: var(--violeta);
   font-size: 22px;
 }
 
@@ -752,11 +803,11 @@ h6 {
 .home-table td {
   padding: 12px 8px;
   text-align: left;
-  border-bottom: 1px solid #eadcff;
+  border-bottom: 1px solid var(--violeta-linea);
 }
 
 .home-table th {
-  color: #4b00a8;
+  color: var(--violeta);
 }
 
 .birthday-list,
@@ -769,7 +820,7 @@ h6 {
 .birthday-list li,
 .movements-list li {
   padding: 12px 0;
-  border-bottom: 1px solid #eadcff;
+  border-bottom: 1px solid var(--violeta-linea);
   font-weight: 500;
 }
 
@@ -781,8 +832,8 @@ h6 {
 }
 
 .home-action-btn {
-  background: #5800a8;
-  color: white;
+  background: var(--violeta);
+  color: var(--blanco);
   text-decoration: none;
   padding: 12px 18px;
   border-radius: 12px;
@@ -790,8 +841,8 @@ h6 {
 }
 
 .home-action-btn:hover {
-  background: #3f007a;
-  color: white;
+  background: var(--violeta-oscuro);
+  color: var(--blanco);
 }
 
 @media (max-width: 900px) {
@@ -817,7 +868,7 @@ h6 {
 /* ===== PROTAGONISTAS / CARDS ===== */
 
 .protagonista-card {
-  background: #ffffff;
+  background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 22px;
   padding: 22px;
@@ -833,8 +884,8 @@ h6 {
 
 .protagonista-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(50, 0, 113, 0.2);
-  border-color: var(--orquidea-bordes);
+  box-shadow: 0 14px 30px rgba(90, 22, 144, 0.2);
+  border-color: var(--violeta-oscuro);
 }
 
 .protagonista-foto {
@@ -842,8 +893,8 @@ h6 {
   height: 92px;
   min-width: 92px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--rama-primario), white);
-  border: 3px solid var(--violeta-primario);
+  background: linear-gradient(135deg, var(--rama-primario), var(--blanco));
+  border: 3px solid var(--violeta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -852,12 +903,12 @@ h6 {
 
 .protagonista-foto i {
   font-size: 42px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
 }
 
 .protagonista-info h3 {
   margin: 0 0 10px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -872,7 +923,7 @@ h6 {
 .ver-perfil {
   display: inline-block;
   margin-top: 8px;
-  color: var(--violeta-primario);
+  color: var(--rama-contraste);
   font-weight: 700;
 }
 
@@ -880,7 +931,7 @@ h6 {
 
 .rama-card,
 .patrulla-card {
-  background: #ffffff;
+  background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 22px;
   padding: 22px;
@@ -896,22 +947,20 @@ h6 {
 .rama-card:hover,
 .patrulla-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(50, 0, 113, 0.2);
-  border-color: var(--orquidea-bordes);
+  box-shadow: 0 14px 30px rgba(90, 22, 144, 0.2);
+  border-color: var(--violeta-oscuro);
 }
 
+/* El cuadrado de color de la rama. Usa el par del banner para que el ícono,
+   que va en --banner-texto, se lea igual en las cuatro ramas. */
 .rama-icono,
 .patrulla-icono {
   width: 82px;
   height: 82px;
   min-width: 82px;
   border-radius: 22px;
-  background: linear-gradient(
-    135deg,
-    var(--rama-primario),
-    var(--rama-secundario)
-  );
-  border: 3px solid var(--violeta-primario);
+  background: linear-gradient(135deg, var(--banner-inicio), var(--banner-fin));
+  border: 3px solid var(--violeta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,13 +969,13 @@ h6 {
 .rama-icono i,
 .patrulla-icono i {
   font-size: 38px;
-  color: var(--violeta-primario);
+  color: var(--banner-texto);
 }
 
 .rama-card h3,
 .patrulla-card h3 {
   margin: 0 0 10px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -989,19 +1038,19 @@ h6 {
 }
 
 .tabs-inst .nav-link {
-  color: var(--violeta-primario);
+  color: var(--violeta);
   font-weight: 700;
   white-space: nowrap;
 }
 
 .tabs-inst .nav-link.active {
   color: var(--violeta-oscuro);
-  border-bottom: 3px solid var(--rama-primario);
+  border-bottom: 3px solid var(--rama-contraste);
 }
 
 /* Contadores de arriba ("Etapa en curso: 4/12") */
 .contador-inst {
-  background: #ffffff;
+  background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 16px;
   padding: 12px 16px;
@@ -1011,22 +1060,22 @@ h6 {
 .contador-inst .numero {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   line-height: 1.1;
 }
 
 /* Una competencia: el borde izquierdo muestra su estado */
 .competencia {
-  border-left: 5px solid #d9d2e3;
+  border-left: 5px solid var(--gris-linea);
 }
 
 .competencia[data-estado="en_proceso"] {
-  border-left-color: var(--scout-amarillo);
+  border-left-color: var(--amarillo);
 }
 
 .competencia[data-estado="desarrollada"] {
-  border-left-color: var(--scout-verde);
-  background-color: rgba(0, 166, 81, 0.06);
+  border-left-color: var(--verde-logro);
+  background-color: rgba(96, 177, 52, 0.08);
 }
 
 .competencia .codigo {
@@ -1058,16 +1107,16 @@ h6 {
 
 /* Etapas e insignias */
 .etapa-card {
-  border-left: 5px solid #d9d2e3;
+  border-left: 5px solid var(--gris-linea);
 }
 
 .etapa-card.lograda {
-  border-left-color: var(--scout-verde);
+  border-left-color: var(--verde-logro);
 }
 
 .etapa-card.en-curso {
-  border-left-color: var(--rama-primario);
-  box-shadow: 0 10px 24px rgba(50, 0, 113, 0.14);
+  border-left-color: var(--rama-oscuro);
+  box-shadow: 0 10px 24px rgba(90, 22, 144, 0.14);
 }
 
 .insignia-icono {
@@ -1079,13 +1128,13 @@ h6 {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: var(--violeta-primario);
-  background: linear-gradient(135deg, var(--rama-primario), var(--rama-secundario));
-  border: 2px solid var(--violeta-primario);
+  color: var(--banner-texto);
+  background: linear-gradient(135deg, var(--banner-inicio), var(--banner-fin));
+  border: 2px solid var(--violeta);
 }
 
 .insignia-icono.pendiente {
-  background: #f1eef5;
-  color: #9a90a8;
-  border-color: #d9d2e3;
+  background: var(--violeta-fondo);
+  color: var(--texto-tenue);
+  border-color: var(--gris-linea);
 }
