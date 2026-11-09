@@ -803,4 +803,4 @@ Zócalo de redes sociales · insignias de indumentaria y uniforme · iconografí
 - ✅ Borrados. Del bloque `HOME DASHBOARD` del CSS, `.home-section-title` sí se usa (en `progresion.php`) y `.encabezado-grupo` también. Los que parecen huérfanos son `.home-stats`, `.home-stat-card`, `.home-table`, `.home-action-btn`, `.home-alerts`, `.home-grid`, `.home-card`, `.birthday-list` y `.movements-list`. Si una búsqueda lo confirma, se borran.
 - ✅ Borrado. `.punto-rama` quedó sin uso después de reestructurar el drawer: el menú ya no lista secciones. Confirmar y borrar.
 - ✅ Sin uso en el código; los archivos los borra Elías a mano. `Logo1.png` y `Logo1.jpg` quedan sin uso una vez que el header pase a `LogoBaseV4.png`.
-- También sin uso, fuera de la lista original: `.home-container`, `.home-actions` y `.home-welcome`. Quedan hasta decidir.
+- ✅ También sin uso y borradas (segunda revisión): `.home-container`, `.home-actions`, `.home-welcome`, `.menu-titulo`, `.menu-detalle`, `.borde-orquidea`, `.tarjeta-lila`, `.pieza-insignia`, `.circulo-logo`, `.insignia-pequena`, `.ver-perfil`, `.patrulla-card` y `.patrulla-icono`.

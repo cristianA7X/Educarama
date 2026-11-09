@@ -70,9 +70,10 @@ require __DIR__ . '/../includes/cabecera.php';
                 <label for="apellido" class="form-label">Apellido</label>
                 <input type="text" class="form-control" id="apellido" name="apellido" maxlength="100" required value="<?= e($persona->apellido ?? '') ?>">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-8 col-lg-6">
                 <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento <span class="text-muted">(opcional)</span></label>
-                <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="<?= e($persona->fechaNacimiento ?? '') ?>">
+                <?php // Tres listas en vez del calendario del navegador (ver Vista::campoFecha). ?>
+                <?= Vista::campoFecha('fecha_nacimiento', 'fecha_nacimiento', $persona?->fechaNacimiento) ?>
             </div>
         </div>
 

@@ -146,13 +146,11 @@ EDUCARAMA - ESTILO GENERAL
 /* Acento de color en las cards. Usa el tono oscuro: el amarillo de Manada no
    se distinguiría del blanco. */
 .protagonista-card,
-.rama-card,
-.patrulla-card {
+.rama-card {
   border-left: 8px solid var(--rama-oscuro);
 }
 .protagonista-card:hover,
-.rama-card:hover,
-.patrulla-card:hover {
+.rama-card:hover {
   border-color: var(--rama-oscuro);
 }
 /* =========================================================
@@ -277,7 +275,6 @@ h6 {
    Solo existe en peso 400: font-synthesis evita que el navegador invente un
    bold deformando la letra. El énfasis va por mayúsculas y letter-spacing. */
 .dato-etiqueta,
-.menu-titulo,
 .badge,
 #tablaNomina th,
 #tablaNominaSeccion th,
@@ -517,23 +514,6 @@ h6 {
   overflow-wrap: anywhere;
 }
 
-.menu-titulo {
-  margin: 16px 14px 4px;
-  font-size: 0.75rem; /* 12 px: el mínimo para la condensada */
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--texto-suave);
-}
-
-.menu-detalle {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--texto-suave);
-  line-height: 1.2;
-}
-
 .menu-separador {
   margin: 14px 8px;
   border-top: 1px solid var(--borde-suave);
@@ -593,6 +573,46 @@ h6 {
   padding: 15px 24px 40px;
 }
 
+/* Campo de fecha en tres listas (Vista::campoFecha): día, mes y año en una
+   fila. Cada lista tiene el ancho mínimo para que su texto no se corte; si en
+   un celular muy angosto no entran las tres, el año pasa a la línea de abajo. */
+.campo-fecha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Menos relleno que el de Bootstrap, que reserva 2.25rem para la flecha. */
+.campo-fecha select {
+  flex: 1 0 auto;
+  padding-left: 0.6rem;
+  padding-right: 1.6rem;
+  background-position: right 0.45rem center;
+}
+
+.campo-fecha [data-parte="dia"] {
+  min-width: 4.3rem;
+  flex-basis: 4.3rem;
+}
+
+.campo-fecha [data-parte="mes"] {
+  min-width: 4.8rem;
+  flex-basis: 4.8rem;
+}
+
+.campo-fecha [data-parte="anio"] {
+  min-width: 5.4rem;
+  flex-basis: 5.4rem;
+}
+
+/* Las tablas que se desplazan de costado tienen que ser el bloque contenedor
+   de sus elementos absolutos (el .visually-hidden de un botón, por ejemplo).
+   Si no, esos elementos escapan del overflow, la página entera se ensancha en
+   el celular y el pie, que mide el 100% de la pantalla, se ve cortado. */
+.table-responsive {
+  position: relative;
+}
+
 .contenedor-principal {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 24px;
@@ -631,51 +651,11 @@ h6 {
   opacity: .7;
 }
 
-.borde-orquidea {
-  border: 1px solid var(--borde-suave);
-}
-
-.tarjeta-lila {
-  background: var(--blanco);
-  border-radius: 20px;
-  box-shadow: var(--sombra-card);
-  border: 1px solid var(--orquidea);
-}
-
 .tarjeta-blanca-borde {
   background-color: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 20px;
   box-shadow: var(--sombra-card);
-}
-
-.circulo-logo,
-.insignia-pequena {
-  background: var(--blanco);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 14px rgba(54, 13, 87, 0.16);
-  border: 2px solid var(--rama-oscuro);
-  overflow: hidden;
-}
-
-.circulo-logo {
-  width: 88px;
-  height: 88px;
-}
-
-.insignia-pequena {
-  width: 80px;
-  height: 80px;
-}
-
-.insignia-pequena img,
-.circulo-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .barra-progreso {
@@ -694,11 +674,6 @@ h6 {
     var(--rama-secundario)
   );
   border-radius: 999px;
-}
-
-.pieza-insignia {
-  box-shadow: 0px 10px 25px 10px rgba(54, 13, 87, 0.14);
-  max-width: 200px;
 }
 
 /* Botón primario. Sus colores salen de --boton-* (ver :root y las clases de
@@ -752,35 +727,7 @@ h6 {
   }
 }
 
-/* ===== HOME DASHBOARD ===== */
-
-.home-container {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-/* Usa el par del banner (y no primario/secundario) para que --banner-texto,
-   que está medido contra ese par, se lea en las cuatro ramas. */
-.home-welcome {
-  background: linear-gradient(180deg, var(--banner-inicio), var(--banner-fin));
-  color: var(--banner-texto);
-  border-radius: 22px;
-  padding: 32px 36px;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 22px rgba(54, 13, 87, 0.12);
-}
-
-.home-welcome h2 {
-  margin: 0 0 8px;
-  font-size: 30px;
-  color: inherit;
-}
-
-.home-welcome p {
-  margin: 0;
-  font-weight: 500;
-  color: inherit;
-}
+/* ===== TÍTULOS DE BLOQUE Y ENCABEZADO DE GRUPO ===== */
 
 .home-section-title {
   color: var(--violeta);
@@ -791,19 +738,6 @@ h6 {
 .encabezado-grupo {
   background: rgba(75, 18, 120, 0.06);
   border-left: 4px solid var(--violeta);
-}
-
-.home-actions {
-  margin-top: 24px;
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 600px) {
-  .home-welcome {
-    padding: 24px;
-  }
 }
 
 /* ===== PROTAGONISTAS / CARDS ===== */
@@ -861,17 +795,9 @@ h6 {
   font-size: 0.95rem;
 }
 
-.ver-perfil {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--rama-contraste);
-  font-weight: 700;
-}
-
 /* ===== RAMAS Y PATRULLAS ===== */
 
-.rama-card,
-.patrulla-card {
+.rama-card {
   background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 22px;
@@ -885,16 +811,14 @@ h6 {
   height: 100%;
 }
 
-.rama-card:hover,
-.patrulla-card:hover {
+.rama-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 14px 30px rgba(54, 13, 87, 0.2);
 }
 
 /* El cuadrado de color de la rama. Usa el par del banner para que el ícono,
    que va en --banner-texto, se lea igual en las cuatro ramas. */
-.rama-icono,
-.patrulla-icono {
+.rama-icono {
   width: 82px;
   height: 82px;
   min-width: 82px;
@@ -906,8 +830,7 @@ h6 {
   justify-content: center;
 }
 
-.rama-icono i,
-.patrulla-icono i {
+.rama-icono i {
   font-size: 38px;
   color: var(--banner-texto);
 }
@@ -936,16 +859,14 @@ h6 {
   vertical-align: -0.25em;
 }
 
-.rama-card h3,
-.patrulla-card h3 {
+.rama-card h3 {
   margin: 0 0 10px;
   color: var(--violeta);
   font-size: 1.25rem;
   font-weight: 700;
 }
 
-.rama-card p,
-.patrulla-card p {
+.rama-card p {
   margin-bottom: 6px;
   color: var(--texto-suave);
   font-weight: 500;
@@ -954,21 +875,18 @@ h6 {
 
 @media (max-width: 576px) {
   .rama-card,
-  .patrulla-card,
   .protagonista-card {
     padding: 16px;
     gap: 12px;
   }
 
-  .rama-icono,
-  .patrulla-icono {
+  .rama-icono {
     width: 64px;
     height: 64px;
     min-width: 64px;
   }
 
   .rama-card h3,
-  .patrulla-card h3,
   .protagonista-info h3 {
     font-size: 1.1rem;
     overflow-wrap: anywhere;

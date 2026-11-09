@@ -1671,3 +1671,47 @@ Con imagen, el círculo (`.insignia-icono.con-imagen`) es solo un marco blanco, 
 **Por qué**: eran restos del dashboard del legacy. Mantenerlos obligaba a migrar colores (como en T1) en reglas que no se ven.
 
 **Corrección (T6)**: las insignias con imagen ya no van dentro de un círculo con borde, y pasan de 52 a 88 px. La forma de la insignia cambia por rama (cuadrada en LyL, rombo en Scouts y Caminantes, rectángulo en Rovers), y el círculo las recortaba. Las que no tienen imagen siguen con el círculo y el ícono genérico.
+
+---
+
+## Formulario de protagonista: warning de PHP en "Año de ingreso"
+
+**Qué cambió**: en el alta, `protagonista_form.php` leía `$protagonista->anioIngreso` con `$protagonista` en null. PHP imprimía el warning dentro del `value` del campo, y las comillas del mensaje cerraban el atributo, así que se veía código en la pantalla y quedaba roto el HTML que seguía. Ahora usa `?->`. Además, el campo de fecha de nacimiento (de protagonista y de familiar) lleva `max` con la fecha de hoy, para que el calendario no ofrezca fechas futuras.
+
+---
+
+## Segunda limpieza de CSS sin uso
+
+**Qué cambió**: se revisaron todas las clases de `styles.css` contra las vistas, el PHP y el JS, y se borraron las que nadie usa:
+- `.home-container`, `.home-welcome`, `.home-actions`;
+- `.menu-titulo`, `.menu-detalle`;
+- `.borde-orquidea`, `.tarjeta-lila`, `.pieza-insignia`;
+- `.circulo-logo`, `.insignia-pequena`;
+- `.ver-perfil`;
+- `.patrulla-card` y `.patrulla-icono`: compartían reglas con `.rama-card` y `.rama-icono`, así que solo se quitó su selector.
+
+**Por qué**: eran restos del legacy. Mantenerlos obligaba a migrar colores y tipografía en reglas que no se ven.
+
+---
+
+## Pie cortado en el celular (`accesos.php`)
+
+**Qué cambió**: `.table-responsive { position: relative; }` en `styles.css`.
+
+**Por qué**: el `<span class="visually-hidden">` del botón "Quitar" de la tabla de roles tiene `position: absolute`, que le pone Bootstrap. Como `.table-responsive` no estaba posicionada, ese span no quedaba recortado por su `overflow` y ensanchaba toda la página: 641 px en una pantalla de 375. La página se podía desplazar de costado, y el pie, que mide el 100% del ancho, se veía cortado.
+
+**Cómo funciona**: con `position: relative`, la tabla es el bloque contenedor de sus elementos absolutos, y el desplazamiento lateral queda dentro de la tabla. Vale para todas las tablas. Se verificó a 375 px en 10 pantallas (accesos de grupo y de sección, las dos nóminas, eventos, perfil, progresión, competencias, inicio y grupo): ninguna supera el ancho de la pantalla.
+
+---
+
+## Fecha de nacimiento en tres listas
+
+**Qué cambió**: en los formularios de protagonista y de familiar, la fecha de nacimiento deja de ser un `<input type="date">` y pasa a tres listas (día, mes abreviado y año, de este hacia atrás). Las arma `Vista::campoFecha($nombre, $id, $valor)`, y `public/js/educarama.js` junta las tres en el campo oculto que se envía.
+
+**Por qué**: el calendario del navegador trae un botón "Hoy" que no se puede quitar. Por su posición se confunde con el de enviar, y un clic accidental cargaba la fecha de hoy como fecha de nacimiento. Además, el calendario arranca en el mes actual, lejos de cualquier fecha de nacimiento.
+
+**Cómo funciona**:
+- Las listas no tienen `name`. Lo que viaja es el oculto `fecha_nacimiento`, con `AAAA-MM-DD` o vacío, así que el Controller y el Service no cambian.
+- El JS deshabilita los días que no existen en el mes elegido y marca la lista como inválida con `setCustomValidity` si la fecha está incompleta, no existe (31 de febrero) o es futura. Mientras sea inválida, el navegador no deja enviar el formulario.
+- Los tres vacíos significa "sin fecha", porque el campo es opcional.
+- En pantallas muy angostas (320 px) el año pasa a una segunda línea.

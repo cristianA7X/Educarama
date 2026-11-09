@@ -229,6 +229,50 @@
     });
 
     // ------------------------------------------------------------------
+    // Campo de fecha en tres listas (Vista::campoFecha):
+    //   <div data-campo-fecha data-max="AAAA-MM-DD"> hidden + día, mes y año
+    // Cada cambio arma la fecha en el campo oculto, que es lo que se envía.
+    // Una fecha incompleta, inexistente o futura deja la lista inválida, y el
+    // navegador no deja enviar el formulario hasta corregirla.
+    // ------------------------------------------------------------------
+
+    document.addEventListener('change', (ev) => {
+        const campo = ev.target.closest('[data-campo-fecha]');
+        if (!campo || !ev.target.matches('select[data-parte]')) { return; }
+
+        const oculto = campo.querySelector('input[type="hidden"]');
+        const lista = (parte) => campo.querySelector('[data-parte="' + parte + '"]');
+        const [dia, mes, anio] = [lista('dia'), lista('mes'), lista('anio')];
+        const d = Number(dia.value), m = Number(mes.value), a = Number(anio.value);
+        const dos = (n) => String(n).padStart(2, '0');
+
+        // Los días que no existen en el mes elegido quedan deshabilitados.
+        const diasDelMes = new Date(a || 2000, m || 1, 0).getDate(); // año bisiesto si no hay año
+        dia.querySelectorAll('option[value]:not([value=""])').forEach((o) => { o.disabled = Number(o.value) > diasDelMes; });
+
+        [dia, mes, anio].forEach((s) => s.setCustomValidity(''));
+        oculto.value = '';
+
+        const elegidas = [d, m, a].filter(Boolean).length;
+        if (elegidas === 0) { return; } // opcional: los tres vacíos es "sin fecha"
+        if (elegidas < 3) {
+            [dia, mes, anio].find((s) => !s.value).setCustomValidity('Completá día, mes y año, o dejá los tres vacíos.');
+            return;
+        }
+        if (d > diasDelMes) {
+            dia.setCustomValidity('Ese mes tiene ' + diasDelMes + ' días.');
+            return;
+        }
+
+        const fecha = a + '-' + dos(m) + '-' + dos(d);
+        if (campo.dataset.max && fecha > campo.dataset.max) {
+            dia.setCustomValidity('La fecha no puede ser futura.');
+            return;
+        }
+        oculto.value = fecha;
+    });
+
+    // ------------------------------------------------------------------
     // Pestañas: la del # de la URL se abre sola (ej. perfil_protagonista.php?id=8#documentos),
     // y al cambiar de pestaña se actualiza el #, así recargar o volver deja la misma.
     // ------------------------------------------------------------------

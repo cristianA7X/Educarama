@@ -27,18 +27,21 @@ Educarama/
 │                  bootstrap.php (autoload propio + url()), Database.php
 ├── database/      educarama.sql (base educarama_v2), seeds/catalogo_competencias.sql,
 │                  datos_ejemplo.sql (solo desarrollo: usuarios de prueba y progresión variada)
-├── docs/          explicacion-de-cambios.md
+├── docs/          explicacion-de-cambios.md, prompt-imagen-de-marca.md (plan de marca T1–T7, hecho)
 ├── src/
 │   ├── Almacen/   componente genérico de archivos subidos (no depende de nada del proyecto)
 │   ├── Model/     una clase por tabla + Enum/
 │   ├── Repository/  + Vista/ (clases vista de consultas con JOIN)
 │   ├── Service/     + Vista/ (avisos y resúmenes) + Excepcion/
 │   ├── Controller/  Controlador (base), Respuesta, Api, Pagina + un Controller por tema
-│   └── Helper/    Csrf, Sesion, Flash
+│   └── Helper/    Csrf, Sesion, Flash, Vista (ayudas de presentación)
 ├── public/        api.php (todos los fetch), descargar.php (documentos), index.php,
-│                  css/styles.css, js/ (educarama.js + uno por pantalla compleja), fonts/ubuntu
+│                  css/styles.css, js/ (educarama.js + uno por pantalla compleja),
+│                  fonts/ubuntu (woff2) y fonts/Ubuntu_Condensed (TTF)
 ├── storage/       archivos subidos (gitignored salvo su .htaccess "Require all denied")
-├── views/         pages/ (una por pantalla), includes/ (cabecera, pie, menu, error), assets/images
+├── views/         pages/ (una por pantalla), includes/ (cabecera, pie, menu, error),
+│                  assets/images: Iconos/ (18 pictogramas oficiales), Insignias/Progresion/,
+│                  Logos/ (Logos_Educarama, Logos_AreasYRamas, logotipos SAAC y WOSM)
 └── _legacy/       código viejo, solo lectura
 ```
 
@@ -233,15 +236,21 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ## Views (paso 5)
 
-- **Estilos:** son los del legacy (`public/css/styles.css`, portado de `_legacy/public/css`) con lo que estaba mal corregido. No es un rediseño. Paleta, fuente Ubuntu (local, `public/fonts/ubuntu`) y clases por rama (`rama-manada`, `rama-unidad`, `rama-caminantes`, `rama-rover`, que definen `--rama-primario` / `--rama-secundario`) se mantienen; `Vista::claseRama($idRama)` las elige **por id de rama**, nunca por el nombre de la sección.
+- **Estilos:** los del legacy (`public/css/styles.css`) corregidos y alineados con el manual de marca de Scouts de Argentina (plan en `docs/prompt-imagen-de-marca.md`). No es un rediseño.
+  - **Color:** toda la UI sale de variables de `:root` y de las clases de rama; **ningún hex suelto** fuera de ese bloque, ni en vistas ni en JS. Violeta de Educarama `#4b1278` (el oficial oscurecido dos pasos); Orquídea, Púrpura, Lila, Celeste y Amarillo con su valor oficial. Clases `rama-lobatos`, `rama-scouts`, `rama-caminantes`, `rama-rovers` (los tres tonos de cada bandera): `--rama-primario`, `--rama-secundario`, `--rama-oscuro`, `--rama-contraste` (el único legible como texto sobre blanco) y el par del banner `--banner-*`. `Vista::claseRama($idRama)` las elige **por id de rama**, nunca por el nombre de la sección; `Vista::colorRama()` da `--rama-contraste` para usar fuera de la clase.
+  - **Botón primario** (`.boton-primario`, variables `--boton-*`): Celeste con texto oscuro en páginas sin rama; violeta en páginas con rama (la clase va en el `<body>`). No usar `btn-primary` (el azul de Bootstrap no es de la paleta).
+  - **Tipografía:** `--fuente` (Ubuntu, Arial de respaldo) para todo; `--fuente-condensada` (Ubuntu Condensed, solo peso 400, con `font-synthesis: none`) solo para etiquetas, badges y celdas y encabezados de las nóminas. Nunca condensada para texto corrido, el `h1` ni por debajo de 12 px.
+  - **Contraste:** texto 4,5:1 y foco 3:1 (`--foco` violeta; sobre el header violeta, amarillo).
+- **Marcas oficiales = dato, no marca de la app.** Sí: insignias, logos de rama como identidad de sección, pictogramas oficiales, atribución en el pie. No: favicon, header, login ni pantallas de carga (ahí va solo `LogoBaseV4.png` de Educarama). Nunca teñidas, en grises ni con filtros, y siempre sobre fondo claro: un estado (pendiente, inactivo) se dice con un badge, no alterando la imagen. El pie aclara que es un proyecto académico sin vinculación oficial.
+- **Tres formas de mostrar una rama:** `Vista::logoRama()` (logo circular oficial, en las tarjetas de sección), `Vista::pictogramaRama()` (huella, rosa de los vientos, sol, cayado: en tablas y líneas de texto) y `Vista::iconoRama()` (Bootstrap, último respaldo). Las áreas usan `Vista::iconoAreaOficial()` y los conceptos sueltos `Vista::iconoOficial($slug)` (clase `.icono-oficial`, `alt=""` si el texto de al lado ya lo dice). Todo método que devuelve null cae en el ícono de Bootstrap. El menú lateral sigue con íconos de Bootstrap.
 - **Cada página** hace: `require_once` de `config/bootstrap.php`, `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`, define `$tituloPagina` (y opcionalmente `$claseRama`, `$sinMenu`, `$contenedorAngosto`, `$scriptsPagina`) y envuelve su contenido con `views/includes/cabecera.php` y `pie.php`. La cabecera pide el menú (`MenuController`) antes de imprimir nada y muestra los mensajes Flash. Login, registro y la página de error van con `$sinMenu = true`.
-- **Todo dato impreso con `e()`** (escapa HTML; vive en `config/bootstrap.php`). Links con `url()`. Fechas con `Vista::fecha()` / `Vista::periodo()`.
+- **Todo dato impreso con `e()`** (escapa HTML; vive en `config/bootstrap.php`). Links con `url()`. Fechas con `Vista::fecha()` / `Vista::periodo()`. Fechas lejanas (nacimiento) se cargan con `Vista::campoFecha()`: tres listas día/mes/año, sin el calendario del navegador (su botón "Hoy" se confundía con enviar).
 - **Menú lateral = drawer** (un offcanvas de Bootstrap). Desde 992 px está a la vista, empuja el contenido y se oculta con el botón de la barra superior (se recuerda en `localStorage`); por debajo es un cajón que se abre encima del contenido, con fondo oscuro. Es **contextual**: por cada grupo del usuario, sus links y sus secciones con los links que su rol permite (un link que no puede usar no se muestra); al final Mi cuenta, Solicitar alta, Solicitudes (admin) y Cerrar sesión.
 - **JavaScript:** `public/js/educarama.js` hace los pedidos a `api.php` (token CSRF, flujo del 409 con `confirmarIgual`, redirecciones, error genérico) y conecta formularios y botones declarados con `data-accion`, `data-datos`, `data-confirmar`, `data-texto`, `data-boton`, `data-peligro`, `data-reiniciar`, `data-recargar`: la mayoría de las páginas no necesita JS propio. Las pantallas complejas tienen su archivo en `public/js/` (se declara con `$scriptsPagina`). Sin SweetAlert2 (sin internet) usa los cuadros nativos.
 - **Cosas del legacy ya corregidas:** texto amarillo sobre blanco en el menú de Manada; el banner violeta con texto oscuro (ahora `--banner-*`, con texto blanco o oscuro según la rama, y el banner de Rovers termina en rojo oscuro); links `/Educarama/...` a mano; Ubuntu cargada dos veces; `<h1>` duplicado (la barra superior no lo es); menú móvil de íconos de 68 px (ahora es el drawer); `.sidebar` con `!important` en un `<style>` del include.
 - **Perfil del protagonista** (`perfil_protagonista.php`): dos pestañas. **Perfil** (datos, resumen de progresión con los links a Competencias y a Etapas e insignias, familiares) y **Documentos** (ver, descargar, subir en un modal, editar tipo y descripción, eliminar). El ⋮ del encabezado: Editar datos, Cambiar de sección, Eliminar, según el rol. `#documentos` en la URL abre esa pestaña (`educarama.js` lo hace con cualquier página de pestañas); subir y eliminar un documento vuelven ahí.
 - **Etapas e insignias** (`progresion.php?id=`, el submenú propio del protagonista): las etapas de la rama (logradas con fecha y elemento; la última se quita, solo Jefe; la en curso con sus tareas tildables, lo que le falta y "Confirmar etapa" con fecha y, en Caminantes, elemento), las insignias de la rama y generales (registrar la entrega con fecha; quitar, solo Jefe) y las especialidades (LyL y Scouts). Lo arma `ProgresionService::pantallaEtapas()`. Cada acción recarga la página.
-- **Insignias sin imágenes por ahora:** un ícono y el nombre (las rutas de imágenes siguen en "Para más adelante"). La Promesa es un dato del protagonista, no una imagen.
+- **Insignias con imagen:** `insignia.imagen` guarda solo el nombre del archivo (la carpeta la pone `Vista::imagenInsignia()`, en `Insignias/Progresion/`). Lobatos, Scouts y Rovers la traen en la fila. Caminantes (etapas 9 a 12) queda en NULL: la imagen sale del elemento elegido en `etapa_lograda` (`Vista::imagenInsigniaCaminantes()`), así que una etapa en curso muestra el ícono genérico aunque la insignia ya esté entregada (aceptado). Ciudadanía no tiene imagen. Con imagen se muestra a 88 px, sin marco (la forma cambia por rama); sin imagen, el círculo con el ícono. La Promesa es un dato del protagonista, no una imagen.
 - **Pantallas hechas:** login, registro, inicio, mi cuenta, solicitud de alta, error, `perfil_protagonista`, `gestionar_competencias`, `progresion`, `protagonista_form`, `familiar_form`, `protagonistas`, `patrullas`, `perfil_patrulla`, `perfil_seccion`, `grupo`, `eventos`, `evento_form`, `accesos`, `solicitudes` y `secciones`.
 
 ## Bugs conocidos del legacy (no repetirlos al portar)
@@ -259,7 +268,17 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ## Para más adelante (no implementar todavía)
 
-Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorCruzDelSur`, resultado al revisar solicitudes, `email_validado`) · envío de emails (aviso de solicitud rechazada: `SolicitudAltaService::notificarRechazo`) · recuperación de contraseña (`token_recuperacion` reservado; necesita envío de emails) · bloqueo por intentos de login fallidos · invitar por email a quien no tiene cuenta (al dar un acceso) · activar la versión A de contraseña · plantillas de evento (`id_tipo_evento` reservado) · acciones personalizadas de protagonistas · momentos de la progresión · rutas de imágenes de insignias · auditoría de confirmaciones · habilitaciones que bloqueen · generador del catálogo desde CSV (reservado fuera del repo).
+Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorCruzDelSur`, resultado al revisar solicitudes, `email_validado`) · envío de emails (aviso de solicitud rechazada: `SolicitudAltaService::notificarRechazo`) · recuperación de contraseña (`token_recuperacion` reservado; necesita envío de emails) · bloqueo por intentos de login fallidos · invitar por email a quien no tiene cuenta (al dar un acceso) · activar la versión A de contraseña · plantillas de evento (`id_tipo_evento` reservado) · acciones personalizadas de protagonistas · momentos de la progresión · auditoría de confirmaciones · habilitaciones que bloqueen · generador del catálogo desde CSV (reservado fuera del repo) · íconos oficiales en el menú lateral (hoy `$enlaceMenu` en `menu.php` arma un `<i class="bi …">`: habría que cambiar su firma para aceptar una imagen).
+
+### Nóminas: columnas personalizables y filtros encadenados
+
+Hoy las dos tablas de `protagonistas.php` (nómina general `#tablaNomina` y de sección `#tablaNominaSeccion`) tienen columnas fijas, se desplazan de costado en pantallas chicas (poco claro) y se ordenan solo por nombre, edad y competencias. Los filtros (grupo, sección, rama; patrulla en la de sección) son independientes entre sí.
+
+1. **Columnas personalizables.** Un botón "Columnas" (dropdown de Bootstrap con casillas) arriba de la tabla elige qué columnas se ven. Cada `<th>` y `<td>` lleva `data-columna="clave"`; el JS oculta con una clase (`d-none`) las no elegidas. Nombre siempre visible. Columnas posibles, todas con datos que ya trae `ProtagonistaEnNomina` (sumar al Repository las que falten, sin datos sensibles para Supervisor): DNI, edad, fecha de nacimiento, sección, grupo, patrulla, etapa actual, etapa en curso, competencias (desarrolladas / total), promesa, año de ingreso. La elección se recuerda por usuario y por tabla en `localStorage` (con try/catch; sin almacenamiento, las columnas por defecto). En celular arranca con pocas columnas (nombre, sección o patrulla, etapa), así no hace falta el desplazamiento lateral.
+2. **Ordenar por cualquier columna visible.** Todo `<th>` con `data-orden`, con la flecha que indica el sentido (`aria-sort` para lectores de pantalla). El valor de orden va en `data-valor` de cada celda (número, fecha ISO o texto normalizado sin acentos), no en el texto visible.
+3. **Filtrar por valor.** Además de la búsqueda por nombre, filtros por los valores de las columnas: listas para las categóricas (patrulla, etapa, promesa sí/no) y rango para las numéricas (edad desde/hasta, competencias mínimas). Un botón "Limpiar filtros" y el contador "Mostrando X de Y".
+4. **Filtros encadenados.** Elegir un grupo deja en el filtro de sección solo las secciones de ese grupo (las otras `disabled`, no borradas, para no perder el orden) y resetea la sección si ya no corresponde; elegir una rama limita las secciones a esa rama; elegir una sección fija grupo y rama. En la nómina de sección, la patrulla ya es de esa sección. Cada `<option>` de sección lleva `data-grupo` y `data-rama` para resolverlo en el navegador, sin pedidos al servidor.
+5. Todo en un `public/js/nomina.js` (sacar el JS en línea de `protagonistas.php`), sin librerías nuevas, compartido por las dos tablas.
 
 ## Orden de trabajo
 
@@ -267,4 +286,5 @@ Baja lógica con respaldo de 1 mes · integración con Cruz del Sur (`ValidadorC
 2. ~~Repositories~~ ✅
 3. ~~Services~~ ✅
 4. ~~Controllers~~ ✅
-5. Views (en curso): hechos el layout base, las pantallas de cuenta, el perfil del protagonista, las competencias y las etapas e insignias; siguen los formularios de protagonista y familiar, y después el resto.
+5. ~~Views~~ ✅ (todas las pantallas), con la alineación con la imagen de marca (T1–T7 de `docs/prompt-imagen-de-marca.md`) ✅
+6. Pruebas en el navegador y correcciones (en curso).

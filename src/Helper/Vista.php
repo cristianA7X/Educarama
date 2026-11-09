@@ -298,4 +298,54 @@ final class Vista
 
         return "$m[3]/$m[2]/$m[1]";
     }
+
+    /**
+     * Campo de fecha con tres listas (día, mes y año) en vez de <input type="date">.
+     * Para fechas lejanas, como la de nacimiento: el calendario del navegador
+     * arranca en hoy y trae un botón "Hoy" que no se puede quitar y se confunde
+     * con el de enviar.
+     *
+     * Las listas no tienen name: lo que viaja es el campo oculto $nombre, con la
+     * fecha 'AAAA-MM-DD' (o vacío), que arma public/js/educarama.js. Así el
+     * servidor recibe lo mismo que con un input de fecha. El JS también marca
+     * como inválida una fecha incompleta, inexistente (31 de febrero) o futura.
+     *
+     * @param string      $id       Id de la lista del día: el <label for> apunta acá.
+     * @param ?string     $valor    Fecha guardada 'AAAA-MM-DD', o null.
+     * @param int         $anios    Cuántos años hacia atrás ofrece la lista de años.
+     */
+    public static function campoFecha(string $nombre, string $id, ?string $valor, int $anios = 100): string
+    {
+        $dia = $mes = $anio = 0;
+        if ($valor !== null && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $valor, $m) === 1) {
+            [$anio, $mes, $dia] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        }
+
+        // Abreviados: con el nombre completo, las tres listas no entran en un celular.
+        $meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        $opcion = static fn (int $v, string $texto, int $elegido): string =>
+            '<option value="' . $v . '"' . ($v === $elegido ? ' selected' : '') . '>' . e($texto) . '</option>';
+
+        $html = '<div class="campo-fecha" data-campo-fecha data-max="' . e(date('Y-m-d')) . '">'
+            . '<input type="hidden" name="' . e($nombre) . '" value="' . e($valor ?? '') . '">';
+
+        $html .= '<select class="form-select" id="' . e($id) . '" data-parte="dia" aria-label="Día"><option value="">Día</option>';
+        for ($d = 1; $d <= 31; $d++) {
+            $html .= $opcion($d, (string) $d, $dia);
+        }
+
+        $html .= '</select><select class="form-select" data-parte="mes" aria-label="Mes"><option value="">Mes</option>';
+        foreach ($meses as $i => $nombreMes) {
+            $html .= $opcion($i + 1, $nombreMes, $mes);
+        }
+
+        // Años de este hacia atrás: las fechas de nacimiento están lejos de hoy.
+        $html .= '</select><select class="form-select" data-parte="anio" aria-label="Año"><option value="">Año</option>';
+        $actual = (int) date('Y');
+        for ($a = $actual; $a >= $actual - $anios; $a--) {
+            $html .= $opcion($a, (string) $a, $anio);
+        }
+
+        return $html . '</select></div>';
+    }
 }
