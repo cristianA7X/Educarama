@@ -66,6 +66,19 @@ final class ProtagonistaController extends Controlador
     // -----------------------------------------------------------------
 
     /**
+     * Nómina general: todos los protagonistas del usuario en una tabla con
+     * progresión básica. Sin parámetros: muestra todas las secciones accesibles.
+     *
+     * Datos: 'nomina' (ProtagonistaEnNomina[]).
+     */
+    public function paginaNomina(): Respuesta
+    {
+        return Respuesta::pagina([
+            'nomina' => $this->protagonistas->nomina($this->usuario()->id),
+        ]);
+    }
+
+    /**
      * Datos: 'seccion' (SeccionEnPantalla), 'protagonistas' (FichaProtagonista[]),
      * 'patrullas' (Patrulla[], para mostrar y filtrar por patrulla).
      *
@@ -82,6 +95,7 @@ final class ProtagonistaController extends Controlador
             'seccion'       => $seccion,
             'protagonistas' => $this->protagonistas->listarPorSeccion($idUsuario, $idSeccion),  // 403 si es Supervisor
             'patrullas'     => $this->patrullas->listarPorSeccion($idUsuario, $idSeccion),
+            'nomina'        => $this->protagonistas->nominaPorSeccion($idUsuario, $idSeccion),
         ]);
     }
 

@@ -35,7 +35,7 @@ require __DIR__ . '/../includes/cabecera.php';
     <div>
         <h1 class="fw-bold mb-1"><?= e($nombre) ?><?= $edad !== null ? ', ' . $edad . ' años' : '' ?></h1>
         <p class="mb-0 fw-bold">
-            <a class="text-reset" href="<?= e(url('views/pages/perfil_seccion.php?id=' . $seccion->seccion->id)) ?>"><?= e($seccion->seccion->nombre) ?></a>
+            <a class="text-reset" href="<?= e(url('views/pages/perfil_seccion.php?id=' . $seccion->seccion->id)) ?>"><?= e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) ?></a>
             · <?= e($seccion->rama->titulo) ?>
         </p>
     </div>
@@ -358,7 +358,7 @@ require __DIR__ . '/../includes/cabecera.php';
                     <label for="id_seccion" class="form-label">Sección de destino</label>
                     <select class="form-select" id="id_seccion" name="id_seccion" required>
                         <?php foreach ($datos['seccionesDestino'] as $destino): ?>
-                            <option value="<?= (int) $destino->seccion->id ?>"><?= e($destino->seccion->nombre) ?> (<?= e($destino->rama->titulo) ?>)</option>
+                            <option value="<?= (int) $destino->seccion->id ?>"><?= e(Vista::nombreCompletoSeccion($destino->seccion->nombre, $destino->rama->id)) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

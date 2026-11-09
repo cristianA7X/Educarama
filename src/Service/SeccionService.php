@@ -156,7 +156,7 @@ final class SeccionService extends ServicioBase
         }
 
         $grupos = array_map(fn (int $id) => $this->grupo($idUsuario, $id), array_keys($idsGrupo));
-        usort($grupos, fn (GrupoEnPantalla $a, GrupoEnPantalla $b) => strcmp($a->grupo->nombre, $b->grupo->nombre));
+        usort($grupos, fn (GrupoEnPantalla $a, GrupoEnPantalla $b) => strcmp($a->grupo->codigo, $b->grupo->codigo));
 
         return $grupos;
     }

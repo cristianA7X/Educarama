@@ -237,6 +237,32 @@ final class AccesoService extends ServicioBase
     }
 
     // =================================================================
+    // Vista de solo lectura: miembros por sección de un grupo
+    // =================================================================
+
+    /**
+     * Los accesos de cada sección del grupo, para el desplegable de solo lectura
+     * en la pantalla de roles del grupo. Solo el Jefe de grupo (que hereda Jefe
+     * en todas las secciones) puede verlo.
+     *
+     * @return list<array{seccion: Seccion, accesos: UsuarioConAcceso[]}>
+     */
+    public function accesosPorSeccionDeGrupo(int $idUsuario, int $idGrupo): array
+    {
+        $this->exigirJefeDeGrupo($idUsuario, $idGrupo);
+
+        $resultado = [];
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            $resultado[] = [
+                'seccion' => $seccion,
+                'accesos' => $this->accesosSeccion->listarUsuariosPorSeccion((int) $seccion->id),
+            ];
+        }
+
+        return $resultado;
+    }
+
+    // =================================================================
     // Auxiliares
     // =================================================================
 

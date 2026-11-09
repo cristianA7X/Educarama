@@ -35,7 +35,7 @@ spl_autoload_register(function (string $clase): void {
     // El más específico va primero: si no, Educarama\Config\... buscaría en src/Config/.
     $prefijos = [
         'Educarama\\Config\\' => __DIR__ . '/',
-        'Educarama\\'         => __DIR__ . '/../src/',
+        'Educarama\\' => __DIR__ . '/../src/',
     ];
 
     foreach ($prefijos as $prefijo => $carpeta) {

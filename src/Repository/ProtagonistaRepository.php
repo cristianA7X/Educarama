@@ -7,6 +7,7 @@ namespace Educarama\Repository;
 
 use Educarama\Model\Protagonista;
 use Educarama\Repository\Vista\FichaProtagonista;
+use Educarama\Repository\Vista\ProtagonistaEnNomina;
 
 /**
  * Lectura y escritura de `protagonista`.
@@ -117,6 +118,78 @@ final class ProtagonistaRepository extends RepositorioBase
            FROM protagonista p
            JOIN persona per     ON per.id = p.id_persona
            LEFT JOIN patrulla pa ON pa.id = p.id_patrulla';
+
+    // -----------------------------------------------------------------
+    // Nómina general (protagonistas de varias secciones con progresión)
+    // -----------------------------------------------------------------
+
+    /**
+     * Todos los protagonistas de las secciones indicadas, con datos personales,
+     * sección, grupo, rama, patrulla, etapa actual y competencias desarrolladas
+     * vs. total. Una sola consulta con JOINs y subqueries.
+     *
+     * @param int[] $idsSecciones
+     * @return ProtagonistaEnNomina[]
+     */
+    public function listarNomina(array $idsSecciones): array
+    {
+        if ($idsSecciones === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($idsSecciones), '?'));
+
+        return $this->listar(
+            "SELECT p.id, p.anio_ingreso, p.promesa, p.id_seccion, p.id_patrulla,
+                    per.dni              AS persona_dni,
+                    per.nombre           AS persona_nombre,
+                    per.apellido         AS persona_apellido,
+                    per.fecha_nacimiento AS persona_fecha_nacimiento,
+                    pa.nombre            AS patrulla_nombre,
+                    s.nombre             AS seccion_nombre,
+                    g.id                 AS grupo_id,
+                    g.codigo             AS grupo_codigo,
+                    g.nombre             AS grupo_nombre,
+                    r.id                 AS rama_id,
+                    r.titulo             AS rama_titulo,
+                    ult_e.titulo         AS etapa_actual_titulo,
+                    COALESCE(cd.desarrolladas, 0) AS competencias_desarrolladas,
+                    COALESCE(ct.total, 0)         AS competencias_total
+               FROM protagonista p
+               JOIN persona per     ON per.id = p.id_persona
+               LEFT JOIN patrulla pa ON pa.id = p.id_patrulla
+               JOIN seccion s       ON s.id = p.id_seccion
+               JOIN grupo g         ON g.id = s.id_grupo
+               JOIN rama r          ON r.id = s.id_rama
+               LEFT JOIN (
+                   SELECT el.id_protagonista, e.titulo
+                     FROM etapa_lograda el
+                     JOIN etapa e ON e.id = el.id_etapa
+                    WHERE e.numero = (
+                        SELECT MAX(e2.numero)
+                          FROM etapa_lograda el2
+                          JOIN etapa e2 ON e2.id = el2.id_etapa
+                         WHERE el2.id_protagonista = el.id_protagonista
+                           AND e2.id_rama = e.id_rama
+                    )
+               ) AS ult_e ON ult_e.id_protagonista = p.id
+               LEFT JOIN (
+                   SELECT id_protagonista, COUNT(*) AS desarrolladas
+                     FROM competencia_protagonista
+                    WHERE estado = 'desarrollada'
+                    GROUP BY id_protagonista
+               ) AS cd ON cd.id_protagonista = p.id
+               LEFT JOIN (
+                   SELECT id_rama, COUNT(*) AS total
+                     FROM competencia
+                    GROUP BY id_rama
+               ) AS ct ON ct.id_rama = s.id_rama
+              WHERE p.id_seccion IN ($placeholders)
+              ORDER BY per.apellido, per.nombre",
+            array_values($idsSecciones),
+            ProtagonistaEnNomina::class,
+        );
+    }
 
     /**
      * Guarda un protagonista nuevo, le completa el id y lo devuelve.

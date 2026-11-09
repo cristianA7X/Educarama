@@ -7,6 +7,8 @@ namespace Educarama\Controller;
 
 use Educarama\Helper\Flash;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use Educarama\Service\SeccionService;
+use Educarama\Service\UsuarioService;
 
 /**
  * Cuentas: login, registro, logout y "Mi cuenta" (cambiar la contraseña).
@@ -29,6 +31,16 @@ final class UsuarioController extends Controlador
 
     /** Adónde va una cuenta recién creada: todavía no tiene accesos. */
     private const SOLICITUD_ALTA = 'views/pages/solicitud_alta.php';
+
+    private SeccionService $secciones;
+
+    public function __construct(
+        ?UsuarioService $usuarioService = null,
+        ?SeccionService $secciones = null,
+    ) {
+        parent::__construct($usuarioService);
+        $this->secciones = $secciones ?? new SeccionService();
+    }
 
     // -----------------------------------------------------------------
     // Páginas
@@ -57,7 +69,11 @@ final class UsuarioController extends Controlador
 
     public function paginaMiCuenta(): Respuesta
     {
-        return Respuesta::pagina(['usuario' => $this->usuario()]);
+        $usuario = $this->usuario();
+        return Respuesta::pagina([
+            'usuario' => $usuario,
+            'grupos'  => $this->secciones->misGrupos($usuario->id),
+        ]);
     }
 
     // -----------------------------------------------------------------

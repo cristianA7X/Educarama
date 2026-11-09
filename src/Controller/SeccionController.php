@@ -14,8 +14,9 @@ use Educarama\Service\UsuarioService;
  * crean ni se editan desde la aplicación (nacen al aprobar una solicitud de alta).
  *
  * Páginas (GET, desde views/pages/):
- *   paginaPerfil  perfil_seccion.php?id=   Cualquier acceso a la sección (Supervisor incluido)
- *   paginaGrupo   grupo.php?id=            Rol de grupo, o acceso a alguna de sus secciones
+ *   paginaSecciones  secciones.php           Todas las secciones del usuario
+ *   paginaPerfil     perfil_seccion.php?id= Cualquier acceso a la sección (Supervisor incluido)
+ *   paginaGrupo      grupo.php?id=          Rol de grupo, o acceso a alguna de sus secciones
  *
  * Reemplaza a perfil_rama.php y ramas.php del legacy (en el legacy, "rama"
  * era la instancia: hoy es la sección).
@@ -33,6 +34,14 @@ final class SeccionController extends Controlador
         parent::__construct($usuarioService);
         $this->secciones = $secciones ?? new SeccionService();
         $this->eventos = $eventos ?? new EventoService();
+    }
+
+    /** Vista general de secciones: todas las del usuario, agrupadas por grupo. */
+    public function paginaSecciones(): Respuesta
+    {
+        return Respuesta::pagina([
+            'grupos' => $this->secciones->misGrupos($this->usuario()->id),
+        ]);
     }
 
     /**

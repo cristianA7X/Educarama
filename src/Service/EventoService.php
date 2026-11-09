@@ -17,8 +17,10 @@ use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Vista\EventoConSecciones;
+use Educarama\Service\Vista\GrupoEnPantalla;
 use Educarama\Service\Vista\EventoEnPantalla;
 use Educarama\Service\Vista\EventosEnPantalla;
+use Educarama\Service\Vista\EventosGenerales;
 use Educarama\Service\Vista\OpcionesEvento;
 
 /**
@@ -54,6 +56,7 @@ final class EventoService extends ServicioBase
     private EventoSeccionRepository $eventoSecciones;
     private GrupoRepository $grupos;
     private SeccionRepository $secciones;
+    private SeccionService $seccionService;
 
     public function __construct(
         ?PermisoService $permisos = null,
@@ -61,6 +64,7 @@ final class EventoService extends ServicioBase
         ?EventoSeccionRepository $eventoSecciones = null,
         ?GrupoRepository $grupos = null,
         ?SeccionRepository $secciones = null,
+        ?SeccionService $seccionService = null,
     ) {
         parent::__construct();
         $this->permisos = $permisos ?? new PermisoService();
@@ -68,6 +72,7 @@ final class EventoService extends ServicioBase
         $this->eventoSecciones = $eventoSecciones ?? new EventoSeccionRepository();
         $this->grupos = $grupos ?? new GrupoRepository();
         $this->secciones = $secciones ?? new SeccionRepository();
+        $this->seccionService = $seccionService ?? new SeccionService();
     }
 
     // -----------------------------------------------------------------
@@ -191,6 +196,88 @@ final class EventoService extends ServicioBase
             ?? throw new \LogicException('listarPorSeccion ya exigió acceso a la sección.');
 
         return $this->armarPantalla($idUsuario, $this->seccion($idSeccion)->idGrupo, $lista, $nivel, $incluirInactivos);
+    }
+
+    /**
+     * Todos los eventos que el usuario puede ver en todos sus grupos, agrupados
+     * por grupo. Para la pantalla general de eventos (drawer → Eventos).
+     *
+     * Por cada grupo donde tiene acceso: si tiene rol de grupo, usa pantallaGrupo;
+     * si solo tiene secciones, arma una pantalla con los eventos de esas secciones
+     * (deduplicados, porque un evento de todo el grupo aparece en cada sección).
+     */
+    public function eventosGenerales(int $idUsuario): EventosGenerales
+    {
+        $grupos = $this->seccionService->misGrupos($idUsuario);
+
+        $porGrupo = [];
+        foreach ($grupos as $grupoPantalla) {
+            $idGrupo = (int) $grupoPantalla->grupo->id;
+
+            if ($grupoPantalla->tieneRolDeGrupo()) {
+                $pantalla = $this->pantallaGrupo($idUsuario, $idGrupo);
+            } else {
+                // Sin rol de grupo: junta los eventos de cada sección accesible sin repetir.
+                $pantalla = $this->pantallaDesdeSeccionesDelUsuario($idUsuario, $idGrupo, $grupoPantalla);
+            }
+
+            $porGrupo[] = ['grupo' => $grupoPantalla, 'pantalla' => $pantalla];
+        }
+
+        return new EventosGenerales($porGrupo);
+    }
+
+    /**
+     * Arma una EventosEnPantalla para un grupo donde el usuario NO tiene rol de
+     * grupo, juntando los eventos de las secciones a las que sí tiene acceso.
+     */
+    private function pantallaDesdeSeccionesDelUsuario(int $idUsuario, int $idGrupo, GrupoEnPantalla $grupoPantalla): EventosEnPantalla
+    {
+        $porId = [];
+        $nivelMayor = null;
+
+        foreach ($grupoPantalla->secciones as $secPantalla) {
+            $idSeccion = (int) $secPantalla->seccion->id;
+            $nivel = $this->permisos->nivelEnSeccion($idUsuario, $idSeccion);
+            if ($nivel === null) {
+                continue;
+            }
+            if ($nivelMayor === null || $nivel->value > $nivelMayor->value) {
+                $nivelMayor = $nivel;
+            }
+
+            $lista = $this->armarListado(
+                $this->eventos->listarPorSeccion($idSeccion),
+                $idGrupo, $nivel, false, false
+            );
+            foreach ($lista as $e) {
+                $porId[$e->evento->id] = $e;
+            }
+        }
+
+        // Ordenar por fecha.
+        $unicos = array_values($porId);
+        usort($unicos, fn (EventoConSecciones $a, EventoConSecciones $b) =>
+            [$a->evento->fechaInicio, $a->evento->id] <=> [$b->evento->fechaInicio, $b->evento->id]);
+
+        $nombres = [];
+        foreach ($this->secciones->listarPorGrupo($idGrupo) as $seccion) {
+            $nombres[(int) $seccion->id] = $seccion->nombre;
+        }
+
+        $eventosEnPantalla = array_map(fn (EventoConSecciones $e) => new EventoEnPantalla(
+            evento: $e,
+            puedeEditar: $this->puedeEscribir($idUsuario, $idGrupo, $e->idSecciones, NivelRol::Responsable),
+            puedeEliminar: $this->puedeEscribir($idUsuario, $idGrupo, $e->idSecciones, NivelRol::Jefe),
+        ), $unicos);
+
+        return new EventosEnPantalla(
+            eventos: $eventosEnPantalla,
+            nombresSecciones: $nombres,
+            puedeCrear: $this->calcularOpciones($idUsuario, $idGrupo)->hayAlgunaOpcion(),
+            puedeVerInactivos: $nivelMayor !== null && $nivelMayor->value >= NivelRol::Responsable->value,
+            incluyeInactivos: false,
+        );
     }
 
     /**

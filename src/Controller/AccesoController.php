@@ -75,9 +75,10 @@ final class AccesoController extends Controlador
         $pantalla = $this->accesos->pantallaGrupo($idUsuario, $idGrupo);
 
         return Respuesta::pagina([
-            'modo'     => 'grupo',
-            'grupo'    => $this->secciones->grupo($idUsuario, $idGrupo),
-            'pantalla' => $pantalla,
+            'modo'              => 'grupo',
+            'grupo'             => $this->secciones->grupo($idUsuario, $idGrupo),
+            'pantalla'          => $pantalla,
+            'accesosSecciones'  => $this->accesos->accesosPorSeccionDeGrupo($idUsuario, $idGrupo),
         ]);
     }
 

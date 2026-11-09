@@ -11,9 +11,11 @@ require_once __DIR__ . '/../../config/bootstrap.php';
 use Educarama\Controller\Pagina;
 use Educarama\Controller\UsuarioController;
 use Educarama\Helper\Csrf;
+use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => (new UsuarioController())->paginaMiCuenta());
 $usuario = $datos['usuario'];
+$grupos = $datos['grupos'];
 
 $tituloPagina = 'Mi cuenta';
 $contenedorAngosto = true;
@@ -32,6 +34,38 @@ require __DIR__ . '/../includes/cabecera.php';
         <dd class="mb-0"><?= e($usuario->email) ?></dd>
     </dl>
 </section>
+
+<?php if ($grupos !== []): ?>
+<section class="tarjeta-blanca-borde p-4 mb-4">
+    <h2 class="h5 texto-violeta fw-bold">Mis roles</h2>
+    <?php foreach ($grupos as $grupoPantalla): ?>
+        <div class="mb-3">
+            <p class="fw-bold mb-1">
+                <i class="bi bi-house-door me-1" aria-hidden="true"></i><?= e(Vista::nombreCompletoGrupo($grupoPantalla->grupo->nombre)) ?>
+                <?php if ($grupoPantalla->nivel !== null): ?>
+                    <span class="badge text-bg-secondary ms-1"><?= e($grupoPantalla->nivel->etiqueta()) ?> del grupo</span>
+                <?php endif; ?>
+            </p>
+            <?php
+            $seccionesConRol = array_filter($grupoPantalla->secciones, fn ($s) => $s->nivel !== null);
+            if ($seccionesConRol !== []):
+            ?>
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($seccionesConRol as $secPantalla): ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-0">
+                            <span>
+                                <i class="bi <?= e(Vista::iconoRama($secPantalla->rama->id)) ?> me-1" aria-hidden="true"></i>
+                                <?= e(Vista::nombreCompletoSeccion($secPantalla->seccion->nombre, $secPantalla->rama->id)) ?>
+                            </span>
+                            <span class="badge text-bg-secondary"><?= e($secPantalla->nivel->etiqueta()) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+</section>
+<?php endif; ?>
 
 <section class="tarjeta-blanca-borde p-4">
     <h2 class="h5 texto-violeta fw-bold">Cambiar la contraseña</h2>

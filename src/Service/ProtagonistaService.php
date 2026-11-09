@@ -13,6 +13,7 @@ use Educarama\Repository\PersonaRepository;
 use Educarama\Repository\ProtagonistaRepository;
 use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\Vista\FichaProtagonista;
+use Educarama\Repository\Vista\ProtagonistaEnNomina;
 use Educarama\Service\Vista\SeccionEnPantalla;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
@@ -66,6 +67,34 @@ final class ProtagonistaService extends ServicioBase
     // -----------------------------------------------------------------
     // Lectura (Ayudante en adelante)
     // -----------------------------------------------------------------
+
+    /**
+     * Nómina general: todos los protagonistas de las secciones a las que el
+     * usuario tiene acceso (Ayudante en adelante), con progresión básica.
+     * Para la tabla/nómina transversal entre secciones y grupos.
+     *
+     * @return ProtagonistaEnNomina[]
+     */
+    public function nomina(int $idUsuario): array
+    {
+        $idsSecciones = [];
+        foreach ($this->seccionService->misGrupos($idUsuario) as $grupo) {
+            foreach ($grupo->secciones as $seccion) {
+                if ($seccion->puedeVerDetalle()) {
+                    $idsSecciones[] = (int) $seccion->seccion->id;
+                }
+            }
+        }
+
+        return $this->protagonistas->listarNomina($idsSecciones);
+    }
+
+    /** Nómina de una sola sección (para la vista tabla en la pantalla de la sección). */
+    public function nominaPorSeccion(int $idUsuario, int $idSeccion): array
+    {
+        $this->permisos->exigirVisibleEnSeccion($idUsuario, $idSeccion, NivelRol::Ayudante, 'La sección no existe.');
+        return $this->protagonistas->listarNomina([$idSeccion]);
+    }
 
     /** @return FichaProtagonista[] Los de la sección, por apellido y nombre. */
     public function listarPorSeccion(int $idUsuario, int $idSeccion): array

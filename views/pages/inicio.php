@@ -47,7 +47,7 @@ require __DIR__ . '/../includes/cabecera.php';
         <?php elseif ($solicitud->estado === EstadoSolicitud::Pendiente): ?>
             <div class="alert alert-warning">
                 <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
-                Tu solicitud para el grupo <strong><?= e($solicitud->datosGrupo['codigo']) ?> · <?= e($solicitud->datosGrupo['nombre']) ?></strong>
+                Tu solicitud para <strong><?= e(Vista::nombreCompletoGrupo($solicitud->datosGrupo['nombre'])) ?></strong>
                 (enviada el <?= e(Vista::fechaDeFechaHora($solicitud->fecha)) ?>) está pendiente de revisión.
             </div>
             <a href="<?= e(url('views/pages/solicitud_alta.php')) ?>" class="btn btn-outline-secondary">Ver mi solicitud</a>
@@ -70,10 +70,12 @@ require __DIR__ . '/../includes/cabecera.php';
     $idGrupo = (int) $grupoPantalla->grupo->id;
     ?>
     <section class="mb-5" aria-labelledby="grupo-<?= $idGrupo ?>">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h2 class="home-section-title m-0" id="grupo-<?= $idGrupo ?>">
-                Grupo <?= e($grupoPantalla->grupo->codigo) ?> · <?= e($grupoPantalla->grupo->nombre) ?>
-            </h2>
+        <div class="encabezado-grupo d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 p-3 rounded-3">
+            <div>
+                <h2 class="h4 fw-bold texto-violeta m-0" id="grupo-<?= $idGrupo ?>">
+                    <?= e(Vista::nombreCompletoGrupo($grupoPantalla->grupo->nombre)) ?>
+                </h2>
+            </div>
             <a href="<?= e(url('views/pages/grupo.php?id=' . $idGrupo)) ?>" class="btn btn-outline-secondary btn-sm">
                 Resumen del grupo <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
@@ -83,7 +85,7 @@ require __DIR__ . '/../includes/cabecera.php';
             <?php foreach ($grupoPantalla->secciones as $seccion): ?>
                 <?php
                 $contenido = '<div class="rama-icono"><i class="bi ' . e(Vista::iconoRama($seccion->rama->id)) . '" aria-hidden="true"></i></div>'
-                    . '<div><h3>' . e($seccion->seccion->nombre) . '</h3>'
+                    . '<div><h3>' . e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) . '</h3>'
                     . '<p>' . e($seccion->rama->titulo) . ($seccion->nivel !== null ? ' · ' . e($seccion->nivel->etiqueta()) : '') . '</p></div>';
                 ?>
                 <div class="col-12 col-md-6">

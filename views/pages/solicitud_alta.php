@@ -51,7 +51,7 @@ foreach ($datos['ramas'] as $rama) {
                 </div>
                 <div class="col-md-8">
                     <label for="nombre" class="form-label">Nombre del grupo</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100" required>
+                    <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100" placeholder="Ej: Los Aromos" required>
                 </div>
             </div>
 
@@ -62,7 +62,7 @@ foreach ($datos['ramas'] as $rama) {
                 <div class="row g-2 align-items-end fila-seccion">
                     <div class="col-12 col-md-6">
                         <label class="form-label">Nombre de la sección</label>
-                        <input type="text" class="form-control" name="seccion_nombre[]" maxlength="100" required>
+                        <input type="text" class="form-control" name="seccion_nombre[]" maxlength="100" placeholder="Ej: Luna Llena" required>
                     </div>
                     <div class="col-9 col-md-5">
                         <label class="form-label">Rama</label>
@@ -80,7 +80,7 @@ foreach ($datos['ramas'] as $rama) {
                 <div class="row g-2 align-items-end fila-seccion">
                     <div class="col-12 col-md-6">
                         <label class="form-label">Nombre de la sección</label>
-                        <input type="text" class="form-control" name="seccion_nombre[]" maxlength="100" required>
+                        <input type="text" class="form-control" name="seccion_nombre[]" maxlength="100" placeholder="Ej: Luna Llena" required>
                     </div>
                     <div class="col-9 col-md-5">
                         <label class="form-label">Rama</label>
@@ -113,14 +113,14 @@ foreach ($datos['ramas'] as $rama) {
             <article class="tarjeta-blanca-borde p-3">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                     <h3 class="h6 fw-bold mb-0">
-                        Grupo <?= e($s->solicitud->datosGrupo['codigo']) ?> · <?= e($s->solicitud->datosGrupo['nombre']) ?>
+                        <?= e(Vista::nombreCompletoGrupo($s->solicitud->datosGrupo['nombre'])) ?>
                     </h3>
                     <span class="badge text-bg-<?= e(Vista::colorEstado($s->solicitud->estado)) ?>"><?= e($s->solicitud->estado->etiqueta()) ?></span>
                 </div>
                 <p class="small text-muted mb-2">Enviada el <?= e(Vista::fechaDeFechaHora($s->solicitud->fecha)) ?></p>
                 <ul class="mb-0">
                     <?php foreach ($s->secciones as $seccion): ?>
-                        <li><?= e($seccion['nombre']) ?> <span class="text-muted">· <?= e($seccion['rama']) ?></span></li>
+                        <li><?= e(Vista::nombreCompletoSeccion($seccion['nombre'], $seccion['id_rama'])) ?> <span class="text-muted">· <?= e($seccion['rama']) ?></span></li>
                     <?php endforeach; ?>
                 </ul>
                 <?php if ($s->solicitud->estado === EstadoSolicitud::Rechazada): ?>

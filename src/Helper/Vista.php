@@ -18,19 +18,37 @@ final class Vista
     private function __construct() {}
 
     /**
-     * Clase CSS de la rama, que define sus colores (--rama-primario y
-     * --rama-secundario en public/css/styles.css). Sale del id de la rama, nunca
-     * del nombre de la sección (bug del legacy: deducirla con strpos).
+     * Clase CSS de la rama. Define sus cuatro colores en public/css/styles.css
+     * (--rama-primario, --rama-secundario, --rama-oscuro y --rama-contraste) y
+     * el degradado del banner. Sale del id de la rama, nunca del nombre de la
+     * sección (bug del legacy: deducirla con strpos).
      * Sin rama (o un id desconocido), '' = la paleta violeta de siempre.
      */
     public static function claseRama(?int $idRama): string
     {
         return match ($idRama) {
-            1       => 'rama-manada',
-            2       => 'rama-unidad',
+            1       => 'rama-lobatos',
+            2       => 'rama-scouts',
             3       => 'rama-caminantes',
-            4       => 'rama-rover',
+            4       => 'rama-rovers',
             default => '',
+        };
+    }
+
+    /**
+     * Color de la rama para usar como texto sobre blanco, fuera de la clase
+     * rama-* (ej. el nombre de la sección en la nómina). Es el mismo valor que
+     * --rama-contraste: el tono de cada bandera que llega a 4,5:1 sobre blanco.
+     * El amarillo de Lobatos y Lobeznas no llega, así que se usa oscurecido.
+     */
+    public static function colorRama(?int $idRama): string
+    {
+        return match ($idRama) {
+            1       => '#a06a00', // Lobatos y Lobeznas (amarillo oficial oscurecido hasta 4,6:1)
+            2       => '#406f33', // Scouts (Pantone 7743 C)
+            3       => '#116483', // Caminantes (Pantone 2392 C)
+            4       => '#931b25', // Rovers (Pantone 7623 C)
+            default => '#791fbf', // Violeta oficial
         };
     }
 
@@ -38,7 +56,7 @@ final class Vista
     public static function iconoRama(?int $idRama): string
     {
         return match ($idRama) {
-            1       => 'bi-stars',
+            1       => 'bi-star-fill',
             2       => 'bi-compass',
             3       => 'bi-signpost-split',
             4       => 'bi-globe-americas',
@@ -136,6 +154,41 @@ final class Vista
     public static function fechaDeFechaHora(?string $fechaHora): string
     {
         return self::fecha($fechaHora === null ? null : substr($fechaHora, 0, 10));
+    }
+
+    /**
+     * Prefijo de sección según la rama, para concatenar con el nombre particular.
+     * Ej: prefijoSeccion(1) → 'Manada', prefijoSeccion(3) → 'Comunidad Caminante'.
+     */
+    public static function prefijoSeccion(int $idRama): string
+    {
+        return match ($idRama) {
+            1       => 'Manada',
+            2       => 'Unidad',
+            3       => 'Comunidad Caminante',
+            4       => 'Comunidad Rover',
+            default => '',
+        };
+    }
+
+    /**
+     * Nombre completo de la sección: prefijo de la rama + nombre particular.
+     * Ej: nombreCompletoSeccion('Luna Llena', 1) → 'Manada Luna Llena'.
+     */
+    public static function nombreCompletoSeccion(string $nombre, int $idRama): string
+    {
+        $prefijo = self::prefijoSeccion($idRama);
+
+        return $prefijo !== '' ? "$prefijo $nombre" : $nombre;
+    }
+
+    /**
+     * Nombre completo del grupo: "Grupo Scout" + nombre particular.
+     * Ej: nombreCompletoGrupo('Los Aromos') → 'Grupo Scout Los Aromos'.
+     */
+    public static function nombreCompletoGrupo(string $nombre): string
+    {
+        return "Grupo Scout $nombre";
     }
 
     /** '2026-11-14' → '14/11/2026'. Si no es una fecha 'AAAA-MM-DD', la devuelve igual. */

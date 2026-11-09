@@ -52,6 +52,19 @@ final class EventoController extends Controlador
     // -----------------------------------------------------------------
 
     /**
+     * Vista general de eventos: todos los eventos de todos los grupos a los que
+     * el usuario tiene acceso. Sin parámetros (drawer → Eventos).
+     *
+     * Datos: 'generales' (EventosGenerales).
+     */
+    public function paginaGeneral(): Respuesta
+    {
+        return Respuesta::pagina([
+            'generales' => $this->eventos->eventosGenerales($this->usuario()->id),
+        ]);
+    }
+
+    /**
      * Datos: 'modo' ('grupo' | 'seccion'), 'grupo' (GrupoEnPantalla, en modo
      * grupo) o 'seccion' (SeccionEnPantalla, en modo sección), y 'pantalla'
      * (EventosEnPantalla).

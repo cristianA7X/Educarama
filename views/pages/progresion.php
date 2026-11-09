@@ -46,9 +46,26 @@ require __DIR__ . '/../includes/cabecera.php';
     </a>
 </section>
 
-<!-- ================================================================ ETAPAS -->
-<h2 class="home-section-title mt-0">Etapas</h2>
-<div class="d-grid gap-3 mb-5">
+<!-- ================================================================ PESTAÑAS -->
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-etapas" data-bs-toggle="tab" data-bs-target="#panel-etapas" type="button" role="tab" aria-controls="panel-etapas" aria-selected="true">
+            <i class="bi bi-layers me-1" aria-hidden="true"></i>Etapas
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-insignias" data-bs-toggle="tab" data-bs-target="#panel-insignias" type="button" role="tab" aria-controls="panel-insignias" aria-selected="false">
+            <i class="bi bi-award me-1" aria-hidden="true"></i>Insignias
+            <?php if ($resumen->insigniaPendiente !== null): ?>
+                <span class="badge text-bg-warning ms-1">1 pendiente</span>
+            <?php endif; ?>
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="panel-etapas" role="tabpanel" aria-labelledby="tab-etapas">
+<div class="d-grid gap-3 mb-4">
     <?php foreach ($pantalla->etapas as $e): ?>
         <?php
         $etapa = $e->etapa;
@@ -150,11 +167,11 @@ require __DIR__ . '/../includes/cabecera.php';
         <div class="alert alert-success mb-0"><i class="bi bi-trophy me-1" aria-hidden="true"></i>Logró todas las etapas de la rama.</div>
     <?php endif; ?>
 </div>
+</div><!-- /panel-etapas -->
 
-<!-- ================================================================ INSIGNIAS -->
-<h2 class="home-section-title">Insignias</h2>
-<p class="small text-muted">Se registra la entrega física, con su fecha. La de una etapa se entrega cuando la etapa empieza.</p>
-<div class="row g-3 mb-5">
+<div class="tab-pane fade" id="panel-insignias" role="tabpanel" aria-labelledby="tab-insignias">
+<p class="small text-muted mb-3">Se registra la entrega física, con su fecha. La de una etapa se entrega cuando la etapa empieza.</p>
+<div class="row g-3 mb-4">
     <?php foreach ($pantalla->insignias as $i): ?>
         <?php
         $idInsignia = (int) $i->insignia->id;
@@ -194,6 +211,8 @@ require __DIR__ . '/../includes/cabecera.php';
         </div>
     <?php endforeach; ?>
 </div>
+</div><!-- /panel-insignias -->
+</div><!-- /tab-content -->
 
 <!-- ================================================================ ESPECIALIDADES -->
 <?php if ($pantalla->especialidades !== []): ?>

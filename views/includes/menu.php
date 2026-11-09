@@ -4,9 +4,10 @@
 // El menú lateral (drawer). Lo incluye views/includes/cabecera.php, que antes
 // carga $datosMenu con MenuController.
 //
-// Es contextual: Inicio, cada grupo del usuario con sus secciones (cada una
-// con sus links según el rol que tiene) y, al final, su cuenta. Un link que
-// el usuario no puede usar no se muestra.
+// Items: Inicio, Grupos (dropdown con los grupos del usuario, sus Eventos y
+// Roles si tiene permiso), Secciones y Protagonistas (links directos; las views
+// generales todavía no existen, apuntan al inicio con fragmento). El filtro por
+// grupo/sección/rama va en cada view, no en el drawer.
 //
 // Por debajo de 992 px es un cajón que se abre encima del contenido; desde
 // 992 px está a la vista y se oculta con el botón de la barra superior
@@ -20,13 +21,12 @@ use Educarama\Model\Enum\NivelRol;
 $usuarioMenu = $datosMenu['usuario'];
 $urlActual = $_SERVER['REQUEST_URI'] ?? '';
 
-// El link de la página actual se marca; ?id=3&inactivos=1 sigue siendo ?id=3.
 $esActivo = static function (string $ruta) use ($urlActual): bool {
     $url = url($ruta);
     return $url === $urlActual || str_starts_with($urlActual, $url . '&');
 };
 
-/** Un link del menú. @param string $ruta Relativa al proyecto, ej. 'views/pages/grupo.php?id=1' */
+/** Un link del menú. */
 $enlaceMenu = static function (string $ruta, string $icono, string $texto) use ($esActivo): void {
     $activo = $esActivo($ruta);
     printf(
@@ -38,6 +38,24 @@ $enlaceMenu = static function (string $ruta, string $icono, string $texto) use (
         e($texto),
     );
 };
+
+// Armar los links del dropdown de Grupos.
+// Por cada grupo: su página, Eventos (si tiene rol de grupo) y Roles (si es Jefe).
+$linksGrupos = [];
+
+foreach ($datosMenu['grupos'] as $grupoMenu) {
+    $idGrupo = (int) $grupoMenu->grupo->id;
+    $linksGrupos[] = ["views/pages/grupo.php?id=$idGrupo", 'bi-house-door', Vista::nombreCompletoGrupo($grupoMenu->grupo->nombre)];
+}
+
+// Eventos grupales: vista general filtrada a los de todo el grupo.
+if ($linksGrupos !== []) {
+    $linksGrupos[] = ['views/pages/eventos.php?grupales=1', 'bi-megaphone', 'Eventos grupales'];
+}
+
+$rutaSecciones = 'views/pages/secciones.php';
+$rutaProtagonistas = 'views/pages/protagonistas.php';
+$rutaEventos = 'views/pages/eventos.php';
 ?>
 <nav class="sidebar offcanvas offcanvas-start" id="menuLateral" tabindex="-1" aria-label="Menú principal">
     <div class="offcanvas-header d-lg-none">
@@ -46,62 +64,37 @@ $enlaceMenu = static function (string $ruta, string $icono, string $texto) use (
     </div>
 
     <div class="offcanvas-body">
-        <p class="menu-usuario mb-2"><i class="bi bi-person-circle me-1" aria-hidden="true"></i><?= e($usuarioMenu->nombre) ?></p>
+        <p class="menu-usuario mb-2"><i class="bi bi-person-circle me-1"
+                aria-hidden="true"></i><?= e($usuarioMenu->nombre) ?></p>
 
         <div class="nav">
             <?php $enlaceMenu('views/pages/inicio.php', 'bi-grid', 'Inicio'); ?>
 
-            <?php foreach ($datosMenu['grupos'] as $grupoMenu): ?>
+            <?php if ($linksGrupos !== []): ?>
                 <?php
-                $idGrupo = (int) $grupoMenu->grupo->id;
-                ?>
-                <p class="menu-titulo">Grupo <?= e($grupoMenu->grupo->codigo) ?> · <?= e($grupoMenu->grupo->nombre) ?></p>
-
-                <?php
-                $enlaceMenu("views/pages/grupo.php?id=$idGrupo", 'bi-house-door', 'Resumen del grupo');
-                if ($grupoMenu->tieneRolDeGrupo()) {
-                    $enlaceMenu("views/pages/eventos.php?id_grupo=$idGrupo", 'bi-megaphone', 'Eventos del grupo');
-                }
-                if ($grupoMenu->nivel === NivelRol::Jefe) {
-                    $enlaceMenu("views/pages/accesos.php?id_grupo=$idGrupo", 'bi-key', 'Accesos del grupo');
-                }
-                ?>
-
-                <?php foreach ($grupoMenu->secciones as $seccionMenu): ?>
-                    <?php
-                    // Una sección que el usuario ve solo por su rol de grupo no tiene páginas propias para él.
-                    if ($seccionMenu->nivel === null) {
-                        continue;
-                    }
-
-                    $idSeccion = (int) $seccionMenu->seccion->id;
-                    $enlaces = [["views/pages/perfil_seccion.php?id=$idSeccion", 'bi-info-circle', 'Perfil de la sección']];
-                    if ($seccionMenu->puedeVerDetalle()) {
-                        $enlaces[] = ["views/pages/protagonistas.php?id_seccion=$idSeccion", 'bi-people', 'Protagonistas'];
-                        if ($seccionMenu->pequenioEquipo() !== null) {
-                            $enlaces[] = ["views/pages/patrullas.php?id_seccion=$idSeccion", 'bi-shield-shaded', $seccionMenu->pequenioEquipo() . 's'];
-                        }
-                    }
-                    $enlaces[] = ["views/pages/eventos.php?id_seccion=$idSeccion", 'bi-megaphone', 'Eventos'];
-                    if ($seccionMenu->puedeEliminar()) {
-                        $enlaces[] = ["views/pages/accesos.php?id_seccion=$idSeccion", 'bi-key', 'Accesos'];
-                    }
-
-                    // Se despliega sola la sección donde está el usuario.
-                    $desplegada = array_filter($enlaces, fn (array $e) => $esActivo($e[0])) !== [];
-                    $idColapso = "menu-seccion-$idSeccion";
+                // Grupos: dropdown si hay más de un link, directo si hay uno solo.
+                if (count($linksGrupos) === 1) {
+                    $enlaceMenu($linksGrupos[0][0], 'bi-house-door', 'Grupos');
+                } else {
+                    $desplegada = array_filter($linksGrupos, fn(array $e) => $esActivo($e[0])) !== [];
                     ?>
-                    <a class="nav-link" href="#<?= e($idColapso) ?>" data-bs-toggle="collapse" role="button"
-                       aria-expanded="<?= $desplegada ? 'true' : 'false' ?>" aria-controls="<?= e($idColapso) ?>">
-                        <span class="punto-rama <?= e(Vista::claseRama($seccionMenu->rama->id)) ?>" aria-hidden="true"></span>
-                        <span><?= e($seccionMenu->seccion->nombre) ?></span>
+                    <a class="nav-link" href="#menu-grupos" data-bs-toggle="collapse" role="button"
+                        aria-expanded="<?= $desplegada ? 'true' : 'false' ?>" aria-controls="menu-grupos">
+                        <span class="icon"><i class="bi bi-house-door" aria-hidden="true"></i></span>
+                        <span>Grupos</span>
                         <i class="bi bi-chevron-down caret" aria-hidden="true"></i>
                     </a>
-                    <div class="sub-menu collapse<?= $desplegada ? ' show' : '' ?>" id="<?= e($idColapso) ?>">
-                        <?php foreach ($enlaces as [$ruta, $icono, $texto]) { $enlaceMenu($ruta, $icono, $texto); } ?>
+                    <div class="sub-menu collapse<?= $desplegada ? ' show' : '' ?>" id="menu-grupos">
+                        <?php foreach ($linksGrupos as [$ruta, $icono, $texto]) {
+                            $enlaceMenu($ruta, $icono, $texto);
+                        } ?>
                     </div>
-                <?php endforeach; ?>
-            <?php endforeach; ?>
+                <?php } ?>
+            <?php endif; ?>
+
+            <?php $enlaceMenu($rutaEventos, 'bi-megaphone', 'Eventos'); ?>
+            <?php $enlaceMenu($rutaSecciones, 'bi-flag', 'Secciones'); ?>
+            <?php $enlaceMenu($rutaProtagonistas, 'bi-people', 'Protagonistas'); ?>
 
             <div class="menu-separador"></div>
 
@@ -113,8 +106,8 @@ $enlaceMenu = static function (string $ruta, string $icono, string $texto) use (
             }
             ?>
 
-            <button type="button" class="nav-link" data-accion="usuario.cerrarSesion"
-                    data-confirmar="¿Cerrar sesión?" data-texto="Se cerrará tu sesión actual." data-boton="Sí, cerrar sesión">
+            <button type="button" class="nav-link" data-accion="usuario.cerrarSesion" data-confirmar="¿Cerrar sesión?"
+                data-texto="Se cerrará tu sesión actual." data-boton="Sí, cerrar sesión">
                 <span class="icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
                 <span>Cerrar sesión</span>
             </button>
