@@ -24,59 +24,60 @@
 -- Usuarios de prueba (contraseña de todos: educarama123)
 --
 --   jefe.grupo1@ejemplo.test             Jefe del grupo 1 (Jefe de todas sus secciones por derivación, sin filas en acceso_seccion)
---   responsable.manada@ejemplo.test      Responsable de la Manada Luna Llena (grupo 1)
---   ayudante.unidad@ejemplo.test         Ayudante de la Unidad Aconcagua (grupo 1)
+--   responsable.manada@ejemplo.test      Responsable de Manada Luna Llena (grupo 1)
+--   ayudante.unidad@ejemplo.test         Ayudante de Unidad Aconcagua (grupo 1)
 --   supervisor.grupo1@ejemplo.test       Supervisor del grupo 1 (rol de grupo, sin acceso a secciones)
---   supervisor.caminantes@ejemplo.test   Supervisor del grupo 1 y Responsable de la Comunidad Caminante Horizonte
+--   supervisor.caminantes@ejemplo.test   Supervisor del grupo 1 y Responsable de Com. Caminante Horizonte
 --   jefe.grupo2@ejemplo.test             Jefe del grupo 2
 --   admin@ejemplo.test                   Admin (es_admin = 1), sin accesos
 --   nuevo@ejemplo.test                   Recién registrado, sin accesos, con una solicitud de alta pendiente (y una rechazada antes)
+--   ejemplo@gmail.com                    Admin + Jefe de los dos grupos (acceso total). Contraseña: ejemplo
 --
--- Grupo 1 "Grupo Scout Los Aromos" (código 901): una sección de cada rama.
--- Grupo 2 "Grupo Scout Cerro Azul" (código 902): Manada y Unidad, para
+-- Grupo 1 "Los Aromos" (código 901): una sección de cada rama.
+-- Grupo 2 "Cerro Azul" (código 902): Manada y Unidad, para
 -- probar que un usuario no ve lo de otro grupo.
 --
 -- Casos de progresión (id de protagonista: nombre, sección, caso):
 --
---    1 Tomás Toledo            Manada Luna Llena              recién ingresado, sin progresión
---    2 Valentina Aguirre        Manada Luna Llena              recién ingresado, sin progresión · sin patrulla
---    3 Benjamín Carrizo        Manada Luna Llena              primera etapa en curso
---    4 Martina Ledesma          Manada Luna Llena              etapa intermedia
---    5 Joaquín Zalazar         Manada Luna Llena              AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
---    6 Catalina Escobar         Manada Luna Llena              AVISO: se pasó del cupo (cupo + 2)
---    7 Mateo Aguirre            Manada Luna Llena              AVISO: cupo completo pero le falta una tarea para cerrar la etapa
---    8 Sofía Ulloa             Manada Luna Llena              AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
---    9 Lautaro Vera             Manada Luna Llena              última etapa en curso
---   10 Emilia Arce              Manada Luna Llena              SUGERENCIA: última etapa lista para confirmar
---   11 Thiago Juárez           Unidad Aconcagua               recién ingresado, sin progresión
---   12 Isabella Quiroga         Unidad Aconcagua               primera etapa en curso
---   13 Bautista Medina          Unidad Aconcagua               etapa intermedia · sin patrulla
---   14 Olivia Núñez           Unidad Aconcagua               AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
---   15 Felipe Ledesma           Unidad Aconcagua               AVISO: se pasó del cupo (cupo + 2)
---   16 Julieta Cabrera          Unidad Aconcagua               AVISO: cupo completo pero le falta una tarea para cerrar la etapa
---   17 Santino Heredia          Unidad Aconcagua               AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
---   18 Renata Echeverría       Unidad Aconcagua               última etapa en curso
---   19 Ignacio Ferreyra         Unidad Aconcagua               SUGERENCIA: última etapa lista para confirmar
---   20 Lucía Díaz Vélez      Unidad Aconcagua               logró todas las etapas de la rama
---   21 Facundo Villegas         Comunidad Caminante Horizonte  recién ingresado, sin progresión
---   22 Abril Salinas            Comunidad Caminante Horizonte  primera etapa en curso
---   23 Ramiro Alvarado          Comunidad Caminante Horizonte  etapa intermedia
---   24 Delfina Bustamante       Comunidad Caminante Horizonte  AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
---   25 Agustín Suárez         Comunidad Caminante Horizonte  AVISO: se pasó del cupo (cupo + 2)
---   26 Milagros Heredia         Comunidad Caminante Horizonte  AVISO: cupo completo pero le falta una tarea para cerrar la etapa
---   27 Nicolás Ojeda           Comunidad Caminante Horizonte  AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
---   28 Camila Maidana           Comunidad Caminante Horizonte  última etapa en curso
---   29 Bruno Lucero             Comunidad Caminante Horizonte  SUGERENCIA: última etapa lista para confirmar
---   30 Zoe Gauna                Comunidad Caminante Horizonte  primera etapa en curso · sin patrulla
---   31 Lisandro Rearte          Comunidad Rover Sendero        recién ingresado, sin progresión
---   32 Malena Giménez          Comunidad Rover Sendero        primera etapa en curso
---   33 Gael Vera                Comunidad Rover Sendero        etapa intermedia
---   34 Pilar Olmedo             Comunidad Rover Sendero        AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
---   35 Valentín Herrera        Comunidad Rover Sendero        AVISO: cupo completo pero le falta una tarea para cerrar la etapa
---   36 Josefina Urquiza         Comunidad Rover Sendero        AVISO: sin la insignia de su etapa en curso (Rovers no tiene acciones)
---   37 Ciro Sosa                Comunidad Rover Sendero        última etapa en curso
---   38 Guadalupe Tapia          Comunidad Rover Sendero        SUGERENCIA: última etapa lista para confirmar
---   39 Simón Iturbe            Comunidad Rover Sendero        primera etapa en curso
+--    1 Tomás Toledo            Manada Luna Llena               recién ingresado, sin progresión
+--    2 Valentina Aguirre        Manada Luna Llena               recién ingresado, sin progresión · sin patrulla
+--    3 Benjamín Carrizo        Manada Luna Llena               primera etapa en curso
+--    4 Martina Ledesma          Manada Luna Llena               etapa intermedia
+--    5 Joaquín Zalazar         Manada Luna Llena               AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
+--    6 Catalina Escobar         Manada Luna Llena               AVISO: se pasó del cupo (cupo + 2)
+--    7 Mateo Aguirre            Manada Luna Llena               AVISO: cupo completo pero le falta una tarea para cerrar la etapa
+--    8 Sofía Ulloa             Manada Luna Llena               AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
+--    9 Lautaro Vera             Manada Luna Llena               última etapa en curso
+--   10 Emilia Arce              Manada Luna Llena               SUGERENCIA: última etapa lista para confirmar
+--   11 Thiago Juárez           Unidad Aconcagua                recién ingresado, sin progresión
+--   12 Isabella Quiroga         Unidad Aconcagua                primera etapa en curso
+--   13 Bautista Medina          Unidad Aconcagua                etapa intermedia · sin patrulla
+--   14 Olivia Núñez           Unidad Aconcagua                AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
+--   15 Felipe Ledesma           Unidad Aconcagua                AVISO: se pasó del cupo (cupo + 2)
+--   16 Julieta Cabrera          Unidad Aconcagua                AVISO: cupo completo pero le falta una tarea para cerrar la etapa
+--   17 Santino Heredia          Unidad Aconcagua                AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
+--   18 Renata Echeverría       Unidad Aconcagua                última etapa en curso
+--   19 Ignacio Ferreyra         Unidad Aconcagua                SUGERENCIA: última etapa lista para confirmar
+--   20 Lucía Díaz Vélez      Unidad Aconcagua                logró todas las etapas de la rama
+--   21 Facundo Villegas         Com. Caminante Horizonte        recién ingresado, sin progresión
+--   22 Abril Salinas            Com. Caminante Horizonte        primera etapa en curso
+--   23 Ramiro Alvarado          Com. Caminante Horizonte        etapa intermedia
+--   24 Delfina Bustamante       Com. Caminante Horizonte        AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
+--   25 Agustín Suárez         Com. Caminante Horizonte        AVISO: se pasó del cupo (cupo + 2)
+--   26 Milagros Heredia         Com. Caminante Horizonte        AVISO: cupo completo pero le falta una tarea para cerrar la etapa
+--   27 Nicolás Ojeda           Com. Caminante Horizonte        AVISO: una competencia en proceso con todas sus acciones; y sin la insignia de su etapa en curso
+--   28 Camila Maidana           Com. Caminante Horizonte        última etapa en curso
+--   29 Bruno Lucero             Com. Caminante Horizonte        SUGERENCIA: última etapa lista para confirmar
+--   30 Zoe Gauna                Com. Caminante Horizonte        primera etapa en curso · sin patrulla
+--   31 Lisandro Rearte          Com. Rover Sendero              recién ingresado, sin progresión
+--   32 Malena Giménez          Com. Rover Sendero              primera etapa en curso
+--   33 Gael Vera                Com. Rover Sendero              etapa intermedia
+--   34 Pilar Olmedo             Com. Rover Sendero              AVISO: llegó al cupo de la etapa en curso (elegir otra avisa)
+--   35 Valentín Herrera        Com. Rover Sendero              AVISO: cupo completo pero le falta una tarea para cerrar la etapa
+--   36 Josefina Urquiza         Com. Rover Sendero              AVISO: sin la insignia de su etapa en curso (Rovers no tiene acciones)
+--   37 Ciro Sosa                Com. Rover Sendero              última etapa en curso
+--   38 Guadalupe Tapia          Com. Rover Sendero              SUGERENCIA: última etapa lista para confirmar
+--   39 Simón Iturbe            Com. Rover Sendero              primera etapa en curso
 --   40 Morena Figueroa          Comunidad Rover Sendero        etapa intermedia
 --   41 Franco Domínguez        Manada Arco Iris               recién ingresado, sin progresión
 --   42 Ámbar Acosta            Manada Arco Iris               primera etapa en curso
@@ -150,17 +151,17 @@ ALTER TABLE `evento`         AUTO_INCREMENT = 1;
 -- ---------------------------------------------------------------------
 
 INSERT INTO `grupo` (`id`, `codigo`, `nombre`) VALUES
-(1, '901', 'Grupo Scout Los Aromos'),
-(2, '902', 'Grupo Scout Cerro Azul');
+(1, '901', 'Los Aromos'),
+(2, '902', 'Cerro Azul');
 
 -- id_rama: 1 Lobatos y Lobeznas, 2 Scouts, 3 Caminantes, 4 Rovers
 INSERT INTO `seccion` (`id`, `nombre`, `id_grupo`, `id_rama`) VALUES
-(1, 'Manada Luna Llena', 1, 1),
-(2, 'Unidad Aconcagua', 1, 2),
-(3, 'Comunidad Caminante Horizonte', 1, 3),
-(4, 'Comunidad Rover Sendero', 1, 4),
-(5, 'Manada Arco Iris', 2, 1),
-(6, 'Unidad Quebracho', 2, 2);
+(1, 'Luna Llena', 1, 1),
+(2, 'Aconcagua', 1, 2),
+(3, 'Horizonte', 1, 3),
+(4, 'Sendero', 1, 4),
+(5, 'Arco Iris', 2, 1),
+(6, 'Quebracho', 2, 2);
 
 -- Seisenas (Manada), Patrullas (Unidad) y Equipos (Caminantes). Rovers no tiene pequeño equipo.
 INSERT INTO `patrulla` (`id`, `nombre`, `id_seccion`) VALUES
@@ -592,13 +593,16 @@ INSERT INTO `usuario` (`id`, `nombre`, `email`, `contrasenia`, `es_admin`, `emai
 (5, 'Carla Mendoza', 'supervisor.caminantes@ejemplo.test', '$2y$10$fng0fONRvGn00iold850qu2I8ONs9.RQnUb41rJaAzqmY39CGSd4K', 0, 0, NULL),
 (6, 'Diego Salvatierra', 'jefe.grupo2@ejemplo.test', '$2y$10$i0.T1DsXCVwKMwaAMoNYmuRVlHCfXaXGn0QlbexWjZeQQCH5o8Wpq', 0, 0, NULL),
 (7, 'Admin Educarama', 'admin@ejemplo.test', '$2y$10$QuNamZpo3FKY.FJNIHLX7enb.8BrDECd.fO9xtQ.NDCo.fXEyvoSy', 1, 0, NULL),
-(8, 'Sergio Villalba', 'nuevo@ejemplo.test', '$2y$10$XK69jCdmioImtIZWNxOsWugmpI0okLL4vEpJl.tEDa/5SafU1ztwW', 0, 0, NULL);
+(8, 'Sergio Villalba', 'nuevo@ejemplo.test', '$2y$10$XK69jCdmioImtIZWNxOsWugmpI0okLL4vEpJl.tEDa/5SafU1ztwW', 0, 0, NULL),
+(9, 'Ejemplo', 'ejemplo@gmail.com', '$2y$10$s6SPr66IvAqKsO4Jy06NVueqf0vPQuR9PTVydrzt.fyB61R.eqxz.', 1, 0, NULL);
 
 INSERT INTO `acceso_grupo` (`id_usuario`, `id_grupo`, `id_rol`) VALUES
 (1, 1, 4),
 (4, 1, 1),
 (5, 1, 1),
-(6, 2, 4);
+(6, 2, 4),
+(9, 1, 4),
+(9, 2, 4);
 
 INSERT INTO `acceso_seccion` (`id_usuario`, `id_seccion`, `id_rol`) VALUES
 (2, 1, 3),
@@ -607,8 +611,8 @@ INSERT INTO `acceso_seccion` (`id_usuario`, `id_seccion`, `id_rol`) VALUES
 
 -- El usuario 8 tuvo una solicitud rechazada (con motivo) y envió otra, que está pendiente.
 INSERT INTO `solicitud_alta` (`id`, `id_usuario`, `datos_grupo`, `datos_secciones`, `estado`, `fecha`, `id_admin_revisor`, `motivo_rechazo`) VALUES
-(1, 8, '{"codigo":"930","nombre":"Grupo Scout Los Ceibos"}', '[{"nombre":"Manada Los Ceibos","id_rama":1},{"nombre":"Unidad Los Ceibos","id_rama":2}]', 'rechazada', '2026-10-20 18:30:00', 7, 'El código 930 no coincide con el del grupo. Revisalo y volvé a enviar la solicitud.'),
-(2, 8, '{"codigo":"903","nombre":"Grupo Scout Los Ceibos"}', '[{"nombre":"Manada Los Ceibos","id_rama":1},{"nombre":"Unidad Los Ceibos","id_rama":2}]', 'pendiente', '2026-10-28 20:15:00', NULL, NULL);
+(1, 8, '{"codigo":"930","nombre":"Los Ceibos"}', '[{"nombre":"Los Ceibos","id_rama":1},{"nombre":"Los Ceibos","id_rama":2}]', 'rechazada', '2026-10-20 18:30:00', 7, 'El código 930 no coincide con el del grupo. Revisalo y volvé a enviar la solicitud.'),
+(2, 8, '{"codigo":"903","nombre":"Los Ceibos"}', '[{"nombre":"Los Ceibos","id_rama":1},{"nombre":"Los Ceibos","id_rama":2}]', 'pendiente', '2026-10-28 20:15:00', NULL, NULL);
 
 -- ---------------------------------------------------------------------
 -- 5. Eventos (sin filas en evento_seccion = de todo el grupo)

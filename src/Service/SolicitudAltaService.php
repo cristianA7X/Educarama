@@ -287,8 +287,9 @@ final class SolicitudAltaService extends ServicioBase
         }
 
         $secciones = array_map(fn (array $d) => [
-            'nombre' => (string) ($d['nombre'] ?? ''),
-            'rama'   => $ramas[$d['id_rama'] ?? 0] ?? 'Rama desconocida',
+            'nombre'  => (string) ($d['nombre'] ?? ''),
+            'id_rama' => (int) ($d['id_rama'] ?? 0),
+            'rama'    => $ramas[$d['id_rama'] ?? 0] ?? 'Rama desconocida',
         ], $solicitud->datosSecciones);
 
         $solicitante = $conSolicitante ? $this->usuarios->buscarPorId($solicitud->idUsuario) : null;
