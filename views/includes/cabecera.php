@@ -57,6 +57,9 @@ $clasesAlerta = ['exito' => 'success', 'error' => 'danger', 'aviso' => 'warning'
         try { if (localStorage.getItem('educarama.menu') === 'oculto') document.documentElement.classList.add('menu-oculto'); } catch (e) {}
     </script>
 
+    <!-- Favicon: el logo de Educarama (nunca una marca oficial de Scouts de Argentina). -->
+    <link rel="icon" type="image/png" href="<?= e(url('views/assets/images/Logos/Logos_Educarama/LogoBaseV4.png')) ?>">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= e(url('public/css/styles.css')) ?>?v=<?= $version('public/css/styles.css') ?>">
@@ -72,7 +75,7 @@ $clasesAlerta = ['exito' => 'success', 'error' => 'danger', 'aviso' => 'warning'
             </button>
         <?php endif; ?>
         <a class="marca" href="<?= e(url('views/pages/inicio.php')) ?>">
-            <img class="marca-logo rounded-circle" src="<?= e(url('views/assets/images/Logo1.png')) ?>" alt="">
+            <img class="marca-logo rounded-circle" src="<?= e(url('views/assets/images/Logos/Logos_Educarama/LogoBaseV4.png')) ?>" alt="">
             <p class="marca-titulo">Educarama<span class="d-none d-sm-inline"> - <?= e($tituloPagina) ?></span></p>
         </a>
     </header>

@@ -1542,3 +1542,132 @@ Todas las vistas, el menú lateral y `EventoService` (con alias `VistaHelper` pa
 **Qué cambió**: en el dropdown de Grupos del drawer se quitaron las entradas individuales "Eventos del Grupo X" y "Roles del Grupo X". Queda solo el link al grupo y "Eventos grupales" al final (si hay al menos un grupo).
 
 **Por qué**: simplificar el menú; esas pantallas se acceden desde la vista del grupo.
+
+---
+
+## Imagen de marca T1: tokens de color (decisiones 1B y 2B)
+
+**Qué cambió**: el violeta principal de Educarama pasa de `#791fbf` a `#4b1278`, y el violeta oscuro de `#5a1690` a `#360d57`. Los bordes, fondos y sombras que estaban escritos con rgba del violeta viejo pasan al nuevo: `rgba(75, 18, 120, X)` para bordes y fondos, y `rgba(54, 13, 87, X)` para sombras. `Vista::colorRama()` devuelve `#4b1278` cuando no hay rama. `public/js/educarama.js` ya no tiene hex propios: el color de los botones de SweetAlert2 se lee de `--violeta` y el de peligro de `--bs-danger`.
+
+Los colores de rama (`.rama-lobatos`, `.rama-scouts`, `.rama-caminantes`, `.rama-rovers`, con los tres tonos oficiales de cada bandera más `--rama-contraste` y el par del banner) y las reglas que los usan ya estaban aplicados.
+
+**Por qué**: el `#4b1278` es el Violeta oficial de Scouts de Argentina oscurecido dos pasos sin cambiar el tono. El oficial se sentía liviano como color dominante de la aplicación, y el círculo cromático no tiene un violeta más oscuro. Orquídea, Púrpura y Lila quedan con su valor oficial exacto.
+
+**Cómo funciona**: toda la UI sale de variables de `:root` y de las clases `.rama-*`. Fuera de ese bloque no hay hex sueltos en `styles.css`, y tampoco en el JS. Cambiar un color es cambiar una sola variable.
+
+**Arreglo de paso**: el hover de `.rama-card` y `.patrulla-card` se definía dos veces. La regla de más abajo pisaba el borde con `--violeta-oscuro`, así que al pasar el mouse el acento de la rama se volvía violeta. Se borró ese `border-color`: queda el de arriba, `var(--rama-oscuro)`.
+
+---
+
+## Imagen de marca T2: arreglos del CSS que arrastra el legacy
+
+**Qué cambió**:
+- `.barra-superior-inst` tenía `box-shadow: var(--borde-suave)`, que es un color y no una sombra, así que el navegador lo ignoraba. Pasa a `var(--sombra-card)`.
+- El anillo de foco (`--foco`) pasa del amarillo al violeta. La excepción es el botón de hamburguesa, que está sobre el header violeta: ahí el violeta no se vería, así que conserva el amarillo.
+- Los cuatro botones que usaban `btn-primary` pasan a `btn btn-sm boton-primario`: el "Guardar" de editar documento (`perfil_protagonista.php`), el `.btn-avanzar` (`gestionar_competencias.php`), "Registrar entrega" y "Empezar / Desarrollada" (`progresion.php`).
+- `.btn-sm.boton-primario:hover` anula el `translateY(-3px)` del hover.
+
+**Por qué**: el amarillo del foco daba 1,4:1 sobre blanco, y WCAG pide 3:1 para los indicadores de foco. El azul de Bootstrap no es un color de la paleta. En un botón chico, el salto del hover se nota demasiado.
+
+**Cómo funciona**: se conserva `.btn` para que `btn-sm` siga dando el tamaño, y `.boton-primario` pisa el fondo con el degradado violeta. Ninguna vista usa `btn-primary`.
+
+---
+
+## Imagen de marca T3: tipografía
+
+**Qué cambió**: se suma Ubuntu Condensed (`public/fonts/Ubuntu_Condensed/UbuntuCondensed-Regular.ttf`, servida en TTF). Las dos familias quedan como variables (`--fuente` y `--fuente-condensada`), y `body` y `h1`–`h6` usan `var(--fuente)` en vez de la lista con Segoe UI escrita a mano. La condensada se aplica a `.dato-etiqueta`, `.menu-titulo`, `.badge`, los encabezados de `.home-table` y los encabezados y celdas de las dos nóminas (`#tablaNomina`, `#tablaNominaSeccion`). Los encabezados de tabla van en mayúsculas, a 0.875rem y con `letter-spacing`.
+
+Dos ajustes para no bajar de 12 px con la condensada: `.menu-titulo` pasa de 0.72rem a 0.75rem, y `.badge` usa `max(0.75em, 0.75rem)`. El 0.75em de Bootstrap daba 10,5 px dentro de un `.small`.
+
+**Por qué**: el manual de marca usa Ubuntu, con Arial como sustitución. La condensada hace que la nómina y las etiquetas entren sin desbordar.
+
+**Cómo funciona**: solo existe Ubuntu Condensed en peso 400, así que `font-synthesis: none` evita que el navegador fabrique un bold deformando la letra. Las reglas con `font-weight: 700` se ven en 400, y el énfasis queda a cargo de las mayúsculas y el `letter-spacing`. El `h1` del banner, las tarjetas, el menú lateral y el pie siguen en Ubuntu.
+
+---
+
+## Botón primario reactivo a la rama
+
+**Qué cambió**: `.boton-primario` deja de ser siempre violeta. Sus colores salen de cuatro variables: `--boton-inicio`, `--boton-fin`, `--boton-texto` y `--boton-sombra`.
+- **Sin rama** (`:root`): el Celeste oficial (`--celeste`) con texto `--texto-sobre-claro`.
+- **Con rama** (`.rama-lobatos`, `.rama-scouts`, `.rama-caminantes`, `.rama-rovers`): el degradado violeta de siempre, con texto blanco.
+
+**Por qué**: en las páginas sin rama todo es violeta (header, banner, menú), y un botón violeta se perdía. El Celeste oficial con texto blanco da 2,6:1, así que va con texto oscuro (7:1). En las páginas de rama el violeta ya se distingue del color de la rama, y un celeste ahí se confundiría con Caminantes.
+
+**Cómo funciona**: la clase de rama está en el `<body>` (`$claseRama` en `cabecera.php`), así que redefine las variables y el botón cambia solo, sin tocar las vistas. El fin del degradado celeste es `color-mix()` del celeste con el texto oscuro (5,6:1): no suma ningún hex nuevo. Los cuadros de SweetAlert2 siguen con el botón violeta, porque van sobre blanco.
+
+---
+
+## Imagen de marca T4: logos de rama (decisión 3B)
+
+**Qué cambió**: las tarjetas de sección de `inicio.php`, `grupo.php` y `secciones.php` muestran el logo oficial circular de la rama en vez del ícono de Bootstrap. Nuevo método `Vista::logoRama(?int $idRama): ?string`, que devuelve la URL de `views/assets/images/Logos/Logos_AreasYRamas/Logo_Circulo_*.png`, o null si la rama es desconocida.
+
+**Por qué**: `Logo_Circulo_*` es el único set completo de logos de rama. El logo es la identidad completa de la rama, y en la tarjeta de sección hay lugar para mostrarlo.
+
+**Cómo funciona**: si `logoRama()` devuelve null, la tarjeta cae en `Vista::iconoRama()`, que sigue igual como último respaldo. Con logo, el cuadrado lleva la clase `con-logo`: fondo blanco y borde `--rama-oscuro`, porque una marca oficial no puede ir sobre un fondo que le baje el contraste. La imagen lleva `alt=""` porque el nombre de la sección, al lado, ya dice la rama.
+
+---
+
+## Imagen de marca T5: íconos de concepto (decisión 3C)
+
+**Qué cambió**: se usan los pictogramas oficiales de Scouts de Argentina, en Orquídea Oscura, desde `views/assets/images/Iconos/` (18 archivos). Hay tres métodos nuevos en `Vista`:
+- `iconoOficial($slug)`: la URL de un ícono.
+- `iconoAreaOficial($idArea)`: el ícono de cada una de las 10 áreas.
+- `pictogramaRama($idRama)`: huella, rosa de los vientos, sol o cayado.
+
+Dónde se usan:
+- Pestañas de área en `gestionar_competencias.php`.
+- Acordeón de especialidades en `progresion.php`.
+- Documentos en `perfil_protagonista.php` (`pdf` / `png`).
+- Links de patrullas (`banderin`) y eventos (`campamento`) en `perfil_seccion.php`.
+- Pictograma de rama en "Mis roles" de `mi_cuenta.php` y en la columna Sección de la nómina general (`protagonistas.php`).
+
+**Por qué**: alinear la iconografía con el sistema oficial. Orquídea Oscura llega a 5,5:1 sobre blanco.
+
+**Cómo funciona**: si un método devuelve null, la vista cae en el ícono de Bootstrap (`iconoArea()` / `iconoRama()`). Los íconos llevan `alt=""` porque el texto de al lado ya dice qué son. `.icono-oficial` los alinea con el texto, a 1.25em.
+
+Hay dos lugares que mantienen el ícono de Bootstrap. El menú lateral, por decisión del plan. Y el botón "Eventos" de `grupo.php`: es un `boton-primario` de color, y un activo oficial no puede ir sobre un fondo que le baje el contraste.
+
+---
+
+## Imagen de marca T6: insignias de progresión (decisión 4B)
+
+**Qué cambió**: la pestaña de insignias de `progresion.php` muestra la imagen oficial de cada insignia de etapa en vez del ícono genérico. `insignia.imagen`, que ya existía, guarda solo el nombre del archivo: `educarama.sql` lo carga con 11 UPDATE después de crear las insignias. Hay dos helpers nuevos en `Vista`:
+- `imagenInsignia($archivo)`: arma la URL en `views/assets/images/Insignias/Progresion/`.
+- `imagenInsigniaCaminantes(?Elemento)`: arma la URL de una insignia de Caminantes según el elemento.
+
+**Por qué**: las insignias son dato oficial del programa, y verlas como son ayuda al educador. La carpeta es un detalle de presentación, así que no se guarda en la base.
+
+**Cómo funciona**:
+- **Lobatos, Scouts y Rovers:** la imagen sale de la fila.
+- **Caminantes (etapas 9 a 12):** la fila queda en NULL, porque la insignia depende del elemento elegido al confirmar la etapa (`etapa_lograda.elemento`). La vista arma un mapa etapa → elemento con las etapas logradas: con elemento, muestra `caminantes-<elemento>.png`; sin elemento, el ícono genérico.
+- **Ciudadanía:** no tiene imagen.
+
+Con imagen, el círculo (`.insignia-icono.con-imagen`) es solo un marco blanco, con borde del tono oscuro de la rama. La imagen nunca se altera: si la insignia está entregada o no lo dice el badge. `datos_ejemplo.sql` no cambia, porque `insignia` es estática y no la toca.
+
+---
+
+## Imagen de marca T7: marca y marco legal (decisión 5B)
+
+**Qué cambió**:
+- **Logo del header:** `cabecera.php` pedía `views/assets/images/Logo1.png`, que no existe en esa ruta, así que el logo no cargaba. Pasa a `Logos/Logos_Educarama/LogoBaseV4.png`, la versión 4 del logo.
+- **Favicon:** se suma, con el mismo logo.
+- **Pie:** decía "Plataforma Educarama - Scouts de Argentina". Ahora aclara que es un proyecto académico sin vinculación oficial, y atribuye el programa educativo y sus nombres a Scouts de Argentina Asociación Civil, con link a scouts.org.ar.
+- **CSS:** `.footer-inst a` en blanco, para que el link se lea sobre el violeta.
+
+**Por qué**: el pie anterior se leía como si fuera un producto oficial de la asociación. Las marcas oficiales son dato, no identidad de la app: el favicon y el header llevan solo el logo de Educarama.
+
+**Cómo funciona**: son cambios en los includes comunes (`cabecera.php` y `pie.php`), así que aplican a todas las páginas. `Logo1.png` y `Logo1.jpg` quedan sin uso.
+
+---
+
+## Limpieza de CSS sin uso
+
+**Qué cambió**: se borraron de `public/css/styles.css` las clases que ninguna vista ni JS usa:
+- del dashboard del legacy: `.home-stats`, `.home-stat-card`, `.home-table`, `.home-action-btn`, `.home-alerts`, `.home-grid`, `.home-card`, `.birthday-list` y `.movements-list`, con sus media queries;
+- `.punto-rama`, que quedó sin uso cuando el drawer dejó de listar secciones.
+
+`.home-table th` también salió de las reglas de Ubuntu Condensed (T3).
+
+**Por qué**: eran restos del dashboard del legacy. Mantenerlos obligaba a migrar colores (como en T1) en reglas que no se ven.
+
+**Corrección (T6)**: las insignias con imagen ya no van dentro de un círculo con borde, y pasan de 52 a 88 px. La forma de la insignia cambia por rama (cuadrada en LyL, rombo en Scouts y Caminantes, rectángulo en Rovers), y el círculo las recortaba. Las que no tienen imagen siguen con el círculo y el ícono genérico.

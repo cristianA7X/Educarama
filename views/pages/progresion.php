@@ -171,15 +171,37 @@ require __DIR__ . '/../includes/cabecera.php';
 
 <div class="tab-pane fade" id="panel-insignias" role="tabpanel" aria-labelledby="tab-insignias">
 <p class="small text-muted mb-3">Se registra la entrega física, con su fecha. La de una etapa se entrega cuando la etapa empieza.</p>
+<?php
+// Elemento elegido en cada etapa lograda (solo Caminantes): decide la imagen de su insignia.
+$elementoPorEtapa = [];
+foreach ($pantalla->etapas as $e) {
+    if ($e->lograda?->elemento !== null) {
+        $elementoPorEtapa[(int) $e->etapa->id] = $e->lograda->elemento;
+    }
+}
+?>
 <div class="row g-3 mb-4">
     <?php foreach ($pantalla->insignias as $i): ?>
         <?php
         $idInsignia = (int) $i->insignia->id;
         $pendiente = $resumen->insigniaPendiente?->id === $idInsignia;
+        // Imagen guardada en la fila; si no hay, la de Caminantes según el elemento elegido.
+        $idEtapaInsignia = $i->insignia->idEtapa;
+        $imagenInsignia = $i->insignia->imagen !== null
+            ? Vista::imagenInsignia($i->insignia->imagen)
+            : ($idEtapaInsignia !== null
+                ? Vista::imagenInsigniaCaminantes($elementoPorEtapa[(int) $idEtapaInsignia] ?? null)
+                : null);
         ?>
         <div class="col-md-6">
             <div class="tarjeta-blanca-borde p-3 h-100 d-flex gap-3 align-items-start<?= $pendiente ? ' border-warning border-2' : '' ?>">
-                <div class="insignia-icono<?= $i->otorgada() ? '' : ' pendiente' ?>" aria-hidden="true"><i class="bi bi-award"></i></div>
+                <div class="insignia-icono<?= $i->otorgada() ? '' : ' pendiente' ?><?= $imagenInsignia !== null ? ' con-imagen' : '' ?>" aria-hidden="true">
+                    <?php if ($imagenInsignia !== null): ?>
+                        <img src="<?= e($imagenInsignia) ?>" alt="">
+                    <?php else: ?>
+                        <i class="bi bi-award"></i>
+                    <?php endif; ?>
+                </div>
                 <div class="flex-grow-1">
                     <p class="fw-bold mb-1"><?= e($i->insignia->titulo) ?></p>
                     <?php if ($i->otorgada()): ?>
@@ -202,7 +224,7 @@ require __DIR__ . '/../includes/cabecera.php';
                                 <input type="hidden" name="id_insignia" value="<?= $idInsignia ?>">
                                 <label class="visually-hidden" for="fecha-insignia-<?= $idInsignia ?>">Fecha de entrega</label>
                                 <input class="form-control form-control-sm w-auto" type="date" id="fecha-insignia-<?= $idInsignia ?>" name="fecha" value="<?= $hoy ?>" max="<?= $hoy ?>">
-                                <button type="submit" class="btn btn-sm btn-primary">Registrar entrega</button>
+                                <button type="submit" class="btn btn-sm boton-primario">Registrar entrega</button>
                             </form>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -234,7 +256,7 @@ require __DIR__ . '/../includes/cabecera.php';
         $idEsp = (int) $esp->especialidad->id;
         if ($esp->estado !== EstadoProgresion::Desarrollada) {
             printf(
-                '<button type="button" class="btn btn-sm btn-primary" data-accion="progresion.avanzarEspecialidad" data-datos="%s" data-recargar>%s</button> ',
+                '<button type="button" class="btn btn-sm boton-primario" data-accion="progresion.avanzarEspecialidad" data-datos="%s" data-recargar>%s</button> ',
                 $datosBoton(['id_especialidad' => $idEsp]),
                 $esp->estado === null ? 'Empezar' : 'Desarrollada',
             );
@@ -282,7 +304,13 @@ require __DIR__ . '/../includes/cabecera.php';
             <div class="accordion-item">
                 <h3 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $idPanel ?>" aria-expanded="false" aria-controls="<?= $idPanel ?>">
-                        <i class="bi <?= e(Vista::iconoArea((int) $area->id)) ?> me-2" aria-hidden="true"></i><?= e($area->titulo) ?>
+                        <?php $iconoArea = Vista::iconoAreaOficial((int) $area->id); ?>
+                        <?php if ($iconoArea !== null): ?>
+                            <img class="icono-oficial me-2" src="<?= e($iconoArea) ?>" alt="">
+                        <?php else: ?>
+                            <i class="bi <?= e(Vista::iconoArea((int) $area->id)) ?> me-2" aria-hidden="true"></i>
+                        <?php endif; ?>
+                        <?= e($area->titulo) ?>
                         <span class="badge text-bg-light border ms-2"><?= count($sinEmpezar) ?> para empezar</span>
                     </button>
                 </h3>

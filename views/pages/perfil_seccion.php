@@ -68,12 +68,12 @@ require __DIR__ . '/../includes/cabecera.php';
         </a>
         <?php if ($equipo !== null): ?>
             <a class="btn btn-outline-secondary" href="<?= e(url('views/pages/patrullas.php?id_seccion=' . $seccion->seccion->id)) ?>">
-                <i class="bi bi-shield-shaded me-1" aria-hidden="true"></i><?= e($equipo) ?>s
+                <img class="icono-oficial me-1" src="<?= e(Vista::iconoOficial('banderin')) ?>" alt=""><?= e($equipo) ?>s
             </a>
         <?php endif; ?>
     <?php endif; ?>
     <a class="btn btn-outline-secondary" href="<?= e(url('views/pages/eventos.php?id_seccion=' . $seccion->seccion->id)) ?>">
-        <i class="bi bi-megaphone me-1" aria-hidden="true"></i>Eventos
+        <img class="icono-oficial me-1" src="<?= e(Vista::iconoOficial('campamento')) ?>" alt="">Eventos
     </a>
     <?php if ($seccion->puedeEliminar()): ?>
         <a class="btn btn-outline-secondary" href="<?= e(url('views/pages/accesos.php?id_seccion=' . $seccion->seccion->id)) ?>">

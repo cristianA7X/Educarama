@@ -9,11 +9,11 @@ EDUCARAMA - ESTILO GENERAL
 :root {
   /* ----- Marca propia de Educarama -------------------------------------
      Violetas del círculo cromático oficial de Scouts de Argentina. */
-  --violeta: #791fbf; /* Violeta */
-  --orquidea: #874dbd; /* Orquídea oscura */
-  --purpura: #a539b6; /* Púrpura */
-  --lila: #b85bee; /* Lila */
-  --violeta-oscuro: #5a1690; /* derivado de --violeta: degradados, hover, estado activo */
+  --violeta: #4b1278;        /* Violeta oficial (#791fbf) oscurecido dos pasos */
+  --orquidea: #874dbd;       /* Orquídea oscura */
+  --purpura: #a539b6;        /* Púrpura */
+  --lila: #b85bee;           /* Lila */
+  --violeta-oscuro: #360d57; /* derivado de --violeta: degradados, hover, estado activo */
 
   /* ----- Resto de la paleta oficial ----- */
   --celeste: #00aaf2; /* Celeste */
@@ -42,9 +42,9 @@ EDUCARAMA - ESTILO GENERAL
   --gris-linea: #d9d2e3;
   --gris-pista: #ece7f4; /* fondo de la barra de progreso */
 
-  --borde-suave: rgba(121, 31, 191, 0.18);
-  --sombra-suave: 0 10px 30px rgba(90, 22, 144, 0.12);
-  --sombra-card: 0 8px 20px rgba(90, 22, 144, 0.1);
+  --borde-suave: rgba(75, 18, 120, 0.18);
+  --sombra-suave: 0 10px 30px rgba(54, 13, 87, 0.12);
+  --sombra-card: 0 8px 20px rgba(54, 13, 87, 0.1);
 
   /* ----- Variables de rama (sin rama: la marca propia) -------------------
      --rama-primario   tono vivo: puntos, íconos, acentos.
@@ -63,11 +63,24 @@ EDUCARAMA - ESTILO GENERAL
   --banner-fin: var(--violeta-oscuro);
   --banner-texto: var(--blanco);
 
+  /* Botón primario (.boton-primario). Sin rama, Celeste oficial con texto
+     oscuro (7:1): con texto blanco no llega a 4,5:1. El fin del degradado es el
+     celeste mezclado con el texto oscuro, sin sumar un hex nuevo (5,6:1). Las
+     clases de rama lo vuelven violeta. */
+  --boton-inicio: var(--celeste);
+  --boton-fin: color-mix(in srgb, var(--celeste) 85%, var(--texto-sobre-claro));
+  --boton-texto: var(--texto-sobre-claro);
+  --boton-sombra: rgba(0, 170, 242, 0.3);
+
   /* Medidas */
   --sidebar-width: 270px;
   --navbar-height: 72px;
   --footer-height: 50px;
-  --foco: 3px solid var(--amarillo);
+  --foco: 3px solid var(--violeta); /* el amarillo daba 1,4:1 sobre blanco; WCAG pide 3:1 */
+
+  /* Tipografía. Arial es la sustitución que pide el manual de marca. */
+  --fuente: "Ubuntu", Arial, sans-serif;
+  --fuente-condensada: "Ubuntu Condensed", "Arial Narrow", Arial, sans-serif;
 }
 
 /* Colores de rama: los tres tonos oficiales de cada bandera de Scouts de
@@ -116,6 +129,18 @@ EDUCARAMA - ESTILO GENERAL
   --banner-inicio: var(--rama-secundario);
   --banner-fin: var(--rama-oscuro);
   --banner-texto: var(--blanco);
+}
+
+/* Con rama, el botón primario vuelve al violeta de Educarama: contra el color
+   de la rama ya se distingue, y un celeste se confundiría con Caminantes. */
+.rama-lobatos,
+.rama-scouts,
+.rama-caminantes,
+.rama-rovers {
+  --boton-inicio: var(--violeta);
+  --boton-fin: var(--violeta-oscuro);
+  --boton-texto: var(--blanco);
+  --boton-sombra: rgba(75, 18, 120, 0.22);
 }
 
 /* Acento de color en las cards. Usa el tono oscuro: el amarillo de Manada no
@@ -197,6 +222,16 @@ EDUCARAMA - ESTILO GENERAL
   font-style: italic;
   font-display: swap;
 }
+
+/* Ubuntu Condensed: solo existe en peso 400. Se sirve en TTF, sin convertir a
+   woff2, para no sumar una herramienta de conversión al proyecto. */
+@font-face {
+  font-family: "Ubuntu Condensed";
+  src: url("../fonts/Ubuntu_Condensed/UbuntuCondensed-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 * {
   box-sizing: border-box;
 }
@@ -208,7 +243,7 @@ body {
 
 body {
   margin: 0;
-  font-family: "Ubuntu", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--fuente);
   font-weight: 400;
 
   color: var(--texto-principal);
@@ -233,8 +268,35 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--fuente);
   font-weight: 700;
+}
+
+/* Ubuntu Condensed para etiquetas, encabezados y celdas de tabla y badges.
+   Nunca para texto corrido, para el h1 de la página ni por debajo de 12 px.
+   Solo existe en peso 400: font-synthesis evita que el navegador invente un
+   bold deformando la letra. El énfasis va por mayúsculas y letter-spacing. */
+.dato-etiqueta,
+.menu-titulo,
+.badge,
+#tablaNomina th,
+#tablaNominaSeccion th,
+#tablaNomina td,
+#tablaNominaSeccion td {
+  font-family: var(--fuente-condensada);
+  font-synthesis: none;
+}
+
+#tablaNomina th,
+#tablaNominaSeccion th {
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* El 0.75em de Bootstrap baja de 12 px dentro de un texto .small. */
+.badge {
+  font-size: max(0.75em, 0.75rem);
 }
 
 /* Scroll más prolijo */
@@ -243,7 +305,7 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(121, 31, 191, 0.35);
+  background: rgba(75, 18, 120, 0.35);
   border-radius: 999px;
 }
 
@@ -262,8 +324,8 @@ h6 {
   align-items: center;
   gap: 12px;
   padding: 0 24px;
-  box-shadow: 0 8px 24px rgba(90, 22, 144, 0.1);
-  border-bottom: 1px solid rgba(121, 31, 191, 0.12);
+  box-shadow: 0 8px 24px rgba(54, 13, 87, 0.1);
+  border-bottom: 1px solid rgba(75, 18, 120, 0.12);
   z-index: 1100;
 }
 
@@ -320,8 +382,10 @@ h6 {
   background: rgba(255, 255, 255, 0.26);
 }
 
+/* El botón está sobre el header violeta: ahí el anillo violeta de --foco no se
+   vería, así que usa el amarillo, que contrasta bien con el violeta oscuro. */
 .boton-menu:focus-visible {
-  outline: var(--foco);
+  outline: 3px solid var(--amarillo);
   outline-offset: 2px;
 }
 
@@ -333,8 +397,13 @@ h6 {
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 -8px 24px rgba(90, 22, 144, 0.18);
+  box-shadow: 0 -8px 24px rgba(54, 13, 87, 0.18);
   font-size: 0.9rem;
+}
+
+/* El link de atribución del pie, legible sobre el degradado violeta. */
+.footer-inst a {
+  color: var(--blanco);
 }
 
 .texto-violeta {
@@ -355,7 +424,7 @@ h6 {
 .sidebar {
   --bs-offcanvas-width: min(var(--sidebar-width), 86vw);
   --bs-offcanvas-bg: rgba(255, 255, 255, 0.97);
-  box-shadow: 8px 0 24px rgba(90, 22, 144, 0.18);
+  box-shadow: 8px 0 24px rgba(54, 13, 87, 0.18);
 }
 
 /* Bootstrap fija top: 0 con .offcanvas.offcanvas-start: hace falta la misma especificidad para ganarle. */
@@ -392,7 +461,7 @@ h6 {
 }
 
 .sidebar .nav-link:hover {
-  background-color: rgba(121, 31, 191, 0.07);
+  background-color: rgba(75, 18, 120, 0.07);
   color: var(--violeta-oscuro);
   transform: translateX(3px);
 }
@@ -403,7 +472,7 @@ h6 {
 }
 
 .sidebar .nav-link.active {
-  background-color: rgba(121, 31, 191, 0.12);
+  background-color: rgba(75, 18, 120, 0.12);
   color: var(--violeta-oscuro);
   font-weight: 700;
 }
@@ -416,7 +485,7 @@ h6 {
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: rgba(121, 31, 191, 0.08);
+  background: rgba(75, 18, 120, 0.08);
 }
 
 .sidebar .nav-link .caret {
@@ -450,7 +519,7 @@ h6 {
 
 .menu-titulo {
   margin: 16px 14px 4px;
-  font-size: 0.72rem;
+  font-size: 0.75rem; /* 12 px: el mínimo para la condensada */
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -470,16 +539,6 @@ h6 {
   border-top: 1px solid var(--borde-suave);
 }
 
-/* Circulito con el color de la rama de la sección (usa .rama-* del elemento) */
-.punto-rama {
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
-  margin: 6px;
-  border-radius: 50%;
-  background: var(--rama-primario);
-  border: 2px solid rgba(90, 22, 144, 0.28);
-}
 
 /* Desde 992 px: el menú está a la vista y empuja el contenido. */
 @media (min-width: 992px) {
@@ -555,7 +614,7 @@ h6 {
   color: var(--banner-texto);
   padding: 18px;
   border-radius: 20px;
-  box-shadow: var(--borde-suave);
+  box-shadow: var(--sombra-card);
 }
 
 /* El subtítulo del banner hereda el color del texto con opacidad reducida.
@@ -597,7 +656,7 @@ h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 14px rgba(90, 22, 144, 0.16);
+  box-shadow: 0 6px 14px rgba(54, 13, 87, 0.16);
   border: 2px solid var(--rama-oscuro);
   overflow: hidden;
 }
@@ -624,7 +683,7 @@ h6 {
   background-color: var(--gris-pista);
   border-radius: 999px;
   overflow: hidden;
-  border: 1px solid rgba(121, 31, 191, 0.14);
+  border: 1px solid rgba(75, 18, 120, 0.14);
 }
 
 .progreso-actual {
@@ -638,28 +697,36 @@ h6 {
 }
 
 .pieza-insignia {
-  box-shadow: 0px 10px 25px 10px rgba(90, 22, 144, 0.14);
+  box-shadow: 0px 10px 25px 10px rgba(54, 13, 87, 0.14);
   max-width: 200px;
 }
 
+/* Botón primario. Sus colores salen de --boton-* (ver :root y las clases de
+   rama): celeste con texto oscuro en las páginas sin rama, donde un botón
+   violeta se perdía contra la marca violeta, y violeta en las de rama. */
 .boton-primario {
-  background: linear-gradient(135deg, var(--violeta), var(--violeta-oscuro));
-  color: var(--blanco);
+  background: linear-gradient(135deg, var(--boton-inicio), var(--boton-fin));
+  color: var(--boton-texto);
   border: none;
   border-radius: 16px;
   transition: all 0.22s ease;
-  box-shadow: 0 8px 18px rgba(121, 31, 191, 0.22);
+  box-shadow: 0 8px 18px var(--boton-sombra);
 }
 
 .boton-primario:hover {
-  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
-  color: var(--blanco);
+  background: linear-gradient(135deg, var(--boton-fin), var(--boton-inicio));
+  color: var(--boton-texto);
   transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(121, 31, 191, 0.3);
+  box-shadow: 0 12px 24px var(--boton-sombra);
 }
 
 .boton-primario:active {
   transform: translateY(0);
+}
+
+/* En un botón chico el salto de 3px del hover es demasiado. */
+.btn-sm.boton-primario:hover {
+  transform: none;
 }
 
 /* ==========================================================================
@@ -700,7 +767,7 @@ h6 {
   border-radius: 22px;
   padding: 32px 36px;
   margin-bottom: 24px;
-  box-shadow: 0 8px 22px rgba(90, 22, 144, 0.12);
+  box-shadow: 0 8px 22px rgba(54, 13, 87, 0.12);
 }
 
 .home-welcome h2 {
@@ -722,106 +789,8 @@ h6 {
 }
 
 .encabezado-grupo {
-  background: rgba(121, 31, 191, 0.06);
+  background: rgba(75, 18, 120, 0.06);
   border-left: 4px solid var(--violeta);
-}
-
-.home-alerts,
-.home-card,
-.home-stat-card {
-  background: var(--blanco);
-  border: 1px solid var(--violeta-borde);
-  border-radius: 18px;
-  box-shadow: 0 8px 18px rgba(90, 22, 144, 0.1);
-}
-
-.home-alerts {
-  padding: 24px;
-}
-
-.home-alerts ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.home-alerts li {
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.home-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin: 24px 0;
-}
-
-.home-stat-card {
-  padding: 22px;
-  text-align: center;
-}
-
-.home-stat-card .icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.home-stat-card h3 {
-  margin: 0;
-  font-size: 30px;
-  color: var(--violeta);
-}
-
-.home-stat-card p {
-  margin: 6px 0 0;
-  font-weight: bold;
-  color: var(--texto-principal);
-}
-
-.home-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 22px;
-}
-
-.home-card {
-  padding: 24px;
-}
-
-.home-card h3 {
-  margin-top: 0;
-  color: var(--violeta);
-  font-size: 22px;
-}
-
-.home-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.home-table th,
-.home-table td {
-  padding: 12px 8px;
-  text-align: left;
-  border-bottom: 1px solid var(--violeta-linea);
-}
-
-.home-table th {
-  color: var(--violeta);
-}
-
-.birthday-list,
-.movements-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.birthday-list li,
-.movements-list li {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--violeta-linea);
-  font-weight: 500;
 }
 
 .home-actions {
@@ -831,35 +800,7 @@ h6 {
   flex-wrap: wrap;
 }
 
-.home-action-btn {
-  background: var(--violeta);
-  color: var(--blanco);
-  text-decoration: none;
-  padding: 12px 18px;
-  border-radius: 12px;
-  font-weight: bold;
-}
-
-.home-action-btn:hover {
-  background: var(--violeta-oscuro);
-  color: var(--blanco);
-}
-
-@media (max-width: 900px) {
-  .home-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .home-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 600px) {
-  .home-stats {
-    grid-template-columns: 1fr;
-  }
-
   .home-welcome {
     padding: 24px;
   }
@@ -884,7 +825,7 @@ h6 {
 
 .protagonista-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(90, 22, 144, 0.2);
+  box-shadow: 0 14px 30px rgba(54, 13, 87, 0.2);
   border-color: var(--violeta-oscuro);
 }
 
@@ -947,8 +888,7 @@ h6 {
 .rama-card:hover,
 .patrulla-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(90, 22, 144, 0.2);
-  border-color: var(--violeta-oscuro);
+  box-shadow: 0 14px 30px rgba(54, 13, 87, 0.2);
 }
 
 /* El cuadrado de color de la rama. Usa el par del banner para que el ícono,
@@ -970,6 +910,30 @@ h6 {
 .patrulla-icono i {
   font-size: 38px;
   color: var(--banner-texto);
+}
+
+/* Con el logo oficial, el cuadrado va sobre blanco: el manual prohíbe poner
+   una marca oficial sobre un fondo que le baje el contraste, y el logo ya trae
+   el color de la rama. */
+.rama-icono.con-logo {
+  background: var(--blanco);
+  border-color: var(--rama-oscuro);
+  padding: 8px;
+}
+
+.rama-icono img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Ícono del sistema iconográfico oficial, en línea con el texto. Va siempre
+   sobre fondo claro: es Orquídea Oscura y sobre un color pierde contraste. */
+.icono-oficial {
+  width: 1.25em;
+  height: 1.25em;
+  object-fit: contain;
+  vertical-align: -0.25em;
 }
 
 .rama-card h3,
@@ -1116,7 +1080,7 @@ h6 {
 
 .etapa-card.en-curso {
   border-left-color: var(--rama-oscuro);
-  box-shadow: 0 10px 24px rgba(90, 22, 144, 0.14);
+  box-shadow: 0 10px 24px rgba(54, 13, 87, 0.14);
 }
 
 .insignia-icono {
@@ -1137,4 +1101,23 @@ h6 {
   background: var(--violeta-fondo);
   color: var(--texto-tenue);
   border-color: var(--gris-linea);
+}
+
+/* Con imagen, sin círculo ni borde: la forma de la insignia cambia por rama
+   (cuadrada en LyL, rombo en Scouts y Caminantes, rectángulo en Rovers) y un
+   marco la recortaría. Va más grande, sobre el blanco de la tarjeta y sin
+   filtros. Que esté entregada o no lo dice el badge, no la imagen. */
+.insignia-icono.con-imagen {
+  width: 88px;
+  height: 88px;
+  min-width: 88px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.insignia-icono img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

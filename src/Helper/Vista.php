@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Educarama\Helper;
 
+use Educarama\Model\Enum\Elemento;
 use Educarama\Model\Enum\EstadoProgresion;
 use Educarama\Model\Enum\EstadoSolicitud;
 use Educarama\Model\Enum\Prioridad;
@@ -48,11 +49,108 @@ final class Vista
             2       => '#406f33', // Scouts (Pantone 7743 C)
             3       => '#116483', // Caminantes (Pantone 2392 C)
             4       => '#931b25', // Rovers (Pantone 7623 C)
-            default => '#791fbf', // Violeta oficial
+            default => '#4b1278', // Violeta de Educarama
         };
     }
 
-    /** Ícono de Bootstrap Icons de cada rama, para las tarjetas de sección. */
+    /**
+     * URL del logo oficial de la rama. Se usa la versión en círculo, el único
+     * set completo de Logos_AreasYRamas. Devuelve null si no hay rama o el id
+     * es desconocido, para que la vista caiga en iconoRama().
+     */
+    public static function logoRama(?int $idRama): ?string
+    {
+        $archivo = match ($idRama) {
+            1       => 'Logo_Circulo_Lobatos-y-Lobeznas.png',
+            2       => 'Logo_Circulo_Scouts.png',
+            3       => 'Logo_Circulo_Caminantes.png',
+            4       => 'Logo_Circulo_Rovers.png',
+            default => null,
+        };
+
+        return $archivo === null
+            ? null
+            : url('views/assets/images/Logos/Logos_AreasYRamas/' . $archivo);
+    }
+
+    /**
+     * URL de un ícono del sistema iconográfico oficial, por su slug
+     * (ej. 'banderin'). Son los pictogramas lineales de Scouts de Argentina en
+     * Orquídea Oscura, la variante que llega a 5,5:1 sobre blanco.
+     */
+    public static function iconoOficial(string $slug): string
+    {
+        return url("views/assets/images/Iconos/$slug.png");
+    }
+
+    /**
+     * Ícono oficial de cada área de desarrollo (las 4 de LyL, Scouts y
+     * Caminantes, y las 6 de Rovers). Null si el área no tiene uno: la vista
+     * cae en iconoArea(), que devuelve el ícono de Bootstrap.
+     */
+    public static function iconoAreaOficial(int $idArea): ?string
+    {
+        $slug = match ($idArea) {
+            1       => 'empatia',        // Salud y Bienestar
+            2       => 'ods-17',         // Paz y Desarrollo
+            3       => 'arbol',          // Ambiente
+            4       => 'construcciones', // Habilidades para la Vida
+            5       => 'montania',       // Corporalidad
+            6       => 'ideas',          // Creatividad
+            7       => 'linterna',       // Carácter
+            8       => 'corazon',        // Afectividad
+            9       => 'dialogo',        // Sociabilidad
+            10      => 'espiritualidad', // Espiritualidad
+            default => null,
+        };
+
+        return $slug === null ? null : self::iconoOficial($slug);
+    }
+
+    /**
+     * Pictograma oficial de la rama, para donde el logo circular no entra: una
+     * celda de tabla, un badge, una línea de texto. Null si la rama no tiene
+     * uno: la vista cae en iconoRama().
+     */
+    public static function pictogramaRama(?int $idRama): ?string
+    {
+        $slug = match ($idRama) {
+            1       => 'huella',              // Manada, el pictograma oficial de la rama
+            2       => 'rosa-de-los-vientos', // Scouts: su bandera y sus insignias la forman
+            3       => 'sol',                 // Caminantes: el Sol de Mayo de la Chakana
+            4       => 'cayado',              // Rovers, el pictograma oficial de la rama
+            default => null,
+        };
+
+        return $slug === null ? null : self::iconoOficial($slug);
+    }
+
+    /**
+     * URL de la imagen de una insignia, a partir del nombre de archivo guardado
+     * en la fila (insignia.imagen). La carpeta es un detalle de presentación:
+     * vive acá, no en la base.
+     */
+    public static function imagenInsignia(?string $archivo): ?string
+    {
+        return $archivo === null
+            ? null
+            : url('views/assets/images/Insignias/Progresion/' . $archivo);
+    }
+
+    /**
+     * Imagen de una insignia de etapa de Caminantes. Las cuatro etapas comparten
+     * fila en `insignia`, pero la insignia que recibe el protagonista depende del
+     * elemento que eligió al confirmar la etapa (etapa_lograda.elemento). Sin
+     * elemento (etapa todavía no lograda) no hay imagen.
+     */
+    public static function imagenInsigniaCaminantes(?Elemento $elemento): ?string
+    {
+        return $elemento === null
+            ? null
+            : self::imagenInsignia('caminantes-' . $elemento->value . '.png');
+    }
+
+    /** Ícono de Bootstrap Icons de cada rama: último respaldo si no hay logo ni pictograma. */
     public static function iconoRama(?int $idRama): string
     {
         return match ($idRama) {

@@ -15,7 +15,12 @@ $scriptsPagina = $scriptsPagina ?? [];
         </main>
 
         <footer class="footer-inst">
-            <p class="m-0 texto-blanco small">© <?= date('Y') ?> Plataforma Educarama - Scouts de Argentina</p>
+            <?php // Aviso de proyecto académico: el pie no puede sugerir respaldo institucional. ?>
+            <p class="m-0 texto-blanco small">
+                © <?= date('Y') ?> Educarama · Proyecto académico sin vinculación oficial con Scouts de Argentina Asociación Civil.<br>
+                El programa educativo y los nombres de ramas, etapas y competencias pertenecen a
+                <a href="https://scouts.org.ar" target="_blank" rel="noopener">Scouts de Argentina Asociación Civil</a>.
+            </p>
         </footer>
     </div>
 

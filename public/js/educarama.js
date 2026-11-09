@@ -24,8 +24,11 @@
 (function () {
     'use strict';
 
-    const COLOR_PRIMARIO = '#45009e';
-    const COLOR_PELIGRO = '#dc3545';
+    // Los colores salen de las variables de public/css/styles.css, para que el
+    // botón de SweetAlert2 no se desfase si cambia la paleta.
+    const variableCss = (nombre) => getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+    const COLOR_PRIMARIO = variableCss('--violeta');
+    const COLOR_PELIGRO = variableCss('--bs-danger'); // rojo de peligro de Bootstrap
     const MENSAJE_INESPERADO = 'Ocurrió un error inesperado. Probá de nuevo en un rato.';
 
     const meta = (nombre) => document.querySelector('meta[name="' + nombre + '"]')?.content ?? '';

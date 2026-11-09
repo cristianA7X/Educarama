@@ -15,7 +15,7 @@ final class Insignia
     public function __construct(
         public ?int    $id,       // null mientras no se guardó en la base
         public string  $titulo,
-        public ?string $imagen,   // Ruta relativa a views/assets/images/
+        public ?string $imagen,   // Nombre del archivo en Insignias/Progresion/ (Vista::imagenInsignia)
         public ?int    $idEtapa,  // Si es la insignia de una etapa
         public ?int    $idRama,   // Si pertenece a una rama
     ) {}

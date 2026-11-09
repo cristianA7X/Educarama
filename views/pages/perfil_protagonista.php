@@ -249,7 +249,7 @@ require __DIR__ . '/../includes/cabecera.php';
                             <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                 <div>
                                     <p class="fw-bold mb-1">
-                                        <i class="bi <?= $esImagen ? 'bi-file-earmark-image' : 'bi-file-earmark-pdf' ?> me-1" aria-hidden="true"></i>
+                                        <img class="icono-oficial me-1" src="<?= e(Vista::iconoOficial($esImagen ? 'png' : 'pdf')) ?>" alt="">
                                         <?= e($d->nombreOriginal) ?>
                                         <?php if ($d->tipoDocumento !== null): ?><span class="badge text-bg-light border ms-1"><?= e($d->tipoDocumento) ?></span><?php endif; ?>
                                     </p>
@@ -294,7 +294,7 @@ require __DIR__ . '/../includes/cabecera.php';
                                             <label class="form-label small" for="desc-<?= $idDoc ?>">Descripción</label>
                                             <input class="form-control form-control-sm" id="desc-<?= $idDoc ?>" name="descripcion" value="<?= e($d->descripcion) ?>">
                                         </div>
-                                        <div class="col-12"><button type="submit" class="btn btn-sm btn-primary">Guardar</button></div>
+                                        <div class="col-12"><button type="submit" class="btn btn-sm boton-primario">Guardar</button></div>
                                     </form>
                                 </div>
                             <?php endif; ?>

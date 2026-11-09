@@ -54,7 +54,12 @@ require __DIR__ . '/../includes/cabecera.php';
                     <?php foreach ($seccionesConRol as $secPantalla): ?>
                         <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-0">
                             <span>
-                                <i class="bi <?= e(Vista::iconoRama($secPantalla->rama->id)) ?> me-1" aria-hidden="true"></i>
+                                <?php $pictograma = Vista::pictogramaRama($secPantalla->rama->id); ?>
+                                <?php if ($pictograma !== null): ?>
+                                    <img class="icono-oficial me-1" src="<?= e($pictograma) ?>" alt="">
+                                <?php else: ?>
+                                    <i class="bi <?= e(Vista::iconoRama($secPantalla->rama->id)) ?> me-1" aria-hidden="true"></i>
+                                <?php endif; ?>
                                 <?= e(Vista::nombreCompletoSeccion($secPantalla->seccion->nombre, $secPantalla->rama->id)) ?>
                             </span>
                             <span class="badge text-bg-secondary"><?= e($secPantalla->nivel->etiqueta()) ?></span>

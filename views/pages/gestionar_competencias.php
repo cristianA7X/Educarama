@@ -124,7 +124,13 @@ require __DIR__ . '/../includes/cabecera.php';
             <li class="nav-item" role="presentation">
                 <button class="nav-link<?= $i === 0 ? ' active' : '' ?>" id="pestania-area-<?= $idArea ?>" data-bs-toggle="tab" data-bs-target="#area-<?= $idArea ?>"
                         type="button" role="tab" aria-controls="area-<?= $idArea ?>" aria-selected="<?= $i === 0 ? 'true' : 'false' ?>">
-                    <i class="bi <?= e(Vista::iconoArea($idArea)) ?> me-1" aria-hidden="true"></i><?= e($area->contador->titulo) ?>
+                    <?php $iconoArea = Vista::iconoAreaOficial($idArea); ?>
+                    <?php if ($iconoArea !== null): ?>
+                        <img class="icono-oficial me-1" src="<?= e($iconoArea) ?>" alt="">
+                    <?php else: ?>
+                        <i class="bi <?= e(Vista::iconoArea($idArea)) ?> me-1" aria-hidden="true"></i>
+                    <?php endif; ?>
+                    <?= e($area->contador->titulo) ?>
                     <span class="badge text-bg-secondary ms-1"><span data-area-desarrolladas="<?= $idArea ?>"><?= $area->contador->desarrolladas ?></span>/<?= $area->contador->total ?></span>
                 </button>
             </li>
@@ -181,7 +187,7 @@ require __DIR__ . '/../includes/cabecera.php';
 
                                 <?php if ($editable): ?>
                                     <div class="d-flex flex-column gap-2 align-items-stretch">
-                                        <button type="button" class="btn btn-sm btn-primary btn-avanzar<?= $avanzar === null ? ' d-none' : '' ?>">
+                                        <button type="button" class="btn btn-sm boton-primario btn-avanzar<?= $avanzar === null ? ' d-none' : '' ?>">
                                             <i class="bi bi-arrow-right-circle me-1" aria-hidden="true"></i><span><?= e($avanzar ?? '') ?></span>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary btn-retroceder<?= $estado === null ? ' invisible' : '' ?>">

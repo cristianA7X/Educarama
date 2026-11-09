@@ -125,7 +125,7 @@ CREATE TABLE `tarea_etapa` (
   CONSTRAINT `fk_tarea_etapa_etapa` FOREIGN KEY (`id_etapa`) REFERENCES `etapa` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- imagen: ruta relativa a views/assets/images/ (formato definitivo pendiente).
+-- imagen: solo el nombre del archivo, en views/assets/images/Insignias/Progresion/ (lo arma Vista::imagenInsignia).
 CREATE TABLE `insignia` (
   `id`       INT          NOT NULL AUTO_INCREMENT,
   `titulo`   VARCHAR(100) NOT NULL,
@@ -514,12 +514,27 @@ INSERT INTO `tarea_etapa` (`id_etapa`, `numero`, `descripcion`) VALUES
 (15, 4, 'Actúa como tutor/a de otros jóvenes.'),
 (15, 5, 'Continúa trabajando en su Plan Personal, se perciben avances y se prepara para su partida.');
 
--- Una insignia por etapa + Ciudadanía (partida Rover). imagen queda NULL hasta definir el formato de ruta.
+-- Una insignia por etapa + Ciudadanía (partida Rover).
 INSERT INTO `insignia` (`titulo`, `imagen`, `id_etapa`, `id_rama`)
 SELECT `titulo`, NULL, `id`, `id_rama` FROM `etapa` ORDER BY `id`;
 
 INSERT INTO `insignia` (`titulo`, `imagen`, `id_etapa`, `id_rama`) VALUES
 ('Ciudadanía', NULL, NULL, 4);
+
+-- Imágenes de las insignias de etapa: solo el nombre del archivo (la carpeta la pone
+-- Vista::imagenInsignia). Caminantes (etapas 9 a 12) queda en NULL: su imagen depende
+-- del elemento elegido en etapa_lograda. Ciudadanía no tiene imagen.
+UPDATE `insignia` SET `imagen` = 'lobatos-1-pata-tierna.png' WHERE `id_etapa` = 1;
+UPDATE `insignia` SET `imagen` = 'lobatos-2-saltador.png'    WHERE `id_etapa` = 2;
+UPDATE `insignia` SET `imagen` = 'lobatos-3-rastreador.png'  WHERE `id_etapa` = 3;
+UPDATE `insignia` SET `imagen` = 'lobatos-4-cazador.png'     WHERE `id_etapa` = 4;
+UPDATE `insignia` SET `imagen` = 'scouts-1-pistas.png'       WHERE `id_etapa` = 5;
+UPDATE `insignia` SET `imagen` = 'scouts-2-senda.png'        WHERE `id_etapa` = 6;
+UPDATE `insignia` SET `imagen` = 'scouts-3-rumbo.png'        WHERE `id_etapa` = 7;
+UPDATE `insignia` SET `imagen` = 'scouts-4-travesia.png'     WHERE `id_etapa` = 8;
+UPDATE `insignia` SET `imagen` = 'rovers-1-encuentro.png'    WHERE `id_etapa` = 13;
+UPDATE `insignia` SET `imagen` = 'rovers-2-compromiso.png'   WHERE `id_etapa` = 14;
+UPDATE `insignia` SET `imagen` = 'rovers-3-proyeccion.png'   WHERE `id_etapa` = 15;
 
 INSERT INTO `especialidad` (`id_area`, `numero`, `titulo`) VALUES
 -- 1 Salud y Bienestar

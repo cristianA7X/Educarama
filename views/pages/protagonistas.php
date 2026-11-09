@@ -122,6 +122,12 @@ if ($esNomina) {
                                 <td class="text-center text-muted"><?= e(number_format($fila->dni, 0, '', '.')) ?></td>
                                 <td class="text-center"><?= $edad !== null ? $edad : '<span class="text-muted">–</span>' ?></td>
                                 <td>
+                                    <?php $pictograma = Vista::pictogramaRama($fila->idRama); ?>
+                                    <?php if ($pictograma !== null): ?>
+                                        <img class="icono-oficial me-1" src="<?= e($pictograma) ?>" alt="">
+                                    <?php else: ?>
+                                        <i class="bi <?= e(Vista::iconoRama($fila->idRama)) ?> me-1" aria-hidden="true"></i>
+                                    <?php endif; ?>
                                     <a class="text-decoration-none fw-semibold" style="color: <?= e(Vista::colorRama($fila->idRama)) ?>" href="<?= e(url('views/pages/protagonistas.php?id_seccion=' . $fila->idSeccion)) ?>">
                                         <?= e($fila->seccionNombre) ?>
                                     </a>

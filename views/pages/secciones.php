@@ -46,7 +46,13 @@ require __DIR__ . '/../includes/cabecera.php';
             <div class="row g-3">
                 <?php foreach ($grupoPantalla->secciones as $seccion): ?>
                     <?php
-                    $contenido = '<div class="rama-icono"><i class="bi ' . e(Vista::iconoRama($seccion->rama->id)) . '" aria-hidden="true"></i></div>'
+                    // El logo oficial de la rama, o el ícono de Bootstrap si la rama no tiene uno.
+                    $logoRama = Vista::logoRama($seccion->rama->id);
+                    $marcaRama = $logoRama !== null
+                        ? '<div class="rama-icono con-logo"><img src="' . e($logoRama) . '" alt=""></div>'
+                        : '<div class="rama-icono"><i class="bi ' . e(Vista::iconoRama($seccion->rama->id)) . '" aria-hidden="true"></i></div>';
+
+                    $contenido = $marcaRama
                         . '<div><h3>' . e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) . '</h3>'
                         . '<p>' . e($seccion->rama->titulo) . ($seccion->nivel !== null ? ' · ' . e($seccion->nivel->etiqueta()) : '') . '</p></div>';
                     ?>
