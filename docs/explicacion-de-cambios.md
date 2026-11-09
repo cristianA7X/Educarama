@@ -1296,3 +1296,249 @@ Cada acción recarga la página (`data-recargar`). Los datos los arma un método
 - **Capturas** de escritorio y móvil.
 
 Se repitió toda la batería de Controllers y Services.
+
+## Formulario de protagonista (`protagonista_form.php`)
+
+Sirve para el alta (`?id_seccion=`) y la edición (`?id=`) de un protagonista. Usa `ProtagonistaController::paginaFormulario`, que trae la sección (con permisos), las patrullas y, si es edición, la ficha del protagonista.
+
+**Decisiones:**
+
+- **DNI solo lectura en edición.** En el alta se escribe y acepta puntos/espacios; en la edición se muestra formateado y se manda como hidden. Cambiarlo es raro y riesgoso por la unicidad en `persona`.
+- **Patrullas solo si la rama tiene pequeño equipo.** El select aparece cuando `SeccionEnPantalla::pequenioEquipo()` no es null (Rovers no lo tiene). La opción por defecto es "Ninguna".
+- **Contenedor angosto** (`$contenedorAngosto = true`): el formulario no necesita el ancho completo.
+- **Sin JS propio:** `data-accion="protagonista.guardar"` y `educarama.js` se ocupan de todo. El 409 (confirmaciones del Service) también funciona sin código extra.
+
+**Campos:** DNI, nombre y apellido (obligatorios), fecha de nacimiento (opcional, `type="date"`), patrulla (select, opcional), año de ingreso (texto con `inputmode="numeric"`, opcional) y promesa (checkbox).
+
+**Botones de cancelar:** en edición vuelven al perfil del protagonista; en alta, al listado de la sección.
+
+## Formulario de familiar (`familiar_form.php`)
+
+Sirve para agregar un familiar a un protagonista (`?id_protagonista=`) y para editarlo (`?id_protagonista=&id_familiar=`). Usa `FamiliarController::paginaFormulario`.
+
+**Decisiones:**
+
+- **DNI siempre editable**, incluso en edición: a diferencia del protagonista, el familiar puede estar duplicado (el aviso del 409 lo maneja `educarama.js` con `confirmarIgual`).
+- **Aviso de familiar compartido:** si `$datos['compartido']` es true, un alert info avisa que los cambios de datos se ven en todos los protagonistas vinculados. No dice cuántos ni cuáles (regla de CLAUDE.md).
+- **Contenedor angosto.**
+- **Sin JS propio.**
+
+**Campos:** DNI, nombre y apellido (obligatorios), fecha de nacimiento (opcional), teléfono (texto libre, opcional), email (validado, opcional), relación (texto libre, opcional, ej. "Madre") y contacto de emergencia (checkbox).
+
+**Cancelar** vuelve al perfil del protagonista.
+
+## Reestructuración del menú lateral (drawer)
+
+El menú dejó de agrupar los links por grupo y sección (un bloque por cada uno) y ahora tiene items fijos por concepto: **Grupos** (el único dropdown), **Secciones**, **Protagonistas**, **Equipos**, **Eventos** y **Roles** (links directos). El filtro por grupo, sección o rama va en cada view, no en el drawer.
+
+**Estructura:**
+
+- **Grupos** (dropdown): primero los "Roles de Grupo X" (solo si es Jefe), después cada grupo con su código y nombre.
+- **Secciones**, **Protagonistas**, **Equipos**, **Eventos**, **Roles**: links directos a una view general. Todavía no existen esas views generales, así que apuntan al inicio por ahora.
+- **Equipos** se muestra solo si el usuario tiene acceso a alguna sección con pequeño equipo. **Roles** se muestra solo si el usuario es Jefe de algún grupo o sección.
+
+**Decisiones:**
+
+- **"Accesos" se renombra a "Roles" de cara al usuario**: el código sigue hablando de `accesos` (rutas, Controllers, Services), pero el menú dice "Roles" porque es lo que el usuario entiende.
+- **Los roles de grupo van dentro del dropdown de Grupos**: al usuario le resulta natural buscar los roles de un grupo junto con los grupos.
+
+## Encabezado de grupo en el inicio
+
+El encabezado de cada grupo en `inicio.php` ahora tiene un fondo sutil (`rgba(69, 0, 158, 0.05)`) con borde izquierdo violeta, un badge con el número de grupo arriba del nombre, y el nombre en `h4 fw-bold texto-violeta`. Mucho más visible que el `home-section-title` anterior.
+
+Los grupos se ordenan por código (antes era por nombre). Se cambió el `usort` en `SeccionService::misGrupos()`.
+
+## Ícono de Manada
+
+Se cambió de `bi-stars` a `bi-star-fill` en `Vista::iconoRama()`. Más claro y reconocible para Lobatos y Lobeznas.
+
+## Listado de protagonistas (`protagonistas.php`)
+
+Listado de protagonistas de una sección (`?id_seccion=`). Usa `ProtagonistaController::paginaListado`, que devuelve las fichas (`FichaProtagonista[]`) y las patrullas. Cada protagonista se muestra como una card (`protagonista-card` del legacy) con nombre, edad y patrulla, enlazada a su perfil.
+
+**Filtro del lado del cliente** (sin JS propio como archivo aparte; el script va inline al final):
+- Buscador por nombre/apellido (texto, filtra al escribir).
+- Select de patrulla (si la rama tiene pequeño equipo), con opción "Sin [seisena/patrulla]".
+- Mensaje "No se encontraron protagonistas con ese filtro" cuando no hay coincidencias.
+
+**Sin protagonistas:** tarjeta con mensaje y un botón para dar de alta al primero (solo Responsable).
+
+## Perfil de sección (`perfil_seccion.php`)
+
+Perfil de una sección (`?id=`). Usa `SeccionController::paginaPerfil`: encabezado con la sección, la rama, el grupo y el rol del usuario; conteos (protagonistas, patrullas, sin patrulla) en tarjetas numéricas; links rápidos a Protagonistas, Patrullas, Eventos y Roles; distribución por patrulla con cantidad; y próximos eventos.
+
+**Decisiones:**
+
+- **Los conteos son sin datos personales** (`ConteoSeccion`), así que el Supervisor también los ve.
+- **Links rápidos** según el rol: Protagonistas y Patrullas desde Ayudante, Roles solo para Jefe.
+- **Roles** se muestra como "Roles" (no "Accesos") para el usuario, consistente con el drawer.
+
+## Patrullas (`patrullas.php`)
+
+Listado de patrullas de una sección (`?id_seccion=`). Usa `PatrullaController::paginaListado`. Cada patrulla es una `tarjeta-blanca-borde` con el nombre y los integrantes como lista enlazada a sus perfiles. Debajo, los protagonistas sin patrulla (si los hay). Modal para crear una nueva patrulla (Responsable). El nombre del equipo varía por rama (`nomenclatura`).
+
+## Perfil de patrulla (`perfil_patrulla.php`)
+
+Perfil de una patrulla (`?id=`). Usa `PatrullaController::paginaPerfil`. Muestra integrantes con botón de quitar, modal para agregar candidatos (el select muestra si ya están en otra patrulla) y menú ⋮ con Renombrar (modal, Responsable) y Eliminar (Jefe).
+
+## Pantalla del grupo (`grupo.php`)
+
+Pantalla de un grupo (`?id=`). Usa `SeccionController::paginaGrupo`. Encabezado con badge del código, nombre y rol. Tarjetas de secciones con color de rama, enlazadas al perfil si el usuario tiene acceso. Links a Eventos (Responsable de grupo) y Roles (Jefe de grupo). Próximos eventos del grupo.
+
+## Eventos (`eventos.php` y `evento_form.php`)
+
+**Listado** (`?id_grupo=` o `?id_seccion=`): usa `EventoController::paginaListado`. Cada evento muestra título, período, prioridad (badge con color), público/privado, descripción y alcance (todo el grupo o las secciones). Menú desplegable por evento: Editar, Desactivar/Reactivar y Eliminar, según permisos. Toggle para ver inactivos (Responsable). Los inactivos se muestran con opacidad reducida y badge "Inactivo".
+
+**Formulario** (`?id_grupo=` para alta o `?id=` para edición): usa `EventoController::paginaFormulario`. Campos: título, descripción, fecha de inicio, fecha de fin (opcional), prioridad (select) y público (checkbox). Alcance: radio "Todo el grupo" / "Algunas secciones" con casillas que se habilitan/deshabilitan según la selección (JS inline).
+
+## Roles (`accesos.php`)
+
+Gestión de roles de un grupo (`?id_grupo=`) o de una sección (`?id_seccion=`). Usa `AccesoController::paginaListado`. Tabla con nombre, email y rol de cada usuario. El rol se cambia con un `<select>` que se envía al elegir (los `rolesAsignables` del Service determinan qué opciones tiene); si no se puede cambiar, muestra un badge estático. Botón de quitar con confirmación. Formulario para agregar a alguien por email, con select de rol (`rolesParaAgregar`). Todas las acciones recargan la página (`data-recargar`). La UI dice "Roles" consistente con el drawer.
+
+## Solicitudes de alta (`solicitudes.php`)
+
+Revisión de solicitudes pendientes (solo admin). Usa `SolicitudAltaController::paginaRevision`. Cada solicitud muestra: grupo pedido (código y nombre), quién la envió (nombre y email), fecha y las secciones con sus ramas. Aprobar con confirmación SweetAlert; rechazar con modal que pide el motivo (obligatorio). Ambas acciones redirigen a la misma pantalla (`Flash` muestra el resultado).
+
+## Drawer: Equipos eliminado, Eventos y Roles por grupo
+
+Se eliminó el link "Equipos" del drawer: a las patrullas se accede desde el perfil de la sección. Se movieron Eventos y Roles adentro del dropdown de Grupos: cada grupo muestra su link de Eventos (si tiene rol de grupo) y de Roles (si es Jefe). Se eliminaron los links sueltos de Eventos y Roles que apuntaban a `inicio.php`. Secciones y Protagonistas quedan como links temporales al inicio hasta que tengan sus propias pantallas de listado general.
+
+## Miembros por sección en roles del grupo
+
+En la pantalla de roles del grupo (`accesos.php?id_grupo=`) se agregó un acordeón "Miembros por sección" que muestra, por cada sección del grupo, los usuarios asignados directamente con su rol, en una tabla de solo lectura. Cada sección tiene un botón para ir a sus roles y editarlos. Los datos vienen de `AccesoService::accesosPorSeccionDeGrupo()`, método nuevo que reutiliza `AccesoSeccionRepository::listarUsuariosPorSeccion()` por cada sección.
+
+## Nómina general de protagonistas
+
+`protagonistas.php` ahora tiene dos modos: con `?id_seccion=` muestra las cards de la sección (el original); sin parámetro muestra la nómina/tabla general con todos los protagonistas de las secciones accesibles del usuario.
+
+**Datos**: `ProtagonistaEnNomina` (clase vista nueva en `Repository/Vista/`) trae en una sola consulta con JOINs y subqueries: datos personales (DNI, nombre, apellido, fecha de nacimiento, año de ingreso), sección, grupo, rama, patrulla, etapa actual (la última lograda) y competencias desarrolladas vs. total de la rama. La consulta está en `ProtagonistaRepository::listarNomina()`.
+
+**Filtros del lado del cliente**: buscador por nombre, selects de grupo, sección y rama (solo si hay más de un valor). Orden por columna (apellido, nombre, edad, competencias) con clic en el encabezado.
+
+**Columna de competencias**: barra de progreso visual con el conteo X/Y.
+
+**Flujo de datos**: `ProtagonistaService::nomina()` recorre los grupos del usuario (`SeccionService::misGrupos`), junta las secciones donde `puedeVerDetalle()` (Ayudante en adelante) y llama al repo con los ids. `ProtagonistaController::paginaNomina()` lo expone.
+
+**Drawer**: "Protagonistas" ahora apunta a `protagonistas.php` (sin parámetro), la nómina general.
+
+---
+
+## Vista general de eventos
+
+**Qué cambió**: `eventos.php` ahora tiene tres modos: sin parámetros (vista general), `?id_grupo=` (eventos del grupo) y `?id_seccion=` (eventos de la sección). Se agregó "Eventos" como link directo en el drawer.
+
+**Por qué**: el usuario necesita ver todos sus eventos en un solo lugar sin entrar grupo por grupo. El link del drawer va a la vista general; los links "Eventos del Grupo X" del dropdown siguen llevando a la vista por grupo.
+
+**Cómo funciona**:
+
+- **`EventoService::eventosGenerales()`**: recorre los grupos del usuario (`SeccionService::misGrupos`). Si tiene rol de grupo, usa `pantallaGrupo`; si solo tiene acceso por secciones, arma una pantalla juntando los eventos de cada sección accesible sin repetir (deduplicación por id de evento). Devuelve `EventosGenerales` con un array de `{grupo, pantalla}` por grupo.
+
+- **`EventosGenerales`** (`Service/Vista/`): clase vista que agrupa los resultados por grupo y ofrece un `total()` para saber si hay algo que mostrar.
+
+- **`EventoController::paginaGeneral()`**: expone `eventosGenerales()` a la vista.
+
+- **Vista general** (tabla compacta): muestra todos los eventos en una tabla con columnas Evento, Fecha, Prioridad, Alcance y Grupo. Incluye filtro por grupo (select, solo si hay más de uno) y acciones de editar/eliminar en un menú de tres puntos. Es más compacta que la vista detallada por grupo/sección, que mantiene las tarjetas con descripción completa.
+
+- **Drawer**: se agregó "Eventos" como link directo a `eventos.php` (sin parámetros), entre Grupos y Secciones.
+
+---
+
+## Toggle cards/tabla en protagonistas de sección
+
+**Qué cambió**: `protagonistas.php?id_seccion=` ahora tiene dos vistas: tarjetas (cards, la original) y tabla (nómina con progresión). Un botón de toggle en el encabezado alterna entre ambas; la preferencia se guarda en `localStorage`.
+
+**Cómo funciona**: `ProtagonistaController::paginaListado` ahora también devuelve `'nomina'` (`ProtagonistaService::nominaPorSeccion`). El JS muestra/oculta los contenedores `#vistaCards` y `#vistaTabla` según el botón activo. Los filtros (buscador y patrulla) funcionan en ambas vistas al mismo tiempo.
+
+---
+
+## Roles en Mi cuenta
+
+**Qué cambió**: `mi_cuenta.php` ahora muestra una sección "Mis roles" entre "Mis datos" y "Cambiar la contraseña", con todos los grupos y secciones del usuario y su rol en cada uno.
+
+**Cómo funciona**: `UsuarioController::paginaMiCuenta` ahora también devuelve `'grupos'` (`SeccionService::misGrupos`). La vista los recorre mostrando el rol de grupo (si tiene) y cada sección con su rol y el ícono de rama.
+
+---
+
+## Insignias como pestaña en progresión
+
+**Qué cambió**: en `progresion.php`, las insignias pasaron de estar debajo de las etapas a ser una pestaña paralela (Bootstrap nav-tabs). Las especialidades siguen debajo de ambas pestañas.
+
+**Por qué**: mejor organización visual; el usuario ve solo lo que le interesa sin tener que scrollear hasta abajo. Si hay una insignia pendiente, la pestaña lo indica con un badge.
+
+---
+
+## Correcciones visuales menores
+
+- **Etiqueta de nómina general**: el subtítulo "Nómina general de todas las secciones…" ahora hereda el color del banner (blanco) en lugar de usar `text-muted` (negro).
+- **Botones del banner en grupo y eventos**: pasaron de `btn-outline-secondary` a `boton-primario` (degradado violeta, consistente con el resto de la app).
+- **Botones "Nuevo" centrados**: los banners de `eventos.php` y `protagonistas.php` usan `align-items-center` para centrar verticalmente los botones.
+
+---
+
+## Tablas de nómina simplificadas
+
+**Qué cambió**: las tablas de protagonistas se simplificaron en ambos modos.
+
+**Tabla general** (`protagonistas.php` sin parámetros):
+- Las columnas Apellido y Nombre se unificaron en una sola "Nombre" con formato "Apellido, Nombre".
+- Se quitó la columna "Ingreso" (año de ingreso).
+- La columna "Sección" muestra solo el nombre, sin la rama entre paréntesis, con el color primario de la rama como tinte del texto (`Vista::colorRama`).
+- La columna "Competencias" muestra solo "X/Y" sin la barra de progreso.
+- Los encabezados están centrados.
+
+**Tabla de sección** (`protagonistas.php?id_seccion=`):
+- Misma unificación de Apellido + Nombre.
+- Se quitaron las columnas "Ingreso" y la barra de progreso de competencias.
+- Los encabezados están centrados.
+
+**Por qué**: la tabla anterior era demasiado ancha y repetía información visual (la barra de progreso no aportaba sobre "12/47"). El color de la sección da un vistazo rápido de la rama sin ocupar una columna.
+
+---
+
+## Vista general de eventos y eventos grupales
+
+**Qué cambió**: se agregaron dos vistas de eventos accesibles desde el menú lateral:
+
+1. **Eventos** (link directo en el drawer): `eventos.php` sin parámetros, muestra todos los eventos de los grupos y secciones accesibles en una tabla compacta con filtro por grupo.
+2. **Eventos grupales** (dentro del dropdown de Grupos): `eventos.php?grupales=1`, la misma vista pero filtrada a los eventos de todo el grupo (sin los que son de secciones específicas).
+
+**Cómo funciona**: `EventoService::eventosGenerales()` itera los grupos del usuario. Para quienes tienen rol de grupo usa `pantallaGrupo`; para quienes solo tienen acceso a secciones usa `pantallaDesdeSeccionesDelUsuario` (agrega los eventos de cada sección y deduplica por id). El resultado (`EventosGenerales`) agrupa los eventos por grupo. En el modo `?grupales=1`, el PHP filtra las filas con `esDeTodoElGrupo()` y calcula el total visible por separado.
+
+---
+
+## Vista general de secciones
+
+**Qué cambió**: `secciones.php` muestra todas las secciones a las que el usuario tiene acceso, agrupadas por grupo, con las tarjetas de rama. Cada tarjeta es clickeable si el usuario tiene acceso directo a la sección. Accesible desde el link "Secciones" del menú lateral.
+
+**Cómo funciona**: usa `SeccionController::paginaSecciones()` → `SeccionService::misGrupos()`, que ya devuelve los grupos con sus secciones y el nivel del usuario en cada una.
+
+---
+
+## Convención de nombres: secciones y grupos sin prefijo en la base
+
+**Qué cambió**: las secciones se guardan solo con su nombre particular (ej. "Luna Llena", no "Manada Luna Llena") y los grupos sin el prefijo "Grupo" (ej. "Los Aromos", no "Grupo Scout Los Aromos"). Los prefijos se concatenan en la capa de presentación según el `id_rama` de la sección.
+
+**Por qué**: separar el dato del formato de presentación. El prefijo de la sección depende de la rama ("Manada", "Unidad", "Comunidad Caminante", "Comunidad Rover") y no coincide con `rama.titulo_corto` ("Caminantes", "Rovers"), así que se necesita una función dedicada.
+
+**Cómo funciona**: tres helpers en `Vista` (`src/Helper/Vista.php`):
+- `prefijoSeccion(int $idRama)`: devuelve "Manada", "Unidad", "Comunidad Caminante" o "Comunidad Rover".
+- `nombreCompletoSeccion(string $nombre, int $idRama)`: concatena prefijo + nombre.
+- `nombreCompletoGrupo(string $nombre)`: concatena "Grupo " + nombre.
+
+Todas las vistas, el menú lateral y `EventoService` (con alias `VistaHelper` para evitar colisión de namespace con `Service\Vista\*`) usan estos helpers. `SolicitudAltaService::enPantalla()` incluye `id_rama` en cada sección para que las vistas puedan calcular el nombre completo. Los datos de ejemplo (`datos_ejemplo.sql`) ya guardan solo el nombre particular.
+
+---
+
+## Tablas: nombre del grupo en vez del código
+
+**Qué cambió**: en las tablas que mostraban el N° de grupo (código), ahora se muestra el nombre completo del grupo con `Vista::nombreCompletoGrupo()`.
+
+**Por qué**: el nombre es más reconocible que el código numérico para el usuario.
+
+---
+
+## Menú lateral: links simplificados por grupo
+
+**Qué cambió**: en el dropdown de Grupos del drawer se quitaron las entradas individuales "Eventos del Grupo X" y "Roles del Grupo X". Queda solo el link al grupo y "Eventos grupales" al final (si hay al menos un grupo).
+
+**Por qué**: simplificar el menú; esas pantallas se acceden desde la vista del grupo.
