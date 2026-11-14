@@ -1,127 +1,55 @@
 <?php
-$rama_page = ""; 
-$tituloPagina = "Inicio de Sesión";
+// views/pages/login.php
+//
+// Iniciar sesión. Con sesión abierta, el Controller redirige al destino.
+// Recibe ?volver= (una página del proyecto) para volver adonde se quería ir.
 
+declare(strict_types=1);
+
+require_once __DIR__ . '/../../config/bootstrap.php';
+
+use Educarama\Controller\Pagina;
+use Educarama\Controller\UsuarioController;
+use Educarama\Helper\Csrf;
+
+$datos = Pagina::cargar(fn () => (new UsuarioController())->paginaLogin($_GET));
+
+$tituloPagina = 'Iniciar sesión';
+$sinMenu = true;
+$contenedorAngosto = true;
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-  
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educarama - Iniciar Sesión</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
-</head>
+<div class="barra-superior-inst mb-4">
+    <h1 class="h3 fw-bold mb-0">Iniciar sesión</h1>
+</div>
 
-<body class="rama-<?php echo $rama_page; ?>">
+<div class="tarjeta-blanca-borde p-4">
+    <form data-accion="usuario.iniciarSesion">
+        <?= Csrf::campo() ?>
+        <input type="hidden" name="volver" value="<?= e($datos['volver']) ?>">
 
-    <?php       include 'includes/barra_superior.php'; 
-    ?>
-    <div class="main-content-wrapper without-sidebar">
-        <div class="container contenedor-principal without-sidebar my-4 p-4">
-            
-            <div class="row mb-3 align-items-center barra-superior-inst mx-0">
-                <div class="align-items-center">
-                    <h1 class="h3 fw-bold mb-0">Iniciar Sesión</h1>
-                </div>
-            </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com"
+                   autocomplete="username" required autofocus>
+        </div>
 
-            <div class="row mb-4 align-items-stretch">
-                <div class="col-md-12 mb-3 mb-md-0">
-                    <div class="tarjeta-blanca-borde p-3 h-100">
-                        <!--  <hr class="border-white opacity-25"> -->
-                       
-                        
-                        <form id="formLogin" method="POST">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese su contraseña" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="btnTogglePassword">
-                                        <i class="bi bi-eye" id="iconoPassword"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                            <a href="register.php" class="btn btn-secondary">Registrarse</a>
-                       </form>
-
-                    </div>
-                </div>
+        <div class="mb-4">
+            <label for="contrasenia" class="form-label">Contraseña</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="contrasenia" name="contrasenia"
+                       autocomplete="current-password" required>
+                <button class="btn btn-outline-secondary" type="button" data-ver-contrasenia="#contrasenia"
+                        aria-label="Mostrar u ocultar la contraseña" aria-pressed="false">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
-    </div>
 
-
-        <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- Lógica para mostrar/ocultar contraseña ---
-        const btnTogglePassword = document.getElementById('btnTogglePassword');
-        const passwordInput = document.getElementById('password');
-        const iconoPassword = document.getElementById('iconoPassword');
-
-        if (btnTogglePassword && passwordInput) {
-            btnTogglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                iconoPassword.classList.toggle('bi-eye');
-                iconoPassword.classList.toggle('bi-eye-slash');
-            });
-        }
-
-        // --- Lógica del formulario de Login ---
-        const formulario = document.querySelector('#formLogin');
-        if (!formulario) {
-            console.error('No se encontró el formulario con id="formLogin"');
-            return;
-        }
-
-        formulario.addEventListener('submit', function (e) {
-            e.preventDefault();
-            
-            const formData = new FormData(formulario);
-            
-            fetch('/Educarama/src/Controladores/AuthController.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.text())
-            .then(texto => {
-                let data;
-                try {
-                    data = JSON.parse(texto);
-                } catch (error) {
-                    alert('El servidor respondió algo que no es JSON. Revisá la consola.');
-                    console.error(texto);
-                    return;
-                }
-                
-                if (data.status === 'success') {
-                    window.location.href = '/Educarama/public/index.php';
-                } else {
-                    alert(data.message || 'No se pudo iniciar sesión.');
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Ocurrió un error al intentar comunicarse con el servidor.');
-            });
-        });
-    });
-    </script>
-
-</body>
-</html>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="boton-primario px-4 py-2 fw-bold">Iniciar sesión</button>
+            <a href="<?= e(url('views/pages/registro.php')) ?>" class="btn btn-outline-secondary px-4 py-2">Crear una cuenta</a>
+        </div>
+    </form>
+</div>
+<?php require __DIR__ . '/../includes/pie.php'; ?>

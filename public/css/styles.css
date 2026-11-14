@@ -1,101 +1,158 @@
 /* ==========================================================================
    public/css/styles.css
-EDUCARAMA - ESTILO GENERAL 
+EDUCARAMA - ESTILO GENERAL
 
+   Todos los colores salen de las variables de :root y de las clases de rama.
+   No se escribe ningún hex suelto más abajo: si hace falta un color nuevo,
+   se agrega acá como variable.
    ========================================================================== */
 :root {
-  /* Paleta institucional */
-  --celeste-inst: #00aaf2;
-  --violeta-primario: #45009e;
-  --violeta-secundario: #a068d4;
-  --violeta-oscuro: #320071;
-  --orquidea-bordes: #6110ad;
-  --lila-cards: #b85bee;
+  /* ----- Marca propia de Educarama -------------------------------------
+     Violetas del círculo cromático oficial de Scouts de Argentina. */
+  --violeta: #4b1278;        /* Violeta oficial (#791fbf) oscurecido dos pasos */
+  --orquidea: #874dbd;       /* Orquídea oscura */
+  --purpura: #a539b6;        /* Púrpura */
+  --lila: #b85bee;           /* Lila */
+  --violeta-oscuro: #360d57; /* derivado de --violeta: degradados, hover, estado activo */
+
+  /* ----- Resto de la paleta oficial ----- */
+  --celeste: #00aaf2; /* Celeste */
+  --amarillo: #fdd617; /* Amarillo tráfico */
+  --verde-logro: #60b134; /* Verde amarillento: estados "logrado / desarrollada" */
+
+  /* Solo para el imagotipo oficial de Scouts de Argentina; nunca para la interfaz. */
+  --celeste-imagotipo: #0081c8;
+  --amarillo-imagotipo: #f7cf00;
+
+  /* Fondo general. No es del círculo cromático: viene del legacy. */
   --beige-fondo: #e0dfb6;
 
-  /* Neutros */
+  /* ----- Neutros ----- */
   --blanco: #ffffff;
   --texto-principal: #2f2440;
   --texto-suave: #6f647c;
-  --borde-suave: rgba(97, 16, 173, 0.18);
-  --sombra-suave: 0 10px 30px rgba(50, 0, 113, 0.12);
-  --sombra-card: 0 8px 20px rgba(50, 0, 113, 0.1);
+  --texto-tenue: #9a90a8;
+  /* Texto oscuro para los fondos claros de rama (amarillos y verdes). */
+  --texto-sobre-claro: #22003f;
 
-  /* Colores Primarios  */
-  --scout-amarillo: hsl(50, 98%, 54%);
-  --scout-verde: #00a651;
-  --scout-celeste: #00aaf2;
-  --scout-rojo: #e30613;
+  /* Tintes derivados del violeta, para bordes, líneas y fondos suaves. */
+  --violeta-borde: #dfc9ff;
+  --violeta-linea: #eadcff;
+  --violeta-fondo: #f1eef5;
+  --gris-linea: #d9d2e3;
+  --gris-pista: #ece7f4; /* fondo de la barra de progreso */
 
-  /* Colores Secundarios (Más claros / pasteles para fondos o detalles) */
-  --scout-amarillo-claro: #fef4b8;
-  --scout-verde-claro: #b3e8cb;
-  --scout-celeste-claro: #b3e6fa;
-  --scout-rojo-claro: #f9b2b6;
+  --borde-suave: rgba(75, 18, 120, 0.18);
+  --sombra-suave: 0 10px 30px rgba(54, 13, 87, 0.12);
+  --sombra-card: 0 8px 20px rgba(54, 13, 87, 0.1);
 
-  /* Variables de Interfaz Dinámicas*/
-  --rama-primario: var(--violeta-primario);
-  --rama-secundario: var(--violeta-secundario);
+  /* ----- Variables de rama (sin rama: la marca propia) -------------------
+     --rama-primario   tono vivo: puntos, íconos, acentos.
+     --rama-secundario tono medio: degradados.
+     --rama-oscuro     tono profundo: bordes gruesos y fin del degradado.
+     --rama-contraste  el único legible como texto sobre blanco (4,5:1). */
+  --rama-primario: var(--violeta);
+  --rama-secundario: var(--orquidea);
+  --rama-oscuro: var(--violeta-oscuro);
+  --rama-contraste: var(--violeta);
+
+  /* Banner de título de cada página (.barra-superior-inst): su degradado y el
+     color del texto. El par está elegido para que el texto pase 4,5:1 en el
+     extremo más desfavorable del degradado. */
+  --banner-inicio: var(--violeta);
+  --banner-fin: var(--violeta-oscuro);
+  --banner-texto: var(--blanco);
+
+  /* Botón primario (.boton-primario). Sin rama, Celeste oficial con texto
+     oscuro (7:1): con texto blanco no llega a 4,5:1. El fin del degradado es el
+     celeste mezclado con el texto oscuro, sin sumar un hex nuevo (5,6:1). Las
+     clases de rama lo vuelven violeta. */
+  --boton-inicio: var(--celeste);
+  --boton-fin: color-mix(in srgb, var(--celeste) 85%, var(--texto-sobre-claro));
+  --boton-texto: var(--texto-sobre-claro);
+  --boton-sombra: rgba(0, 170, 242, 0.3);
 
   /* Medidas */
-  --sidebar-width: 220px;
-  --sidebar-mobile-width: 68px;
+  --sidebar-width: 270px;
   --navbar-height: 72px;
   --footer-height: 50px;
-}
-.rama-manada {
-  --rama-primario: var(--scout-amarillo);
-  --rama-secundario: var(--scout-amarillo-claro);
-}
-.rama-unidad {
-  --rama-primario: var(--scout-verde);
-  --rama-secundario: var(--scout-verde-claro);
-}
-.rama-caminantes {
-  --rama-primario: var(--scout-celeste);
-  --rama-secundario: var(--scout-celeste-claro);
-}
-.rama-rover {
-  --rama-primario: var(--scout-rojo);
-  --rama-secundario: var(--scout-rojo-claro);
+  --foco: 3px solid var(--violeta); /* el amarillo daba 1,4:1 sobre blanco; WCAG pide 3:1 */
+
+  /* Tipografía. Arial es la sustitución que pide el manual de marca. */
+  --fuente: "Ubuntu", Arial, sans-serif;
+  --fuente-condensada: "Ubuntu Condensed", "Arial Narrow", Arial, sans-serif;
 }
 
-/* Acento de color en las cards */
+/* Colores de rama: los tres tonos oficiales de cada bandera de Scouts de
+   Argentina. El contraste anotado es el del texto del banner contra el
+   extremo más desfavorable de su degradado. */
+
+/* Lobatos y Lobeznas — amarillo (Pantone 7406 C, 124 C, 1375 C). 7,3:1 */
+.rama-lobatos {
+  --rama-primario: #f5c600;
+  --rama-secundario: #ec9d00;
+  --rama-oscuro: #ea8e11;
+  --rama-contraste: #a06a00; /* derivado: el amarillo oficial no llega a 4,5:1 sobre blanco */
+  --banner-inicio: var(--rama-primario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--texto-sobre-claro);
+}
+
+/* Scouts — verde (Pantone 7489 C, 370 C, 7743 C). 4,6:1 */
+.rama-scouts {
+  --rama-primario: #65ac46;
+  --rama-secundario: #588d3c;
+  --rama-oscuro: #406f33;
+  --rama-contraste: #406f33;
+  --banner-inicio: var(--rama-primario);
+  --banner-fin: var(--rama-secundario);
+  --banner-texto: var(--texto-sobre-claro);
+}
+
+/* Caminantes — azul celeste (Pantone 3125 C, 3145 C, 2392 C). 4,9:1 */
+.rama-caminantes {
+  --rama-primario: #08a2c7;
+  --rama-secundario: #0a7b96;
+  --rama-oscuro: #116483;
+  --rama-contraste: #116483;
+  --banner-inicio: var(--rama-secundario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--blanco);
+}
+
+/* Rovers — rojo (Pantone 1788 C, 2350 C, 7623 C). 6,5:1 */
+.rama-rovers {
+  --rama-primario: #e73333;
+  --rama-secundario: #b81d1b;
+  --rama-oscuro: #931b25;
+  --rama-contraste: #931b25;
+  --banner-inicio: var(--rama-secundario);
+  --banner-fin: var(--rama-oscuro);
+  --banner-texto: var(--blanco);
+}
+
+/* Con rama, el botón primario vuelve al violeta de Educarama: contra el color
+   de la rama ya se distingue, y un celeste se confundiría con Caminantes. */
+.rama-lobatos,
+.rama-scouts,
+.rama-caminantes,
+.rama-rovers {
+  --boton-inicio: var(--violeta);
+  --boton-fin: var(--violeta-oscuro);
+  --boton-texto: var(--blanco);
+  --boton-sombra: rgba(75, 18, 120, 0.22);
+}
+
+/* Acento de color en las cards. Usa el tono oscuro: el amarillo de Manada no
+   se distinguiría del blanco. */
 .protagonista-card,
-.rama-card,
-.patrulla-card {
-  border-left: 8px solid var(--rama-primario);
+.rama-card {
+  border-left: 8px solid var(--rama-oscuro);
 }
 .protagonista-card:hover,
-.rama-card:hover,
-.patrulla-card:hover {
-  border-color: var(--rama-primario);
+.rama-card:hover {
+  border-color: var(--rama-oscuro);
 }
-/* MANADA (Amarillo) */
-
-body.rama-manada {
-  --rama-primario: var(--scout-amarillo);
-  --rama-secundario: var(--scout-amarillo-claro);
-}
-
-/* UNIDAD (Verde) */
-body.rama-unidad {
-  --rama-primario: var(--scout-verde);
-  --rama-secundario: var(--scout-verde-claro);
-}
-
-/* CAMINANTES (Celeste) */
-body.rama-caminantes {
-  --rama-primario: var(--scout-celeste);
-  --rama-secundario: var(--scout-celeste-claro);
-}
-
-/* ROVER (Rojo) */
-body.rama-rover {
-  --rama-primario: var(--scout-rojo);
-  --rama-secundario: var(--scout-rojo-claro);
-}
-
 /* =========================================================
    UBUNTU
    ========================================================= */
@@ -163,25 +220,16 @@ body.rama-rover {
   font-style: italic;
   font-display: swap;
 }
-/* ==========================================================================
-   AJUSTES CONDICIONALES PARA PAGINAS SIN SIDEBAR/FOOTER
-   ========================================================================== */
 
-/* Si el body tiene la clase no-sidebar, eliminamos el margen izquierdo del contenido */
-body.no-sidebar .main-content-wrapper {
-  margin-left: 0;
+/* Ubuntu Condensed: solo existe en peso 400. Se sirve en TTF, sin convertir a
+   woff2, para no sumar una herramienta de conversión al proyecto. */
+@font-face {
+  font-family: "Ubuntu Condensed";
+  src: url("../fonts/Ubuntu_Condensed/UbuntuCondensed-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
-
-/* Si el body tiene la clase no-footer, ajustamos el padding inferior */
-body.no-footer .main-content-wrapper {
-  padding-bottom: 40px; /* O el valor que desees sin sumar el footer */
-}
-
-/* Opcional: Si quieres que el main ocupe todo el ancho si no hay sidebar */
-body.no-sidebar .main-content-wrapper {
-  width: 100%;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -193,7 +241,7 @@ body {
 
 body {
   margin: 0;
-  font-family: "Ubuntu", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--fuente);
   font-weight: 400;
 
   color: var(--texto-principal);
@@ -218,8 +266,34 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--fuente);
   font-weight: 700;
+}
+
+/* Ubuntu Condensed para etiquetas, encabezados y celdas de tabla y badges.
+   Nunca para texto corrido, para el h1 de la página ni por debajo de 12 px.
+   Solo existe en peso 400: font-synthesis evita que el navegador invente un
+   bold deformando la letra. El énfasis va por mayúsculas y letter-spacing. */
+.dato-etiqueta,
+.badge,
+#tablaNomina th,
+#tablaNominaSeccion th,
+#tablaNomina td,
+#tablaNominaSeccion td {
+  font-family: var(--fuente-condensada);
+  font-synthesis: none;
+}
+
+#tablaNomina th,
+#tablaNominaSeccion th {
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* El 0.75em de Bootstrap baja de 12 px dentro de un texto .small. */
+.badge {
+  font-size: max(0.75em, 0.75rem);
 }
 
 /* Scroll más prolijo */
@@ -228,12 +302,12 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(69, 0, 158, 0.35);
+  background: rgba(75, 18, 120, 0.35);
   border-radius: 999px;
 }
 
 /* ==========================================================================
-   BARRA SUPERIOR E INFERIOR
+   BARRA SUPERIOR Y PIE
    ========================================================================== */
 .header-inst {
   position: fixed;
@@ -241,19 +315,14 @@ h6 {
   left: 0;
   width: 100%;
   height: var(--navbar-height);
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
-
-  backdrop-filter: blur(10px);
-  color: var(--violeta-primario);
+  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
+  color: var(--blanco);
   display: flex;
   align-items: center;
+  gap: 12px;
   padding: 0 24px;
-  box-shadow: 0 8px 24px rgba(50, 0, 113, 0.1);
-  border-bottom: 1px solid rgba(97, 16, 173, 0.12);
+  box-shadow: 0 8px 24px rgba(54, 13, 87, 0.1);
+  border-bottom: 1px solid rgba(75, 18, 120, 0.12);
   z-index: 1100;
 }
 
@@ -261,68 +330,148 @@ h6 {
   max-height: 50px;
 }
 
-.footer-inst {
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: var(--footer-height);
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
+.header-inst .marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--blanco);
+  text-decoration: none;
+}
 
+.header-inst .marca:hover {
+  color: var(--blanco);
+}
+
+.header-inst .marca-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.header-inst .marca-titulo {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Botón de hamburguesa: abre y cierra el menú lateral */
+.boton-menu {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--blanco);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.boton-menu:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+/* El botón está sobre el header violeta: ahí el anillo violeta de --foco no se
+   vería, así que usa el amarillo, que contrasta bien con el violeta oscuro. */
+.boton-menu:focus-visible {
+  outline: 3px solid var(--amarillo);
+  outline-offset: 2px;
+}
+
+.footer-inst {
+  min-height: var(--footer-height);
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--violeta-oscuro), var(--violeta));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 -8px 24px rgba(50, 0, 113, 0.18);
-  z-index: 1100;
+  text-align: center;
+  box-shadow: 0 -8px 24px rgba(54, 13, 87, 0.18);
   font-size: 0.9rem;
 }
 
+/* El link de atribución del pie, legible sobre el degradado violeta. */
+.footer-inst a {
+  color: var(--blanco);
+}
+
 .texto-violeta {
-  color: var(--violeta-primario);
+  color: var(--violeta);
 }
 .texto-blanco {
-  color: #ffffff;
+  color: var(--blanco);
 }
 
 /* ==========================================================================
-   MENÚ LATERAL
+   MENÚ LATERAL (drawer)
+
+   Es un offcanvas de Bootstrap. Por debajo de 992 px se abre encima del
+   contenido, con fondo oscuro. Desde 992 px arranca abierto, empuja el
+   contenido y se oculta con la clase html.menu-oculto (public/js/educarama.js
+   la guarda en localStorage).
    ========================================================================== */
 .sidebar {
-  position: fixed;
-  top: var(--navbar-height);
-  left: 0;
-  height: calc(100% - var(--navbar-height));
-  width: var(--sidebar-width);
-  background: rgba(255, 255, 255, 0.92);
-  transition: width 0.3s ease;
-  z-index: 1000;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 16px 12px;
-  box-shadow: 8px 0 24px rgba(50, 0, 113, 0.18);
+  --bs-offcanvas-width: min(var(--sidebar-width), 86vw);
+  --bs-offcanvas-bg: rgba(255, 255, 255, 0.97);
+  box-shadow: 8px 0 24px rgba(54, 13, 87, 0.18);
 }
 
-.sidebar .nav.flex-column {
+/* Bootstrap fija top: 0 con .offcanvas.offcanvas-start: hace falta la misma especificidad para ganarle. */
+.sidebar.offcanvas.offcanvas-start {
+  top: var(--navbar-height);
+}
+
+.sidebar .offcanvas-body {
+  padding: 14px 12px 24px;
+}
+
+.sidebar .nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 
 .sidebar .nav-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 46px;
-  padding: 11px 14px;
-  color: var(--rama-primario);
-  text-decoration: none;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: var(--violeta);
+  background: transparent;
+  border: 0;
   border-radius: 14px;
-  transition: all 0.22s ease;
+  text-align: left;
+  text-decoration: none;
   font-weight: 500;
   letter-spacing: 0.1px;
+  transition: all 0.22s ease;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(75, 18, 120, 0.07);
+  color: var(--violeta-oscuro);
+  transform: translateX(3px);
+}
+
+.sidebar .nav-link:focus-visible {
+  outline: var(--foco);
+  outline-offset: -2px;
+}
+
+.sidebar .nav-link.active {
+  background-color: rgba(75, 18, 120, 0.12);
+  color: var(--violeta-oscuro);
+  font-weight: 700;
 }
 
 .sidebar .nav-link .icon {
@@ -333,52 +482,135 @@ h6 {
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.13);
+  background: rgba(75, 18, 120, 0.08);
 }
 
-.sidebar .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.96);
-  color: var(--rama-primario);
-  transform: translateX(4px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+.sidebar .nav-link .caret {
+  margin-left: auto;
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
 }
 
-.sidebar .nav-link:hover .icon {
-  background-color: rgba(69, 0, 158, 0.1);
-}
-
-.sidebar .nav-link.active,
-.sidebar .nav-link:active {
-  background-color: var(--rama-secundario);
-  color: var(--violeta-oscuro);
+.sidebar .nav-link[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
 }
 
 .sidebar .sub-menu {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 2px 0 6px 20px;
+  padding-left: 6px;
+  border-left: 2px solid var(--borde-suave);
 }
 
 .sidebar .sub-menu .nav-link {
   min-height: 40px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   font-size: 0.9rem;
-  font-weight: 500;
+}
+
+.menu-usuario {
+  margin: 0 14px 10px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.menu-separador {
+  margin: 14px 8px;
+  border-top: 1px solid var(--borde-suave);
+}
+
+
+/* Desde 992 px: el menú está a la vista y empuja el contenido. */
+@media (min-width: 992px) {
+  .sidebar.offcanvas {
+    visibility: visible;
+    transform: none;
+    transition: none;
+  }
+
+  html.menu-listo .sidebar.offcanvas {
+    transition:
+      transform 0.3s ease,
+      visibility 0s;
+  }
+
+  html.menu-oculto .sidebar.offcanvas {
+    transform: translateX(-100%);
+    visibility: hidden;
+  }
+
+  html.menu-listo.menu-oculto .sidebar.offcanvas {
+    transition:
+      transform 0.3s ease,
+      visibility 0s linear 0.3s;
+  }
+
+  body:not(.no-sidebar) .contenido-pagina {
+    margin-left: var(--sidebar-width);
+  }
+
+  html.menu-listo body:not(.no-sidebar) .contenido-pagina {
+    transition: margin-left 0.3s ease;
+  }
+
+  html.menu-oculto body:not(.no-sidebar) .contenido-pagina {
+    margin-left: 0;
+  }
 }
 
 /* ==========================================================================
    CONTENIDO PRINCIPAL
    ========================================================================== */
-.main-content-wrapper {
-  padding: calc(var(--navbar-height) + 15px) 24px
-    calc(var(--footer-height) + 40px);
+.contenido-pagina {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  margin-left: var(--sidebar-width);
+  padding-top: var(--navbar-height);
 }
 
-.main-content-wrapper.without-sidebar {
-  margin-left: 0;
+.main-content-wrapper {
+  flex: 1 0 auto;
+  padding: 15px 24px 40px;
+}
+
+/* Campo de fecha en tres listas (Vista::campoFecha): día, mes y año en una
+   fila. Cada lista tiene el ancho mínimo para que su texto no se corte; si en
+   un celular muy angosto no entran las tres, el año pasa a la línea de abajo. */
+.campo-fecha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Menos relleno que el de Bootstrap, que reserva 2.25rem para la flecha. */
+.campo-fecha select {
+  flex: 1 0 auto;
+  padding-left: 0.6rem;
+  padding-right: 1.6rem;
+  background-position: right 0.45rem center;
+}
+
+.campo-fecha [data-parte="dia"] {
+  min-width: 4.3rem;
+  flex-basis: 4.3rem;
+}
+
+.campo-fecha [data-parte="mes"] {
+  min-width: 4.8rem;
+  flex-basis: 4.8rem;
+}
+
+.campo-fecha [data-parte="anio"] {
+  min-width: 5.4rem;
+  flex-basis: 5.4rem;
+}
+
+/* Las tablas que se desplazan de costado tienen que ser el bloque contenedor
+   de sus elementos absolutos (el .visually-hidden de un botón, por ejemplo).
+   Si no, esos elementos escapan del overflow, la página entera se ensancha en
+   el celular y el pie, que mide el 100% de la pantalla, se ve cortado. */
+.table-responsive {
+  position: relative;
 }
 
 .contenedor-principal {
@@ -389,73 +621,49 @@ h6 {
   max-width: 1100px;
 }
 
+/* Página angosta (login, registro...): una sola tarjeta centrada */
+.contenedor-angosto {
+  max-width: 560px;
+}
+
 /* ==========================================================================
    PERFIL / COMPONENTES
    ========================================================================== */
 .barra-superior-inst {
-  background: linear-gradient(
-    180deg,
-    var(--rama-primario),
-    var(--rama-secundario)
-  );
+  background: linear-gradient(135deg, var(--banner-inicio), var(--banner-fin));
+  color: var(--banner-texto);
   padding: 18px;
   border-radius: 20px;
-  box-shadow: var(--borde-suave);
-}
-
-.borde-orquidea {
-  border: 1px solid var(--borde-suave);
-}
-
-.tarjeta-lila {
-  background: white;
-  border-radius: 20px;
   box-shadow: var(--sombra-card);
-  border: 1px solid var(--orquidea-bordes);
+}
+
+/* El subtítulo del banner hereda el color del texto con opacidad reducida.
+   Sobreescribe .text-muted y cualquier inline que pise el color. */
+.barra-superior-inst p {
+  color: inherit;
+  opacity: .85;
+}
+.barra-superior-inst a.text-reset {
+  color: inherit;
+}
+.barra-superior-inst .text-muted {
+  color: inherit !important;
+  opacity: .7;
 }
 
 .tarjeta-blanca-borde {
-  background-color: #ffffff;
+  background-color: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 20px;
   box-shadow: var(--sombra-card);
-}
-
-.circulo-logo,
-.insignia-pequena {
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 14px rgba(50, 0, 113, 0.16);
-  border: 2px solid var(--rama-primario);
-  overflow: hidden;
-}
-
-.circulo-logo {
-  width: 88px;
-  height: 88px;
-}
-
-.insignia-pequena {
-  width: 80px;
-  height: 80px;
-}
-
-.insignia-pequena img,
-.circulo-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .barra-progreso {
   height: 16px;
-  background-color: #ece7f4;
+  background-color: var(--gris-pista);
   border-radius: 999px;
   overflow: hidden;
-  border: 1px solid rgba(97, 16, 173, 0.12);
+  border: 1px solid rgba(75, 18, 120, 0.14);
 }
 
 .progreso-actual {
@@ -468,69 +676,48 @@ h6 {
   border-radius: 999px;
 }
 
-.pieza-insignia {
-  box-shadow: 0px 10px 25px 10px rgba(50, 0, 113, 0.14);
-  max-width: 200px;
-}
-
+/* Botón primario. Sus colores salen de --boton-* (ver :root y las clases de
+   rama): celeste con texto oscuro en las páginas sin rama, donde un botón
+   violeta se perdía contra la marca violeta, y violeta en las de rama. */
 .boton-primario {
-  background: linear-gradient(
-    135deg,
-    var(--violeta-primario),
-    var(--orquidea-bordes)
-  );
-  color: white;
+  background: linear-gradient(135deg, var(--boton-inicio), var(--boton-fin));
+  color: var(--boton-texto);
   border: none;
   border-radius: 16px;
   transition: all 0.22s ease;
-  box-shadow: 0 8px 18px rgba(69, 0, 158, 0.22);
+  box-shadow: 0 8px 18px var(--boton-sombra);
 }
 
 .boton-primario:hover {
-  background: linear-gradient(
-    135deg,
-    var(--orquidea-bordes),
-    var(--violeta-primario)
-  );
+  background: linear-gradient(135deg, var(--boton-fin), var(--boton-inicio));
+  color: var(--boton-texto);
   transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(69, 0, 158, 0.3);
+  box-shadow: 0 12px 24px var(--boton-sombra);
 }
 
 .boton-primario:active {
   transform: translateY(0);
 }
 
+/* En un botón chico el salto de 3px del hover es demasiado. */
+.btn-sm.boton-primario:hover {
+  transform: none;
+}
+
 /* ==========================================================================
    RESPONSIVIDAD
    ========================================================================== */
 @media (max-width: 768px) {
-  :root {
-    --sidebar-width: var(--sidebar-mobile-width);
-  }
-
   .header-inst {
     padding: 0 14px;
+    gap: 8px;
   }
 
-  .sidebar {
-    padding: 12px 8px;
-  }
-
-  .sidebar .description {
-    display: none;
-  }
-
-  .sidebar .nav-link {
-    justify-content: center;
-    padding: 12px 0;
-  }
-
-  .sidebar .nav-link .icon {
-    margin: 0;
+  .header-inst .marca-titulo {
+    font-size: 1.1rem;
   }
 
   .main-content-wrapper {
-    margin-left: var(--sidebar-mobile-width);
     padding-left: 12px;
     padding-right: 12px;
   }
@@ -540,186 +727,23 @@ h6 {
   }
 }
 
-/* ===== HOME DASHBOARD ===== */
-
-.home-container {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.home-welcome {
-  background: linear-gradient(
-    180deg,
-    var(--rama-primario),
-    var(--rama-secundario)
-  );
-  border-radius: 22px;
-  padding: 32px 36px;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 22px rgba(88, 0, 168, 0.12);
-}
-
-.home-welcome h2 {
-  margin: 0 0 8px;
-  font-size: 30px;
-  color: #22003f;
-}
-
-.home-welcome p {
-  margin: 0;
-  font-weight: 500;
-  color: #2b1746;
-}
+/* ===== TÍTULOS DE BLOQUE Y ENCABEZADO DE GRUPO ===== */
 
 .home-section-title {
-  color: #4b00a8;
+  color: var(--violeta);
   font-size: 24px;
   margin: 24px 0 14px;
 }
 
-.home-alerts,
-.home-card,
-.home-stat-card {
-  background: #ffffff;
-  border: 1px solid #dfc9ff;
-  border-radius: 18px;
-  box-shadow: 0 8px 18px rgba(88, 0, 168, 0.1);
-}
-
-.home-alerts {
-  padding: 24px;
-}
-
-.home-alerts ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.home-alerts li {
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.home-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin: 24px 0;
-}
-
-.home-stat-card {
-  padding: 22px;
-  text-align: center;
-}
-
-.home-stat-card .icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.home-stat-card h3 {
-  margin: 0;
-  font-size: 30px;
-  color: #4b00a8;
-}
-
-.home-stat-card p {
-  margin: 6px 0 0;
-  font-weight: bold;
-  color: #2b1746;
-}
-
-.home-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 22px;
-}
-
-.home-card {
-  padding: 24px;
-}
-
-.home-card h3 {
-  margin-top: 0;
-  color: #4b00a8;
-  font-size: 22px;
-}
-
-.home-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.home-table th,
-.home-table td {
-  padding: 12px 8px;
-  text-align: left;
-  border-bottom: 1px solid #eadcff;
-}
-
-.home-table th {
-  color: #4b00a8;
-}
-
-.birthday-list,
-.movements-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.birthday-list li,
-.movements-list li {
-  padding: 12px 0;
-  border-bottom: 1px solid #eadcff;
-  font-weight: 500;
-}
-
-.home-actions {
-  margin-top: 24px;
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.home-action-btn {
-  background: #5800a8;
-  color: white;
-  text-decoration: none;
-  padding: 12px 18px;
-  border-radius: 12px;
-  font-weight: bold;
-}
-
-.home-action-btn:hover {
-  background: #3f007a;
-  color: white;
-}
-
-@media (max-width: 900px) {
-  .home-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .home-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .home-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .home-welcome {
-    padding: 24px;
-  }
+.encabezado-grupo {
+  background: rgba(75, 18, 120, 0.06);
+  border-left: 4px solid var(--violeta);
 }
 
 /* ===== PROTAGONISTAS / CARDS ===== */
 
 .protagonista-card {
-  background: #ffffff;
+  background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 22px;
   padding: 22px;
@@ -735,8 +759,8 @@ h6 {
 
 .protagonista-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(50, 0, 113, 0.2);
-  border-color: var(--orquidea-bordes);
+  box-shadow: 0 14px 30px rgba(54, 13, 87, 0.2);
+  border-color: var(--violeta-oscuro);
 }
 
 .protagonista-foto {
@@ -744,8 +768,8 @@ h6 {
   height: 92px;
   min-width: 92px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--rama-primario), white);
-  border: 3px solid var(--violeta-primario);
+  background: linear-gradient(135deg, var(--rama-primario), var(--blanco));
+  border: 3px solid var(--violeta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -754,12 +778,12 @@ h6 {
 
 .protagonista-foto i {
   font-size: 42px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
 }
 
 .protagonista-info h3 {
   margin: 0 0 10px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -771,18 +795,10 @@ h6 {
   font-size: 0.95rem;
 }
 
-.ver-perfil {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--violeta-primario);
-  font-weight: 700;
-}
-
 /* ===== RAMAS Y PATRULLAS ===== */
 
-.rama-card,
-.patrulla-card {
-  background: #ffffff;
+.rama-card {
+  background: var(--blanco);
   border: 1px solid var(--borde-suave);
   border-radius: 22px;
   padding: 22px;
@@ -795,46 +811,62 @@ h6 {
   height: 100%;
 }
 
-.rama-card:hover,
-.patrulla-card:hover {
+.rama-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(50, 0, 113, 0.2);
-  border-color: var(--orquidea-bordes);
+  box-shadow: 0 14px 30px rgba(54, 13, 87, 0.2);
 }
 
-.rama-icono,
-.patrulla-icono {
+/* El cuadrado de color de la rama. Usa el par del banner para que el ícono,
+   que va en --banner-texto, se lea igual en las cuatro ramas. */
+.rama-icono {
   width: 82px;
   height: 82px;
   min-width: 82px;
   border-radius: 22px;
-  background: linear-gradient(
-    135deg,
-    var(--rama-primario),
-    var(--rama-secundario)
-  );
-  border: 3px solid var(--violeta-primario);
+  background: linear-gradient(135deg, var(--banner-inicio), var(--banner-fin));
+  border: 3px solid var(--violeta);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.rama-icono i,
-.patrulla-icono i {
+.rama-icono i {
   font-size: 38px;
-  color: var(--violeta-primario);
+  color: var(--banner-texto);
 }
 
-.rama-card h3,
-.patrulla-card h3 {
+/* Con el logo oficial, el cuadrado va sobre blanco: el manual prohíbe poner
+   una marca oficial sobre un fondo que le baje el contraste, y el logo ya trae
+   el color de la rama. */
+.rama-icono.con-logo {
+  background: var(--blanco);
+  border-color: var(--rama-oscuro);
+  padding: 8px;
+}
+
+.rama-icono img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Ícono del sistema iconográfico oficial, en línea con el texto. Va siempre
+   sobre fondo claro: es Orquídea Oscura y sobre un color pierde contraste. */
+.icono-oficial {
+  width: 1.25em;
+  height: 1.25em;
+  object-fit: contain;
+  vertical-align: -0.25em;
+}
+
+.rama-card h3 {
   margin: 0 0 10px;
-  color: var(--violeta-primario);
+  color: var(--violeta);
   font-size: 1.25rem;
   font-weight: 700;
 }
 
-.rama-card p,
-.patrulla-card p {
+.rama-card p {
   margin-bottom: 6px;
   color: var(--texto-suave);
   font-weight: 500;
@@ -843,23 +875,167 @@ h6 {
 
 @media (max-width: 576px) {
   .rama-card,
-  .patrulla-card,
   .protagonista-card {
     padding: 16px;
     gap: 12px;
   }
 
-  .rama-icono,
-  .patrulla-icono {
+  .rama-icono {
     width: 64px;
     height: 64px;
     min-width: 64px;
   }
 
   .rama-card h3,
-  .patrulla-card h3,
   .protagonista-info h3 {
     font-size: 1.1rem;
     overflow-wrap: anywhere;
   }
+}
+
+/* ==========================================================================
+   PERFIL DEL PROTAGONISTA Y PROGRESIÓN
+   ========================================================================== */
+
+/* Pares etiqueta / valor (datos del protagonista) */
+.dato-etiqueta {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.dato-valor {
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+/* Pestañas con el estilo de la plataforma; se deslizan en pantallas chicas */
+.tabs-inst {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tabs-inst .nav-link {
+  color: var(--violeta);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabs-inst .nav-link.active {
+  color: var(--violeta-oscuro);
+  border-bottom: 3px solid var(--rama-contraste);
+}
+
+/* Contadores de arriba ("Etapa en curso: 4/12") */
+.contador-inst {
+  background: var(--blanco);
+  border: 1px solid var(--borde-suave);
+  border-radius: 16px;
+  padding: 12px 16px;
+  height: 100%;
+}
+
+.contador-inst .numero {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--violeta);
+  line-height: 1.1;
+}
+
+/* Una competencia: el borde izquierdo muestra su estado */
+.competencia {
+  border-left: 5px solid var(--gris-linea);
+}
+
+.competencia[data-estado="en_proceso"] {
+  border-left-color: var(--amarillo);
+}
+
+.competencia[data-estado="desarrollada"] {
+  border-left-color: var(--verde-logro);
+  background-color: rgba(96, 177, 52, 0.08);
+}
+
+.competencia .codigo {
+  min-width: 2.4rem;
+}
+
+.competencia.guardando {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* "Volver atrás" solo se ve en el modo Corregir */
+.competencia .btn-retroceder,
+.aviso-corregir {
+  display: none;
+}
+
+.modo-corregir .competencia .btn-retroceder {
+  display: inline-block;
+}
+
+.modo-corregir .aviso-corregir {
+  display: block;
+}
+
+.lista-acciones .form-check {
+  margin-bottom: 6px;
+}
+
+/* Etapas e insignias */
+.etapa-card {
+  border-left: 5px solid var(--gris-linea);
+}
+
+.etapa-card.lograda {
+  border-left-color: var(--verde-logro);
+}
+
+.etapa-card.en-curso {
+  border-left-color: var(--rama-oscuro);
+  box-shadow: 0 10px 24px rgba(54, 13, 87, 0.14);
+}
+
+.insignia-icono {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--banner-texto);
+  background: linear-gradient(135deg, var(--banner-inicio), var(--banner-fin));
+  border: 2px solid var(--violeta);
+}
+
+.insignia-icono.pendiente {
+  background: var(--violeta-fondo);
+  color: var(--texto-tenue);
+  border-color: var(--gris-linea);
+}
+
+/* Con imagen, sin círculo ni borde: la forma de la insignia cambia por rama
+   (cuadrada en LyL, rombo en Scouts y Caminantes, rectángulo en Rovers) y un
+   marco la recortaría. Va más grande, sobre el blanco de la tarjeta y sin
+   filtros. Que esté entregada o no lo dice el badge, no la imagen. */
+.insignia-icono.con-imagen {
+  width: 88px;
+  height: 88px;
+  min-width: 88px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.insignia-icono img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
