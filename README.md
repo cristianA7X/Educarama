@@ -1,61 +1,176 @@
 # Educarama ⚜️
 
-> **Educación + Rama**: Una herramienta digital para el seguimiento del crecimiento y la progresión personal en el Movimiento Scout.
+> **Educación + Rama**: herramienta digital para el seguimiento de la progresión personal en el Movimiento Scout de Argentina.
 
-![Logo de Educarama](views/assets/images/Logo1.png)
+![Logo de Educarama](views/assets/images/Logos/Logos_Educarama/LogoBaseV4.png)
 
-## 📖 Sobre el Proyecto
+## Sobre el proyecto
 
-Educarama nace como un proyecto universitario para la carrera de **Desarrollo de Software** en el Instituto Leopoldo Marechal. Su objetivo es solucionar la fragmentación de la información en los grupos scouts, donde actualmente se depende de métodos manuales o planillas de Excel genéricas que dificultan el seguimiento pedagógico.
+Educarama nace como proyecto universitario para la carrera de **Desarrollo de Software** en el Instituto Leopoldo Marechal. Su objetivo es resolver la fragmentación de la información en los grupos scouts, donde actualmente se depende de métodos manuales o planillas genéricas que dificultan el seguimiento pedagógico.
 
-A diferencia de los sistemas oficiales centrados en lo administrativo, Educarama es una herramienta diseñada para el **trabajo de campo del educador**, enfocándose en la visualización clara y rápida del progreso de cada joven.
+A diferencia de los sistemas oficiales centrados en lo administrativo, Educarama es una herramienta diseñada para el **trabajo de campo del educador**, enfocándose en la visualización clara y rápida del progreso de cada protagonista.
 
----
-
-## 🚀 Funcionalidades Core
-
-- **Gestión de Educadores:** Registro de perfiles, autenticación segura con manejo de sesiones y control de acceso mediante middlewares.
-- **Gestión de Protagonistas:** Alta, edición y visualización de beneficiarios con datos personales, rama, patrulla y gestión de vínculos familiares.
-- **Progresión Personal:** Módulo para la asignación de competencias, seguimiento de acciones y control manual de entrega de insignias.
-- **Panel Principal y Avisos:** Home interactivo con estadísticas, próximos eventos, cumpleaños y gestión de avisos importantes.
+El proyecto se encuentra en la rama `refactor/v2`, que rehace la arquitectura de cero con PHP orientado a objetos y capas bien separadas (Model → Repository → Service → Controller → View).
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Funcionalidades
 
-- **Backend:** PHP (Programación Orientada a Objetos, Patrón MVC y Clean Architecture).
-- **Base de Datos:** MySQL (Gestión mediante PDO y consultas preparadas).
-- **Frontend:** HTML5, CSS3, JavaScript.
-- **Framework CSS:** Bootstrap 5 y Bootstrap Icons.
-- **Entorno de Desarrollo:** XAMPP (Localhost).
+- **Gestión de grupos y secciones:** alta mediante solicitud revisada por un administrador; cada grupo tiene sus secciones (Manada, Unidad, Caminantes, Rovers).
+- **Roles y accesos:** cuatro niveles (Supervisor, Ayudante, Responsable, Jefe) con herencia del Jefe de grupo a todas sus secciones.
+- **Protagonistas:** alta, edición, pase de sección, asignación a patrullas y baja con cascada completa.
+- **Progresión personal:** competencias por área y etapa, acciones (cumplidas/pendientes), cupo por etapa con avisos salteables, confirmación de etapas con tareas y elemento (Caminantes), e insignias registradas a mano.
+- **Familiares:** vinculación de familiares a protagonistas, con detección de personas ya cargadas por DNI y contactos de emergencia.
+- **Documentos:** subida de PDF, JPG y PNG hasta 5 MB por protagonista, con descarga segura a través de un controller (sin links directos al almacén).
+- **Eventos:** grupales o por secciones, con prioridad, alcance, activación/desactivación y próximos eventos en el inicio.
+- **Interfaz responsive:** menú lateral contextual, paleta por rama, fuente Ubuntu local y SweetAlert2 para confirmaciones.
 
 ---
 
-## 👥 Equipo de Trabajo
+## Stack tecnológico
 
-- **Elías Zarate**
+| Capa | Tecnología |
+|---|---|
+| Backend | PHP 8.1+ con POO y `strict_types` |
+| Base de datos | MySQL / MariaDB con PDO (consultas preparadas, sin emulación) |
+| Frontend | HTML5, CSS3, JavaScript vanilla |
+| CSS | Bootstrap 5.3.3 + Bootstrap Icons 1.10.5 (CDN) |
+| Alertas | SweetAlert2 11 (CDN) |
+| Entorno | XAMPP (Apache + MySQL en localhost) |
+
+No se usan frameworks, Composer ni npm. Las librerías de front se cargan por CDN con versión fija.
+
+---
+
+## Equipo de trabajo
+
+- **Elías Zárate**
 - **Camila Cardozo**
 - **Cristian López**
 - **Valentina Loza**
+- **Germán Lucero**
 
 ---
 
-## 📁 Estructura de Directorios
-
-```text
-Educarama/
-├── public/                  # Punto de entrada y recursos estáticos públicos
-│   ├── css/                 # Estilos personalizados (styles.css)
-│   ├── js/                  # Scripts de JavaScript (app.js)
-│   └── index.php            # Home principal protegido
-├── src/                     # Lógica del Backend (MVC / Clean Architecture)
-│   ├── Controladores/       # Controladores HTTP y Middlewares de seguridad
-│   ├── Datos/               # Repositorios y conexión a Base de Datos (PDO)
-│   ├── Model/               # Entidades y modelos de datos
-│   ├── Repositorio/         # Interfaces genéricas de persistencia
-│   └── Servicios/           # Servicios de lógica de negocio
-└── views/                   # Vistas y componentes visuales
-    ├── assets/              # Imágenes, logos e insignias oficiales
-    └── pages/               # Vistas principales (protagonistas, ramas, patrullas, login)
+## Estructura del proyecto
 
 ```
+Educarama/
+├── config/                      Configuración y arranque
+│   ├── config.php               BASE_URL, ZONA_HORARIA, DB_*, ALMACEN_*
+│   ├── config.local.php         Overrides locales (gitignored)
+│   ├── bootstrap.php            Autoload propio (spl_autoload_register) + url() + e()
+│   └── Database.php             PDO singleton
+├── database/
+│   ├── educarama.sql            Esquema completo (base educarama_v2)
+│   ├── seeds/
+│   │   └── catalogo_competencias.sql   186 competencias + 848 acciones
+│   └── datos_ejemplo.sql        Datos de desarrollo (usuarios, grupos, progresión)
+├── docs/
+│   └── explicacion-de-cambios.md
+├── src/
+│   ├── Almacen/                 Componente genérico de archivos (no depende del proyecto)
+│   ├── Model/                   31 clases (una por tabla) + 5 enums en Enum/
+│   ├── Repository/              Consultas a la base; devuelven Models
+│   │   └── Vista/               Clases vista para consultas con JOIN
+│   ├── Service/                 Reglas de negocio, validaciones, permisos
+│   │   ├── Vista/               Clases para pantallas (resúmenes, fichas)
+│   │   └── Excepcion/           Excepciones tipadas del dominio
+│   ├── Controller/              Un controller por tema + Controlador base, Respuesta, Api, Pagina
+│   └── Helper/                  Csrf, Sesion, Flash, Vista (helpers de presentación)
+├── public/                      Punto de entrada web
+│   ├── index.php                Redirección al inicio
+│   ├── api.php                  Endpoint único para fetch (JSON)
+│   ├── descargar.php            Descarga segura de documentos
+│   ├── css/styles.css           Estilos (paleta, clases por rama, componentes)
+│   ├── js/
+│   │   ├── educarama.js         Fetch declarativo, CSRF, SweetAlert2, pestañas
+│   │   ├── competencias.js      Pantalla de competencias del protagonista
+│   │   └── solicitud_alta.js    Formulario dinámico de solicitud
+│   └── fonts/ubuntu/            Fuente Ubuntu local (woff2)
+├── storage/                     Archivos subidos (gitignored)
+├── views/
+│   ├── includes/                cabecera.php, pie.php, menu.php, error.php
+│   ├── pages/                   Una vista por pantalla (21 archivos)
+│   └── assets/images/           Logos, insignias, banderas de rama, íconos scouts
+└── _legacy/                     Código viejo (solo lectura, referencia para portar)
+```
+
+---
+
+## Instalación
+
+### Requisitos
+
+- [XAMPP](https://www.apachefriends.org/) con PHP 8.1+ y MySQL/MariaDB
+- Navegador moderno (Chrome, Firefox, Edge)
+
+### Pasos
+
+1. Clonar el repositorio en la carpeta `htdocs` de XAMPP:
+   ```bash
+   cd C:/xampp/htdocs
+   git clone <url-del-repo> Educarama
+   cd Educarama
+   git checkout refactor/v2
+   ```
+
+2. Crear la base de datos e importar el esquema (desde phpMyAdmin o la terminal):
+   ```sql
+   CREATE DATABASE educarama_v2 CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish_ci;
+   ```
+   Importar en orden:
+   1. `database/educarama.sql`
+   2. `database/seeds/catalogo_competencias.sql`
+   3. `database/datos_ejemplo.sql` *(solo para desarrollo)*
+
+3. Copiar la configuración local:
+   ```bash
+   cp config/config.local.php.example config/config.local.php
+   ```
+   Editar `config/config.local.php` con los datos de tu MySQL si difieren de los de XAMPP por defecto (`root` sin contraseña).
+
+4. Crear la carpeta de almacenamiento:
+   ```bash
+   mkdir -p storage/documentos
+   ```
+
+5. Iniciar Apache y MySQL desde el panel de XAMPP y entrar a:
+   ```
+   http://localhost/Educarama/
+   ```
+
+### Usuarios de prueba
+
+Contraseña de todos: `educarama123` (excepto `ejemplo@gmail.com` que usa `ejemplo`).
+
+| Email | Rol |
+|---|---|
+| `jefe.grupo1@ejemplo.test` | Jefe del grupo 1 |
+| `responsable.manada@ejemplo.test` | Responsable de Manada (grupo 1) |
+| `ayudante.unidad@ejemplo.test` | Ayudante de Unidad (grupo 1) |
+| `supervisor.grupo1@ejemplo.test` | Supervisor del grupo 1 |
+| `supervisor.caminantes@ejemplo.test` | Supervisor grupo 1 + Responsable Caminantes |
+| `jefe.grupo2@ejemplo.test` | Jefe del grupo 2 |
+| `admin@ejemplo.test` | Administrador (revisa solicitudes) |
+| `nuevo@ejemplo.test` | Sin accesos, con solicitud pendiente |
+| `ejemplo@gmail.com` | Admin + Jefe de los dos grupos |
+
+---
+
+## Datos oficiales del programa Scout
+
+| Rama | Nombre común | Especialidades | Acciones | Etapas |
+|---|---|---|---|---|
+| Lobatos y Lobeznas | Manada | Sí | Sí | Pata Tierna, Saltador/a, Rastreador/a, Cazador/a |
+| Scouts | Unidad | Sí | Sí | Pistas, Senda, Rumbo, Travesía |
+| Caminantes | Comunidad Caminante | No | Sí | 4 etapas × elemento (agua, tierra, fuego, aire) |
+| Rovers | Comunidad Rover | No | No | Encuentro, Compromiso, Proyección |
+
+Catálogo cargado: **186 competencias** y **848 acciones** distribuidas en 4 ramas y 10 áreas.
+
+---
+
+## Licencia
+
+Proyecto universitario. Todos los derechos reservados.

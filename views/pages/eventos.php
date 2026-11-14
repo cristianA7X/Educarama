@@ -1,196 +1,299 @@
 <?php
-require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
+// views/pages/eventos.php
+//
+// Tres modos:
+//   Sin parámetros          → vista general: todos los eventos de los grupos accesibles,
+//                             en tabla compacta con filtro por grupo.
+//   ?id_grupo=              → eventos del grupo (rol de grupo necesario).
+//   ?id_seccion=            → eventos de la sección (acceso a la sección necesario).
+// &inactivos=1 muestra también los desactivados (Responsable en adelante).
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+declare(strict_types=1);
 
-$tituloPagina = "Gestionar eventos";
+require_once __DIR__ . '/../../config/bootstrap.php';
 
-require_once __DIR__ . '/../../src/Controladores/EventoControlador.php';
+use Educarama\Controller\EventoController;
+use Educarama\Controller\Pagina;
+use Educarama\Helper\Csrf;
+use Educarama\Helper\Vista;
 
-$controlador = new EventoControlador();
+// ─── Modo general (sin parámetros) ─────────────────────────────────────
+if (!isset($_GET['id_grupo']) && !isset($_GET['id_seccion'])) {
+    $datos = Pagina::cargar(fn () => (new EventoController())->paginaGeneral());
+    $generales = $datos['generales'];
+    $soloGrupales = isset($_GET['grupales']);
 
-try {
-    $controlador->procesarAcciones();
+    $tituloPagina = $soloGrupales ? 'Eventos grupales' : 'Eventos';
+    require __DIR__ . '/../includes/cabecera.php';
+    ?>
+    <section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <h1 class="fw-bold mb-1"><?= $soloGrupales ? 'Eventos grupales' : 'Eventos' ?></h1>
+            <p class="mb-0"><?= $soloGrupales ? 'Eventos de todo el grupo, de todos tus grupos.' : 'Todos los eventos de tus grupos y secciones.' ?></p>
+        </div>
+    </section>
 
-    $eventoEditar = $controlador->obtenerEventosParaEditar();
-    $eventos = $controlador->listarEventos();
-
-} catch (Exception $e) {
-    $error = $e->getMessage();
-
-    $eventoEditar = null;
-    $eventos = [];
-}
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educarama - Eventos</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
-</head>
-
-<body>
-<?php
-include __DIR__ . '/includes/barra_superior.php';
-include __DIR__ . '/includes/menu_lateral.php';
-?>
-
-<div class="main-content-wrapper">
-    <div class="container contenedor-principal  p-4">
-        <?php if (!empty($error)): ?>
-    <div class="alert alert-danger">
-        <?= htmlspecialchars($error) ?>
-    </div>
+    <?php
+    // Contar eventos visibles (si solo grupales, filtrar los que no son de todo el grupo).
+    $totalVisible = 0;
+    if ($soloGrupales) {
+        foreach ($generales->porGrupo as $fila) {
+            foreach ($fila['pantalla']->eventos as $ep) {
+                if ($ep->evento->esDeTodoElGrupo()) {
+                    $totalVisible++;
+                }
+            }
+        }
+    } else {
+        $totalVisible = $generales->total();
+    }
+    ?>
+    <?php if ($totalVisible === 0): ?>
+        <section class="tarjeta-blanca-borde p-4">
+            <p class="text-muted mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>No hay eventos<?= $soloGrupales ? ' grupales' : '' ?>.</p>
+        </section>
+    <?php else: ?>
+        <?php // Filtro por grupo (solo si hay más de uno)
+        if (count($generales->porGrupo) > 1): ?>
+            <div class="mb-3">
+                <select id="filtro-grupo" class="form-select form-select-sm w-auto">
+                    <option value="">Todos los grupos</option>
+                    <?php foreach ($generales->porGrupo as $fila): ?>
+                        <option value="<?= (int) $fila['grupo']->grupo->id ?>">
+                            <?= e($fila['grupo']->grupo->nombre) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         <?php endif; ?>
 
-        <div class="barra-superior-inst mb-4">
-            <h1 class="fw-bold mb-1">Eventos        
-            </h1>
-            <p class="mb-0">Administrá los eventos que se muestran en la pantalla de inicio.</p>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tabla-eventos">
+                <thead class="table-light">
+                    <tr>
+                        <th>Evento</th>
+                        <th style="min-width:120px">Fecha</th>
+                        <th>Prioridad</th>
+                        <th>Alcance</th>
+                        <th>Grupo</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($generales->porGrupo as $fila):
+                        $grupoPantalla = $fila['grupo'];
+                        $pantalla = $fila['pantalla'];
+                        $idGrupoFila = (int) $grupoPantalla->grupo->id;
+                        $nombres = $pantalla->nombresSecciones;
+                        $grupoLabel = $grupoPantalla->grupo->nombre;
+
+                        foreach ($pantalla->eventos as $ep):
+                            $esDeTodo = $ep->evento->esDeTodoElGrupo();
+                            if ($soloGrupales && !$esDeTodo) { continue; }
+                            $ev = $ep->evento->evento;
+                            $alcance = $esDeTodo
+                                ? 'Todo el grupo'
+                                : implode(', ', array_map(fn (int $id) => $nombres[$id] ?? "Sección $id", $ep->evento->idSecciones));
+                    ?>
+                        <tr data-grupo="<?= $idGrupoFila ?>"<?= !$ev->activo ? ' class="opacity-75"' : '' ?>>
+                            <td>
+                                <strong><?= e($ev->titulo) ?></strong>
+                                <?php if (!$ev->activo): ?>
+                                    <span class="badge text-bg-secondary ms-1">Inactivo</span>
+                                <?php endif; ?>
+                                <?php if ($ev->esPublico): ?>
+                                    <i class="bi bi-globe2 ms-1 text-muted" title="Público" aria-hidden="true"></i>
+                                <?php endif; ?>
+                            </td>
+                            <td class="small"><?= e(Vista::periodo($ev->fechaInicio, $ev->fechaFin)) ?></td>
+                            <td><span class="badge text-bg-<?= e(Vista::colorPrioridad($ev->prioridad)) ?>"><?= e($ev->prioridad->etiqueta()) ?></span></td>
+                            <td class="small">
+                                <?php if ($esDeTodo): ?>
+                                    <i class="bi bi-people me-1" aria-hidden="true"></i><?= e($alcance) ?>
+                                <?php else: ?>
+                                    <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i><?= e($alcance) ?>
+                                <?php endif; ?>
+                            </td>
+                            <td class="small"><?= e($grupoLabel) ?></td>
+                            <td class="text-end">
+                                <?php if ($ep->puedeEditar || $ep->puedeEliminar): ?>
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Acciones">
+                                            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <?php if ($ep->puedeEditar): ?>
+                                                <li><a class="dropdown-item" href="<?= e(url('views/pages/evento_form.php?id=' . $ev->id)) ?>"><i class="bi bi-pencil me-2" aria-hidden="true"></i>Editar</a></li>
+                                            <?php endif; ?>
+                                            <?php if ($ep->puedeEliminar): ?>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" type="button" data-accion="evento.eliminar"
+                                                            data-datos='<?= e(json_encode(['id_evento' => (int) $ev->id, 'volver' => 'views/pages/eventos.php'])) ?>'
+                                                            data-confirmar="¿Eliminar «<?= e($ev->titulo) ?>»?" data-texto="No se puede deshacer." data-boton="Sí, eliminar" data-peligro>
+                                                        <i class="bi bi-trash me-2" aria-hidden="true"></i>Eliminar
+                                                    </button>
+                                                </li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var filtro = document.getElementById('filtro-grupo');
+            if (!filtro) return;
 
-        <div class="tarjeta-blanca-borde p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h2 class="h4 texto-violeta fw-bold mb-0">Eventos cargados</h2>
-
-
-            </div>
-
-            <?php if (!empty($eventos)): ?>
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Prioridad</th>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($eventos as $evento): ?>
-                                <tr>
-                                    <td>
-                                        <strong><?= htmlspecialchars($evento['titulo']) ?></strong><br>
-                                        <small><?= htmlspecialchars($evento['descripcion']) ?></small>
-                                    </td>
-                                    <td><?= ucfirst(htmlspecialchars($evento['prioridad'])) ?></td>
-                                    <td><?= htmlspecialchars($evento['fecha_inicio']) ?></td>
-                                    <td><?= $evento['fecha_fin'] ? htmlspecialchars($evento['fecha_fin']) : 'Sin fin' ?></td>
-                                    <td>
-                                        <?php if ($evento['activo']): ?>
-                                            <span class="badge bg-success">Activo</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary">Inactivo</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="/Educarama/views/pages/gestionar_eventos.php?editar=<?= $evento['id'] ?>" class="btn btn-sm btn-warning">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-
-                                        <?php if ($evento['activo']): ?>
-                                            <a
-                                                href="#"
-                                                class="btn btn-sm btn-danger btn-desactivar"
-                                                data-id="<?= $evento['id'] ?>"
-                                                data-titulo="<?= htmlspecialchars($evento['titulo']) ?>"
-                                            >
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-                                        <?php else: ?>
-                                            <a 
-                                                href="/Educarama/views/pages/gestionar_eventos.php?accion=reactivar&id=<?= $evento  ['id'] ?>" 
-                                                class="btn btn-sm btn-success"
-                                            >
-                                                <i class="bi bi-arrow-clockwise"></i>
-                                            </a>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else: ?>
-                <p>No hay eventos cargados.</p>
-            <?php endif; ?>
-            
-            <!-- BOTONES DE ACCIÓN -->
-            <div class="row g-3">
-
-          
-                <div class="col-12 col-md-4">
-                    <a 
-                        href="gestionar_eventos.php" 
-                        class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
-                        <i class="bi bi-person-gear me-2"></i>Crear nuevo evento
-                        </a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-
-document.querySelectorAll('.btn-desactivar').forEach(boton => {
-
-    boton.addEventListener('click', function(e){
-
-        e.preventDefault();
-
-        let id = this.dataset.id;
-        let titulo = this.dataset.titulo;
-
-        Swal.fire({
-
-            title: '¿Desactivar evento?',
-            html: `
-                <b>${titulo}</b><br><br>
-                El evento dejará de mostrarse en la pantalla de inicio.
-            `,
-            icon: 'warning',
-
-            showCancelButton: true,
-
-            confirmButtonColor: '#45009e',
-            cancelButtonColor: '#d33',
-
-            confirmButtonText: 'Sí, desactivar',
-            cancelButtonText: 'Cancelar'
-
-        }).then((result)=>{
-
-            if(result.isConfirmed){
-
-                window.location =
-                    'gestionar_eventos.php?accion=desactivar&id=' + id;
-
-            }
-
+            filtro.addEventListener('change', function () {
+                var valor = this.value;
+                var filas = document.querySelectorAll('#tabla-eventos tbody tr');
+                filas.forEach(function (fila) {
+                    fila.style.display = (!valor || fila.dataset.grupo === valor) ? '' : 'none';
+                });
+            });
         });
+        </script>
+    <?php endif; ?>
+    <?php
+    require __DIR__ . '/../includes/pie.php';
+    return;
+}
 
-    });
+// ─── Modo grupo / sección (con parámetros) ─────────────────────────────
+$datos = Pagina::cargar(fn () => (new EventoController())->paginaListado($_GET));
+$modo = $datos['modo'];
+$pantalla = $datos['pantalla'];
+$eventos = $pantalla->eventos;
+$nombres = $pantalla->nombresSecciones;
 
-});
+if ($modo === 'grupo') {
+    $grupoPantalla = $datos['grupo'];
+    $tituloCtx = Vista::nombreCompletoGrupo($grupoPantalla->grupo->nombre);
+    $linkVolver = 'views/pages/grupo.php?id=' . $grupoPantalla->grupo->id;
+    $idGrupo = (int) $grupoPantalla->grupo->id;
+    $rutaActual = 'views/pages/eventos.php?id_grupo=' . $idGrupo;
+} else {
+    $seccion = $datos['seccion'];
+    $tituloCtx = Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id) . ' · ' . $seccion->rama->titulo;
+    $linkVolver = 'views/pages/perfil_seccion.php?id=' . $seccion->seccion->id;
+    $idGrupo = (int) $seccion->grupo->id;
+    $rutaActual = 'views/pages/eventos.php?id_seccion=' . $seccion->seccion->id;
+    $claseRama = Vista::claseRama($seccion->rama->id);
+}
 
-</script>
-</body>
-</html>
+$tituloPagina = 'Eventos · ' . ($modo === 'grupo' ? Vista::nombreCompletoGrupo($grupoPantalla->grupo->nombre) : Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id));
+require __DIR__ . '/../includes/cabecera.php';
+?>
+<section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h1 class="fw-bold mb-1">Eventos</h1>
+        <p class="mb-0"><a class="text-reset" href="<?= e(url($linkVolver)) ?>"><?= e($tituloCtx) ?></a></p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <?php if ($pantalla->puedeVerInactivos && !$pantalla->incluyeInactivos): ?>
+            <a class="boton-primario px-3 py-2 fw-bold text-decoration-none" href="<?= e(url($rutaActual . '&inactivos=1')) ?>">
+                <i class="bi bi-eye-slash me-1" aria-hidden="true"></i>Ver inactivos
+            </a>
+        <?php elseif ($pantalla->incluyeInactivos): ?>
+            <a class="boton-primario px-3 py-2 fw-bold text-decoration-none" href="<?= e(url($rutaActual)) ?>">
+                <i class="bi bi-eye me-1" aria-hidden="true"></i>Solo activos
+            </a>
+        <?php endif; ?>
+        <?php if ($pantalla->puedeCrear): ?>
+            <a class="boton-primario px-3 py-2 fw-bold text-decoration-none" href="<?= e(url('views/pages/evento_form.php?id_grupo=' . $idGrupo)) ?>">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo evento
+            </a>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php if ($eventos === []): ?>
+    <section class="tarjeta-blanca-borde p-4">
+        <p class="text-muted mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>No hay eventos<?= $pantalla->incluyeInactivos ? '' : ' activos' ?>.</p>
+    </section>
+<?php else: ?>
+    <div class="d-grid gap-3">
+        <?php foreach ($eventos as $ep): ?>
+            <?php
+            $ev = $ep->evento->evento;
+            $esDeTodo = $ep->evento->esDeTodoElGrupo();
+            $activo = $ev->activo;
+            ?>
+            <div class="tarjeta-blanca-borde p-4<?= !$activo ? ' opacity-75' : '' ?>">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">
+                            <?= e($ev->titulo) ?>
+                            <?php if (!$activo): ?>
+                                <span class="badge text-bg-secondary ms-1">Inactivo</span>
+                            <?php endif; ?>
+                        </h2>
+                        <p class="small text-muted mb-0">
+                            <i class="bi bi-calendar-event me-1" aria-hidden="true"></i><?= e(Vista::periodo($ev->fechaInicio, $ev->fechaFin)) ?>
+                            · <span class="badge text-bg-<?= e(Vista::colorPrioridad($ev->prioridad)) ?>"><?= e($ev->prioridad->etiqueta()) ?></span>
+                            <?php if ($ev->esPublico): ?>
+                                · <i class="bi bi-globe2 me-1" aria-hidden="true"></i>Público
+                            <?php endif; ?>
+                        </p>
+                    </div>
+
+                    <?php if ($ep->puedeEditar || $ep->puedeEliminar): ?>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Acciones">
+                                <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <?php if ($ep->puedeEditar): ?>
+                                    <li><a class="dropdown-item" href="<?= e(url('views/pages/evento_form.php?id=' . $ev->id)) ?>"><i class="bi bi-pencil me-2" aria-hidden="true"></i>Editar</a></li>
+                                    <?php if ($activo): ?>
+                                        <li>
+                                            <button class="dropdown-item" type="button" data-accion="evento.desactivar"
+                                                    data-datos='<?= e(json_encode(['id_evento' => (int) $ev->id, 'volver' => $rutaActual])) ?>'
+                                                    data-confirmar="¿Desactivar «<?= e($ev->titulo) ?>»?" data-texto="Ya no aparece en los listados." data-boton="Sí, desactivar">
+                                                <i class="bi bi-pause-circle me-2" aria-hidden="true"></i>Desactivar
+                                            </button>
+                                        </li>
+                                    <?php else: ?>
+                                        <li>
+                                            <button class="dropdown-item" type="button" data-accion="evento.reactivar"
+                                                    data-datos='<?= e(json_encode(['id_evento' => (int) $ev->id, 'volver' => $rutaActual])) ?>'
+                                                    data-confirmar="¿Reactivar «<?= e($ev->titulo) ?>»?" data-boton="Sí, reactivar">
+                                                <i class="bi bi-play-circle me-2" aria-hidden="true"></i>Reactivar
+                                            </button>
+                                        </li>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <?php if ($ep->puedeEliminar): ?>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" type="button" data-accion="evento.eliminar"
+                                                data-datos='<?= e(json_encode(['id_evento' => (int) $ev->id, 'volver' => $rutaActual])) ?>'
+                                                data-confirmar="¿Eliminar «<?= e($ev->titulo) ?>»?" data-texto="No se puede deshacer." data-boton="Sí, eliminar" data-peligro>
+                                            <i class="bi bi-trash me-2" aria-hidden="true"></i>Eliminar
+                                        </button>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <p class="mb-2"><?= nl2br(e($ev->descripcion)) ?></p>
+                <p class="small text-muted mb-0">
+                    <?php if ($esDeTodo): ?>
+                        <i class="bi bi-people me-1" aria-hidden="true"></i>Todo el grupo
+                    <?php else: ?>
+                        <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>
+                        <?= e(implode(', ', array_map(fn (int $id) => $nombres[$id] ?? "Sección $id", $ep->evento->idSecciones))) ?>
+                    <?php endif; ?>
+                </p>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+<?php require __DIR__ . '/../includes/pie.php'; ?>

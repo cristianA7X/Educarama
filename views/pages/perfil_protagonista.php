@@ -1,402 +1,373 @@
 <?php
-require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-require_once __DIR__ . '/../../src/Controladores/ProtagonistaController.php';
-require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+// views/pages/perfil_protagonista.php
+//
+// La página central del protagonista, con dos pestañas:
+//  - Perfil: sus datos, el resumen de su progresión (con los links a
+//    Competencias y a Etapas e insignias) y sus familiares.
+//  - Documentos: ver, descargar, subir, editar y eliminar.
+// El menú ⋮ del encabezado tiene Editar, Cambiar de sección y Eliminar, según el rol.
 
+declare(strict_types=1);
 
-$tituloPagina = "Perfil de Protagonista";
-$controlador = new ProtagonistaController();
-$protagonista = $controlador->obtenerPerfilDesdeUrl();
+require_once __DIR__ . '/../../config/bootstrap.php';
 
-if (!$protagonista) {
-    header("Location: protagonistas.php");
-    exit;
-}
+use Educarama\Controller\Pagina;
+use Educarama\Controller\ProtagonistaController;
+use Educarama\Helper\Csrf;
+use Educarama\Helper\Vista;
 
-$fechaNacimiento = new DateTime($protagonista['fecha_nacimiento']);
-$hoy = new DateTime();
-$edad = $hoy->diff($fechaNacimiento)->y;
+$datos = Pagina::cargar(fn () => (new ProtagonistaController())->paginaPerfil($_GET));
+$ficha = $datos['ficha'];
+$seccion = $datos['seccion'];
+$resumen = $datos['resumen'];
+$persona = $ficha->persona;
+$protagonista = $ficha->protagonista;
+$id = (int) $protagonista->id;
+$edad = Vista::edad($persona->fechaNacimiento);
+$equipo = $seccion->pequenioEquipo();
+$nombre = $persona->nombre . ' ' . $persona->apellido;
 
-require_once __DIR__ . '/../../src/Controladores/RamaController.php';
-require_once __DIR__ . '/../../src/Datos/ProgresionRepository.php';
-require_once __DIR__ . '/../../src/Servicios/ProgresionService.php';
-
-// --- NUEVO: REPOSITORIO DE DOCUMENTOS ---
-require_once __DIR__ . '/../../src/Datos/DocumentoRepository.php';
-
-$progRepo = new ProgresionRepository();
-$progService = new ProgresionService($progRepo);
-$docRepo = new DocumentoRepository();
-
-$idCategoriaRama = (int) ($protagonista['id_categoria_rama'] ?? 2);
-
-// Obtenemos alertas y documentos
-$alertas = $progService->obtenerAlertas($protagonista['id'], $idCategoriaRama);
-$documentos = $docRepo->obtenerDocumentosPorProtagonista($protagonista['id']);
+$tituloPagina = $nombre;
+$claseRama = Vista::claseRama($seccion->rama->id);
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educarama - Perfil de Protagonista</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-    <!-- Google Fonts: Ubuntu -->
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
-</head>
+<section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start gap-3">
+    <div>
+        <h1 class="fw-bold mb-1"><?= e($nombre) ?><?= $edad !== null ? ', ' . $edad . ' años' : '' ?></h1>
+        <p class="mb-0 fw-bold">
+            <a class="text-reset" href="<?= e(url('views/pages/perfil_seccion.php?id=' . $seccion->seccion->id)) ?>"><?= e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) ?></a>
+            · <?= e($seccion->rama->titulo) ?>
+        </p>
+    </div>
 
-<body class="<?= claseRama($idCategoriaRama) ?>">
-    <?php 
-    include __DIR__ . '/includes/barra_superior.php'; 
-    include __DIR__ . '/includes/menu_lateral.php'; 
-    ?>
+    <?php if ($seccion->puedeEditar() || $seccion->puedeEliminar() || $datos['seccionesDestino'] !== []): ?>
+        <div class="dropdown">
+            <button class="btn btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+                <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <?php if ($seccion->puedeEditar()): ?>
+                    <li><a class="dropdown-item" href="<?= e(url('views/pages/protagonista_form.php?id=' . $id)) ?>"><i class="bi bi-pencil me-2" aria-hidden="true"></i>Editar datos</a></li>
+                <?php endif; ?>
+                <?php if ($datos['seccionesDestino'] !== []): ?>
+                    <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#modalPase"><i class="bi bi-arrow-left-right me-2" aria-hidden="true"></i>Cambiar de sección</button></li>
+                <?php endif; ?>
+                <?php if ($seccion->puedeEliminar()): ?>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button class="dropdown-item text-danger" type="button" data-accion="protagonista.eliminar"
+                                data-datos='<?= e(json_encode(['id_protagonista' => $id])) ?>'
+                                data-confirmar="¿Eliminar a <?= e($nombre) ?>?"
+                                data-texto="Se borran su progresión, sus documentos y sus vínculos con familiares. No se puede deshacer."
+                                data-boton="Sí, eliminar" data-peligro>
+                            <i class="bi bi-trash me-2" aria-hidden="true"></i>Eliminar
+                        </button>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+</section>
 
-    <!-- CONTENEDOR MAESTRO -->
-    <div class="main-content-wrapper">
-        
-        <div class="container contenedor-principal  p-4">
-            
-            <!-- MENSAJES DE ÉXITO -->
-            <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>
-                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    Los datos del protagonista se modificaron correctamente.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-            <?php endif; ?>
+<ul class="nav nav-tabs tabs-inst mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pestania-perfil" data-bs-toggle="tab" data-bs-target="#perfil" type="button" role="tab" aria-controls="perfil" aria-selected="true">
+            <i class="bi bi-person me-1" aria-hidden="true"></i>Perfil
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pestania-documentos" data-bs-toggle="tab" data-bs-target="#documentos" type="button" role="tab" aria-controls="documentos" aria-selected="false">
+            <i class="bi bi-folder2-open me-1" aria-hidden="true"></i>Documentos <span class="badge text-bg-secondary"><?= count($datos['documentos']) ?></span>
+        </button>
+    </li>
+</ul>
 
-            <!-- ALERTAS DE PROGRESIÓN DINÁMICAS -->
-            <?php if (!empty($alertas)): ?>
-                <?php foreach ($alertas as $alerta): ?>
-                    <div class="alert alert-warning alert-dismissible fade show mb-4 d-flex align-items-center shadow-sm" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
-                        <div>
-                            <strong class="d-block"><?= htmlspecialchars($alerta['titulo']) ?></strong>
-                            <?= htmlspecialchars($alerta['mensaje']) ?>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-            
-            <!-- ENCABEZADO DEL PERFIL -->
-            <div class="barra-superior-inst mb-3 row align-items-center 
-             mx-0">
-                <div class="col-8">
-                <h1 class="fw-bold mb-1">
-                        <?= htmlspecialchars($protagonista['nombre']) ?> 
-                        <?= htmlspecialchars($protagonista['apellido']) ?>, 
-                        <?= $edad ?> años
-                    </h1>
-                    <p class="mb-0 fw-bold">
-                        <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama asignada') ?>
+<div class="tab-content">
+    <!-- ================================================================ PERFIL -->
+    <div class="tab-pane fade show active" id="perfil" role="tabpanel" aria-labelledby="pestania-perfil" tabindex="0">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <section class="tarjeta-blanca-borde p-4 h-100">
+                    <h2 class="h5 texto-violeta fw-bold mb-3">Datos</h2>
+                    <p class="dato-etiqueta">DNI</p>
+                    <p class="dato-valor"><?= e(number_format($persona->dni, 0, ',', '.')) ?></p>
+                    <p class="dato-etiqueta">Fecha de nacimiento</p>
+                    <p class="dato-valor"><?= $persona->fechaNacimiento !== null ? e(Vista::fecha($persona->fechaNacimiento)) : '<span class="text-muted">Sin dato</span>' ?></p>
+                    <?php if ($equipo !== null): ?>
+                        <p class="dato-etiqueta"><?= e($equipo) ?></p>
+                        <p class="dato-valor">
+                            <?php if ($ficha->nombrePatrulla !== null): ?>
+                                <a href="<?= e(url('views/pages/perfil_patrulla.php?id=' . $protagonista->idPatrulla)) ?>"><?= e($ficha->nombrePatrulla) ?></a>
+                            <?php else: ?>
+                                <span class="text-muted">Sin <?= e(mb_strtolower($equipo)) ?></span>
+                            <?php endif; ?>
+                        </p>
+                    <?php endif; ?>
+                    <p class="dato-etiqueta">Año de ingreso</p>
+                    <p class="dato-valor"><?= $protagonista->anioIngreso !== null ? (int) $protagonista->anioIngreso : '<span class="text-muted">Sin dato</span>' ?></p>
+                    <p class="dato-etiqueta">Promesa</p>
+                    <p class="dato-valor mb-0">
+                        <?= $protagonista->promesa
+                            ? '<span class="badge text-bg-success"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Hizo la Promesa</span>'
+                            : '<span class="text-muted">Todavía no</span>' ?>
                     </p>
-                </div>
-                <div class="col-4 d-flex justify-content-end">
-                    <div class="circulo-logo">
-                        <img class="img-fluid rounded-circle" src="../assets/images/RamaLogoLyL.png" alt="Logo rama">
-                    </div>
-                </div>
+                </section>
             </div>
 
-            <!-- INFORMACIÓN BÁSICA -->
-            <div class="row mb-4 align-items-stretch">
-                <div class="col-md-12 mb-3 mb-md-0">
-                    <div class="tarjeta-blanca-borde p-3 h-100">
-                        <p class="m-0 fw-bold">
-                            <i class="bi bi-calendar-event me-2"></i>
-                            Fecha de Nacimiento: <?= date("d/m/Y", strtotime($protagonista['fecha_nacimiento'])) ?>
-                        </p>
-                        <p class="m-0 fw-bold">
-                            <i class="bi bi-diagram-3 me-2"></i>
-                            Rama: <?= htmlspecialchars($protagonista['rama'] ?? 'Sin rama') ?>
-                        </p>
-                        <p class="m-0 fw-bold">
-                            <i class="bi bi-shield-shaded me-2"></i>
-                            Patrulla: <?= htmlspecialchars($protagonista['patrulla'] ?? 'Sin patrulla') ?>
-                        </p>
-                        <p class="m-0 fw-bold">
-                            <i class="bi bi-calendar-check me-2"></i>
-                            Año de ingreso: <?= htmlspecialchars($protagonista['anio_ingreso'] ?? 'Sin dato') ?>
-                        </p>
+            <div class="col-lg-7">
+                <section class="tarjeta-blanca-borde p-4 h-100">
+                    <h2 class="h5 texto-violeta fw-bold mb-3">Progresión personal</h2>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <p class="dato-etiqueta">Etapa actual</p>
+                            <p class="dato-valor mb-0"><?= $resumen->etapaActual !== null ? e($resumen->etapaActual->titulo) : '<span class="text-muted">Ninguna todavía</span>' ?></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="dato-etiqueta">Etapa en curso</p>
+                            <p class="dato-valor mb-0">
+                                <?php if ($resumen->etapaEnCurso !== null): ?>
+                                    <?= e($resumen->etapaEnCurso->titulo) ?>
+                                    <span class="text-muted small">(<?= $resumen->enCursoDesarrolladas ?>/<?= $resumen->cupoEnCurso() ?> desarrolladas)</span>
+                                <?php else: ?>
+                                    <span class="text-muted">Logró todas las etapas</span>
+                                <?php endif; ?>
+                            </p>
+                        </div>
                     </div>
-                </div>
+
+                    <?php $porcentaje = $resumen->competenciasTotal > 0 ? (int) round(100 * $resumen->desarrolladasTotal / $resumen->competenciasTotal) : 0; ?>
+                    <div class="barra-progreso mb-1" role="progressbar" aria-label="Competencias desarrolladas" aria-valuenow="<?= $porcentaje ?>" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progreso-actual" style="width: <?= $porcentaje ?>%"></div>
+                    </div>
+                    <p class="small fw-bold texto-violeta mb-3">Competencias desarrolladas: <?= $resumen->desarrolladasTotal ?> / <?= $resumen->competenciasTotal ?></p>
+
+                    <?php if ($resumen->insigniaPendiente !== null): ?>
+                        <div class="alert alert-warning py-2 small">
+                            <i class="bi bi-award me-1" aria-hidden="true"></i>
+                            Tiene la etapa <?= e($resumen->etapaEnCurso?->titulo ?? '') ?> en curso y todavía no recibió su insignia.
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($resumen->etapaEnCurso !== null && $resumen->etapaLista()): ?>
+                        <div class="alert alert-success py-2 small">
+                            <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+                            Cumplió todo para confirmar la etapa <?= e($resumen->etapaEnCurso->titulo) ?>.
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="boton-primario px-3 py-2 fw-bold text-decoration-none" href="<?= e(url('views/pages/gestionar_competencias.php?id=' . $id)) ?>">
+                            <i class="bi bi-list-check me-1" aria-hidden="true"></i>Competencias
+                        </a>
+                        <a class="btn btn-outline-secondary" href="<?= e(url('views/pages/progresion.php?id=' . $id)) ?>">
+                            <i class="bi bi-award me-1" aria-hidden="true"></i>Etapas e insignias
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <section class="tarjeta-blanca-borde p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 texto-violeta fw-bold mb-0">Familiares</h2>
+                <?php if ($seccion->puedeEditar()): ?>
+                    <a class="btn btn-outline-secondary btn-sm" href="<?= e(url('views/pages/familiar_form.php?id_protagonista=' . $id)) ?>">
+                        <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Agregar familiar
+                    </a>
+                <?php endif; ?>
             </div>
 
-            <!-- SECCIÓN DE PROGRESIÓN -->
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <h2 class="h4 texto-violeta fw-bold">Progresión Personal</h2>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="h-100 d-flex flex-column align-items-center justify-content-center">
-                        <div class="pieza-insignia h50 d-flex flex-wrap">
-                             <div class="d-grid h50" style="grid-template-columns: repeat(2, 1fr);">
-                                <img class="img-fluid" src="../assets/images/insignias/Progresion 1 Rama Lobatos y Lobeznas_Lobo Pata Tierna.png" alt="Insignia 1">
-                                <img class="img-fluid" src="../assets/images/insignias/Progresion 2 Rama Lobatos y Lobeznas_Lobo Saltador.png" alt="Insignia 2">
-                                <img class="img-fluid" src="../assets/images/insignias/Progresion 4 Rama Lobatos y Lobeznas_Lobo Cazador.png" alt="Insignia 4">
-                                <img class="img-fluid" src="../assets/images/insignias/Progresion 3 Rama Lobatos y Lobeznas_Lobo Rastreador.png" alt="Insignia 3">
+            <?php if ($datos['familiares'] === []): ?>
+                <p class="text-muted mb-0">No tiene familiares cargados.</p>
+            <?php else: ?>
+                <div class="list-group">
+                    <?php foreach ($datos['familiares'] as $f): ?>
+                        <?php $nombreFamiliar = $f->persona->nombre . ' ' . $f->persona->apellido; ?>
+                        <div class="list-group-item d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <p class="fw-bold mb-1">
+                                    <?= e($nombreFamiliar) ?>
+                                    <?php if ($f->vinculo->vinculo !== null): ?><span class="text-muted fw-normal">· <?= e($f->vinculo->vinculo) ?></span><?php endif; ?>
+                                    <?php if ($f->vinculo->esContactoDeEmergencia): ?>
+                                        <span class="badge text-bg-danger ms-1"><i class="bi bi-telephone-plus me-1" aria-hidden="true"></i>Emergencia</span>
+                                    <?php endif; ?>
+                                </p>
+                                <p class="small mb-0">
+                                    <?php if ($f->familiar->telefonoContacto !== null): ?>
+                                        <i class="bi bi-telephone me-1" aria-hidden="true"></i><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $f->familiar->telefonoContacto)) ?>"><?= e($f->familiar->telefonoContacto) ?></a>
+                                    <?php endif; ?>
+                                    <?php if ($f->familiar->emailContacto !== null): ?>
+                                        <span class="ms-2"><i class="bi bi-envelope me-1" aria-hidden="true"></i><a href="mailto:<?= e($f->familiar->emailContacto) ?>"><?= e($f->familiar->emailContacto) ?></a></span>
+                                    <?php endif; ?>
+                                    <?php if ($f->familiar->telefonoContacto === null && $f->familiar->emailContacto === null): ?>
+                                        <span class="text-muted">Sin datos de contacto</span>
+                                    <?php endif; ?>
+                                </p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 justify-content-center d-flex flex-column">
-                    <div class="d-flex flex-column align-items-center justify-content-center">
-                        <div class="barra-progreso w-100 mb-2">
-                             <div class="progreso-actual" style="width: 60%;"></div>
-                        </div>
-                        <p class="texto-violeta fw-bold m-0">Competencias: 6 / 10</p>
-                    </div>
-                    
-                    <h2 class="h4 texto-violeta fw-bold mt-4">Promesa Scout</h2>
-                    <div class="tarjeta-blanca-borde p-2 d-flex flex-row align-items-center justify-content-around">
-                        <div class="insignia-pequena">
-                            <img src="../assets/images/FlorLizNacional.png" alt="Insignia Nacional">
-                        </div>
-                        <div class="insignia-pequena">
-                            <img src="../assets/images/FlorLizInternacional.jpg" alt="Insignia Internacional">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN DE DOCUMENTACIÓN -->
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <h2 class="h4 texto-violeta fw-bold">Documentación Adjunta</h2>
-                </div>
-                <div class="col-12">
-                    <div class="tarjeta-blanca-borde p-3">
-                        <?php if (empty($documentos)): ?>
-                            <p class="text-muted m-0"><i class="bi bi-info-circle me-2"></i>No hay documentos adjuntos para este protagonista.</p>
-                        <?php else: ?>
-                            <div class="list-group">
-                                <?php foreach ($documentos as $doc): ?>
-                                    <a href="/Educarama<?= htmlspecialchars($doc['ruta_archivo']) ?>" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <i class="bi bi-file-earmark-text text-primary me-2"></i>
-                                            <?= htmlspecialchars($doc['nombre_original']) ?>
-                                            <br>
-                                            <small class="text-muted">Subido el <?= date('d/m/Y', strtotime($doc['fecha_subida'])) ?></small>
-                                        </div>
-                                        <i class="bi bi-box-arrow-up-right text-muted"></i>
+                            <?php if ($seccion->puedeEditar()): ?>
+                                <div class="d-flex gap-2">
+                                    <a class="btn btn-outline-secondary btn-sm" href="<?= e(url('views/pages/familiar_form.php?id_protagonista=' . $id . '&id_familiar=' . $f->familiar->id)) ?>">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">Editar a <?= e($nombreFamiliar) ?></span>
                                     </a>
-                                <?php endforeach; ?>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" data-accion="familiar.desvincular"
+                                            data-datos='<?= e(json_encode(['id_protagonista' => $id, 'id_familiar' => $f->familiar->id])) ?>'
+                                            data-confirmar="¿Desvincular a <?= e($nombreFamiliar) ?>?" data-boton="Sí, desvincular" data-peligro>
+                                        <i class="bi bi-x-lg" aria-hidden="true"></i><span class="visually-hidden">Desvincular a <?= e($nombreFamiliar) ?></span>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    </div>
+
+    <!-- ================================================================ DOCUMENTOS -->
+    <div class="tab-pane fade" id="documentos" role="tabpanel" aria-labelledby="pestania-documentos" tabindex="0">
+        <section class="tarjeta-blanca-borde p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 texto-violeta fw-bold mb-0">Documentos</h2>
+                <?php if ($seccion->puedeEditar()): ?>
+                    <button type="button" class="boton-primario px-3 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalSubir">
+                        <i class="bi bi-upload me-1" aria-hidden="true"></i>Subir documento
+                    </button>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($datos['documentos'] === []): ?>
+                <p class="text-muted mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>No hay documentos para este protagonista.</p>
+            <?php else: ?>
+                <div class="list-group">
+                    <?php foreach ($datos['documentos'] as $d): ?>
+                        <?php
+                        $idDoc = (int) $d->id;
+                        $esImagen = str_starts_with($d->tipoMime, 'image/');
+                        $urlDescarga = url('public/descargar.php?id=' . $idDoc);
+                        ?>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    <p class="fw-bold mb-1">
+                                        <img class="icono-oficial me-1" src="<?= e(Vista::iconoOficial($esImagen ? 'png' : 'pdf')) ?>" alt="">
+                                        <?= e($d->nombreOriginal) ?>
+                                        <?php if ($d->tipoDocumento !== null): ?><span class="badge text-bg-light border ms-1"><?= e($d->tipoDocumento) ?></span><?php endif; ?>
+                                    </p>
+                                    <?php if ($d->descripcion !== null): ?><p class="small mb-1"><?= nl2br(e($d->descripcion)) ?></p><?php endif; ?>
+                                    <p class="small text-muted mb-0">Subido el <?= e(Vista::fechaDeFechaHora($d->fechaSubida)) ?> · <?= e(Vista::tamanio($d->tamanioBytes)) ?></p>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php if ($esImagen): ?>
+                                        <a class="btn btn-outline-secondary btn-sm" href="<?= e($urlDescarga . '&ver=1') ?>" target="_blank" rel="noopener">
+                                            <i class="bi bi-eye me-1" aria-hidden="true"></i>Ver
+                                        </a>
+                                    <?php endif; ?>
+                                    <a class="btn btn-outline-secondary btn-sm" href="<?= e($urlDescarga) ?>">
+                                        <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar
+                                    </a>
+                                    <?php if ($seccion->puedeEditar()): ?>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#editar-doc-<?= $idDoc ?>" aria-expanded="false">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">Editar</span>
+                                        </button>
+                                    <?php endif; ?>
+                                    <?php if ($seccion->puedeEliminar()): ?>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-accion="documento.eliminar"
+                                                data-datos='<?= e(json_encode(['id_documento' => $idDoc])) ?>'
+                                                data-confirmar="¿Eliminar «<?= e($d->nombreOriginal) ?>»?" data-texto="El archivo se borra y no se puede recuperar."
+                                                data-boton="Sí, eliminar" data-peligro>
+                                            <i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Eliminar</span>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        <?php endif; ?>
+
+                            <?php if ($seccion->puedeEditar()): ?>
+                                <div class="collapse mt-3" id="editar-doc-<?= $idDoc ?>">
+                                    <form class="row g-2" data-accion="documento.actualizar" data-recargar>
+                                        <?= Csrf::campo() ?>
+                                        <input type="hidden" name="id_documento" value="<?= $idDoc ?>">
+                                        <div class="col-md-4">
+                                            <label class="form-label small" for="tipo-<?= $idDoc ?>">Tipo</label>
+                                            <input class="form-control form-control-sm" id="tipo-<?= $idDoc ?>" name="tipo_documento" maxlength="50" value="<?= e($d->tipoDocumento) ?>">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label small" for="desc-<?= $idDoc ?>">Descripción</label>
+                                            <input class="form-control form-control-sm" id="desc-<?= $idDoc ?>" name="descripcion" value="<?= e($d->descripcion) ?>">
+                                        </div>
+                                        <div class="col-12"><button type="submit" class="btn btn-sm boton-primario">Guardar</button></div>
+                                    </form>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    </div>
+</div>
+
+<?php if ($seccion->puedeEditar()): ?>
+    <!-- Subir un documento -->
+    <div class="modal fade" id="modalSubir" tabindex="-1" aria-labelledby="tituloSubir" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" data-accion="documento.subir">
+                <?= Csrf::campo() ?>
+                <input type="hidden" name="id_protagonista" value="<?= $id ?>">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="tituloSubir">Subir un documento</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="archivo" class="form-label">Archivo</label>
+                        <input type="file" class="form-control" id="archivo" name="archivo" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+                        <div class="form-text">PDF, JPG o PNG, hasta 5 MB.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo_documento" class="form-label">Tipo <span class="text-muted">(opcional)</span></label>
+                        <input type="text" class="form-control" id="tipo_documento" name="tipo_documento" maxlength="50" placeholder="Ej.: Ficha médica">
+                    </div>
+                    <div>
+                        <label for="descripcion" class="form-label">Descripción <span class="text-muted">(opcional)</span></label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
                     </div>
                 </div>
-            </div>
-
-            <!-- BOTONES DE ACCIÓN -->
-            <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <a href="alta_protagonista.php?id=<?= $protagonista['id'] ?>" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
-                        <i class="bi bi-person-gear me-2"></i>Editar Perfil
-                    </a>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="boton-primario px-3 py-2 fw-bold">Subir</button>
                 </div>
-                <div class="col-12 col-md-4">
-                    <a href="gestionar_competencias.php?id=<?= $protagonista['id'] ?>" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
-                        <i class="bi bi-award me-2"></i>Asignar competencias
-                    </a>
-                </div>
-            </div>
-            
+            </form>
         </div>
     </div>
+<?php endif; ?>
 
-    <!-- Modal Recomendación de Insignia -->
-    <div class="modal fade" id="modalRecomendacion" tabindex="-1" aria-labelledby="modalRecomendacionLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content tarjeta-blanca-borde">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title texto-violeta fw-bold" id="modalRecomendacionLabel">Recomendación de Progresión</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center">
-            <div id="loaderRecomendacion" class="spinner-border text-primary my-3" role="status" style="display: none;"></div>
-            <div id="contenidoRecomendacion">
-                <h3 id="porcentajeAvance" class="display-4 fw-bold texto-violeta mb-0"></h3>
-                <p class="text-muted fw-bold">Competencias logradas: <span id="textoCompetencias"></span></p>
-                <div class="alert alert-info mt-3 fw-bold" id="mensajeRecomendacion"></div>
-            </div>
-          </div>
-          <div class="modal-footer border-0 pt-0 justify-content-center">
-            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
-            <button type="button" class="boton-primario px-4" id="btnOtorgarInsigniaBtn" style="display: none;">Otorgar Insignia</button>
-          </div>
+<?php if ($datos['seccionesDestino'] !== []): ?>
+    <!-- Cambiar de sección -->
+    <div class="modal fade" id="modalPase" tabindex="-1" aria-labelledby="tituloPase" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" data-accion="protagonista.cambiarSeccion"
+                  data-confirmar="¿Pasar a <?= e($nombre) ?> a otra sección?"
+                  data-texto="Queda sin <?= e(mb_strtolower($equipo ?? 'patrulla')) ?>. Su progresión de esta rama queda guardada como historial.">
+                <?= Csrf::campo() ?>
+                <input type="hidden" name="id_protagonista" value="<?= $id ?>">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="tituloPase">Cambiar de sección</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="id_seccion" class="form-label">Sección de destino</label>
+                    <select class="form-select" id="id_seccion" name="id_seccion" required>
+                        <?php foreach ($datos['seccionesDestino'] as $destino): ?>
+                            <option value="<?= (int) $destino->seccion->id ?>"><?= e(Vista::nombreCompletoSeccion($destino->seccion->nombre, $destino->rama->id)) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="boton-primario px-3 py-2 fw-bold">Cambiar de sección</button>
+                </div>
+            </form>
         </div>
-      </div>
     </div>
-
-    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-    
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(() => {
-                const alerta = document.querySelector('.alert-success');
-                if (alerta) {
-                    const alertaBootstrap = bootstrap.Alert.getOrCreateInstance(alerta);
-                    alertaBootstrap.close();
-                }
-            }, 3000);
-
-            const idProtagonista = <?= json_encode($protagonista['id']) ?>;
-            const idCategoriaRama = <?= $idCategoriaRama ?>; 
-
-            // --- MANEJO DE CHECKBOXES DE ACCIONES ---
-            const checkboxesAccion = document.querySelectorAll('.checkbox-accion');
-            checkboxesAccion.forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    const idAccion = this.dataset.idAccion;
-                    const estado = this.checked ? 1 : 0;
-
-                    fetch('/Educarama/src/Controladores/ProgresionController.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'marcar_accion',
-                            id_protagonista: idProtagonista,
-                            id_accion: idAccion,
-                            estado: estado
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status !== 'success') {
-                            alert('Error al guardar la acción: ' + data.message);
-                            this.checked = !this.checked; 
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error de Fetch:', error);
-                        alert('Error de conexión con el servidor.');
-                        this.checked = !this.checked;
-                    });
-                });
-            });
-
-            // --- MANEJO DE CHECKBOXES DE COMPETENCIAS ---
-            const checkboxesCompetencia = document.querySelectorAll('.checkbox-competencia');
-            checkboxesCompetencia.forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    const idCompetencia = this.dataset.idCompetencia;
-                    const codigoCompetencia = this.dataset.codigoCompetencia;
-                    const estado = this.checked ? 1 : 0;
-
-                    fetch('/Educarama/src/Controladores/ProgresionController.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'marcar_competencia',
-                            id_protagonista: idProtagonista,
-                            id_competencia: idCompetencia,
-                            codigo_competencia: codigoCompetencia,
-                            estado: estado
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status !== 'success') {
-                            alert('Error al guardar la competencia: ' + data.message);
-                            this.checked = !this.checked;
-                        } else {
-                            location.reload(); 
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error de Fetch:', error);
-                        alert('Error de conexión con el servidor.');
-                        this.checked = !this.checked;
-                    });
-                });
-            });
-
-            // --- LÓGICA PARA RECOMENDACIÓN DE INSIGNIA ---
-            const btnRecomendar = document.getElementById('btnRecomendarInsignia');
-            const modalElement = document.getElementById('modalRecomendacion');
-            
-            if (btnRecomendar && modalElement) {
-                const modalRecomendacion = new bootstrap.Modal(modalElement);
-                
-                btnRecomendar.addEventListener('click', function() {
-                    document.getElementById('contenidoRecomendacion').style.display = 'none';
-                    document.getElementById('loaderRecomendacion').style.display = 'inline-block';
-                    document.getElementById('btnOtorgarInsigniaBtn').style.display = 'none';
-                    modalRecomendacion.show();
-
-                    fetch('/Educarama/src/Controladores/ProgresionController.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'evaluar_recomendacion',
-                            id_protagonista: idProtagonista,
-                            id_categoria_rama: idCategoriaRama
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('loaderRecomendacion').style.display = 'none';
-                        document.getElementById('contenidoRecomendacion').style.display = 'block';
-
-                        if (data.status === 'success') {
-                            const info = data.data;
-                            document.getElementById('porcentajeAvance').innerText = info.porcentaje + '%';
-                            document.getElementById('textoCompetencias').innerText = info.desarrolladas + ' de ' + info.total;
-                            document.getElementById('mensajeRecomendacion').innerText = info.mensaje;
-
-                            if (info.recomendacion_id) {
-                                const btnOtorgar = document.getElementById('btnOtorgarInsigniaBtn');
-                                btnOtorgar.style.display = 'inline-block';
-                                
-                                btnOtorgar.onclick = function() {
-                                    otorgarInsignia(info.recomendacion_id);
-                                };
-                            }
-                        } else {
-                            document.getElementById('mensajeRecomendacion').innerText = 'Error: ' + data.message;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.getElementById('loaderRecomendacion').style.display = 'none';
-                        document.getElementById('mensajeRecomendacion').innerText = 'Hubo un error de conexión con el servidor.';
-                        document.getElementById('contenidoRecomendacion').style.display = 'block';
-                    });
-                });
-            }
-
-            function otorgarInsignia(idInsignia) {
-                fetch('/Educarama/src/Controladores/ProgresionController.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'otorgar_insignia',
-                        id_protagonista: idProtagonista,
-                        id_insignia: idInsignia
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert(data.message);
-                        location.reload(); 
-                    } else {
-                        alert('Error al otorgar insignia: ' + data.message);
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+<?php endif; ?>
+<?php require __DIR__ . '/../includes/pie.php'; ?>
