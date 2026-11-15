@@ -1,25 +1,16 @@
 <?php
 // views/pages/gestionar_competencias.php
-//
-// Las competencias de un protagonista (CLAUDE.md, "Pantalla de competencias"):
-//  - Una pestaña por área, con TODAS las competencias de la rama (sin fila = pendiente).
-//  - El botón de cada una solo avanza: Pendiente → En proceso → Desarrollada.
-//  - ⋮ → "Corregir" activa los botones para volver atrás (Responsable en adelante).
-//  - Acciones: casillas dentro de cada competencia, en un desplegable (no en Rovers).
-//  - Contadores arriba (etapa en curso y total) y en cada pestaña; filtro por estado.
-//  - Cada clic se guarda en el momento (public/js/competencias.js); si hay un
-//    aviso (cupo, acciones sin cumplir), primero se pide confirmación.
-
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProgresionController;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\EstadoProgresion;
 
-$datos = Pagina::cargar(fn () => (new ProgresionController())->paginaCompetencias($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProgresionController::class)->paginaCompetencias($_GET));
+
 $ficha = $datos['ficha'];
 $pantalla = $datos['pantalla'];
 $resumen = $pantalla->resumen;
@@ -30,7 +21,6 @@ $termino = $pantalla->terminos['competencias'] ?? 'Competencias';
 $editable = $pantalla->puedeEditar;
 $nombresEtapas = $pantalla->nombresEtapas;
 
-/** El botón que solo avanza, según el estado. */
 $textoAvanzar = static fn (?EstadoProgresion $estado): ?string => match ($estado) {
     null                         => 'Elegir',
     EstadoProgresion::EnProceso  => 'Desarrollada',
@@ -40,8 +30,10 @@ $textoAvanzar = static fn (?EstadoProgresion $estado): ?string => match ($estado
 $tituloPagina = 'Competencias de ' . $nombre;
 $claseRama = Vista::claseRama($rama->id);
 $scriptsPagina = ['public/js/competencias.js'];
-require __DIR__ . '/../includes/cabecera.php';
+
+require_once __DIR__ . '/../includes/cabecera.php';
 ?>
+<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e($nombre) ?></h1>

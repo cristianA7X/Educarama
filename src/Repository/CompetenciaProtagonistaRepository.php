@@ -1,24 +1,18 @@
-<?php
-// src/Repository/CompetenciaProtagonistaRepository.php
-
+<?php // src/Repository/CompetenciaProtagonistaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\CompetenciaProtagonista;
+use PDO;
 
-/**
- * Lectura y escritura de `competencia_protagonista`: las competencias que un
- * protagonista eligió (en proceso) o ya desarrolló.
- *
- * Tabla de progresión: sin fila = pendiente. La fila la crea un educador al confirmar,
- * y pasar de 'en proceso' a 'desarrollada' es un actualizar().
- * Sin id propio: cada fila se identifica por id_protagonista + id_competencia.
- *
- * Contar cuántas tiene desarrolladas y compararlo con la etapa lo hace el Service.
- */
 final class CompetenciaProtagonistaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idCompetencia): ?CompetenciaProtagonista
     {
         return $this->buscarUno(
@@ -28,15 +22,8 @@ final class CompetenciaProtagonistaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Todas las competencias del protagonista (en proceso y desarrolladas),
-     * en el orden del catálogo: área y número.
-     *
-     * @return CompetenciaProtagonista[]
-     */
     public function listarPorProtagonista(int $idProtagonista): array
     {
-        // El JOIN es solo para ordenar: se devuelven únicamente las columnas de competencia_protagonista.
         return $this->listar(
             'SELECT cp.*
                FROM competencia_protagonista cp
@@ -48,10 +35,6 @@ final class CompetenciaProtagonistaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Registra que el protagonista eligió (o desarrolló) una competencia.
-     * La fecha viene en el objeto: el Service pone la de hoy o la que cargue el educador.
-     */
     public function insertar(CompetenciaProtagonista $cp): void
     {
         $this->ejecutar(
@@ -67,7 +50,6 @@ final class CompetenciaProtagonistaRepository extends RepositorioBase
         );
     }
 
-    /** Cambia el estado (ej. en proceso → desarrollada) y la fecha del cambio. */
     public function actualizar(CompetenciaProtagonista $cp): void
     {
         $this->ejecutar(
@@ -83,7 +65,6 @@ final class CompetenciaProtagonistaRepository extends RepositorioBase
         );
     }
 
-    /** Borra la fila: la competencia vuelve a quedar pendiente. */
     public function eliminar(int $idProtagonista, int $idCompetencia): void
     {
         $this->ejecutar(

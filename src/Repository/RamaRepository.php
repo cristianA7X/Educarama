@@ -1,19 +1,18 @@
-<?php
-// src/Repository/RamaRepository.php
-
+<?php // src/Repository/RamaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\Rama;
+use PDO;
 
-/**
- * Lectura de `rama`: las 4 ramas del programa (LyL, Scouts, Caminantes, Rovers).
- * Tabla estática: solo lectura.
- */
 final class RamaRepository extends RepositorioEstatico
 {
-    /** @return Rama[] Las 4 ramas, en orden (1 LyL … 4 Rovers). */
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function listarTodas(): array
     {
         return $this->listar('SELECT * FROM rama ORDER BY id', [], Rama::class);

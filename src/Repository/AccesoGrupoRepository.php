@@ -1,23 +1,19 @@
-<?php
-// src/Repository/AccesoGrupoRepository.php
-
+<?php // src/Repository/AccesoGrupoRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\AccesoGrupo;
 use Educarama\Repository\Vista\UsuarioConAcceso;
+use PDO;
 
-/**
- * Lectura y escritura de `acceso_grupo`: qué rol tiene un usuario sobre un grupo.
- * No tiene id propio: cada fila se identifica por id_usuario + id_grupo.
- *
- * Este repositorio solo guarda filas. Las reglas de permisos (quién puede dar
- * o cambiar un rol, y que el Jefe de grupo es Jefe de todas sus secciones sin
- * filas en acceso_seccion) las aplica el Service.
- */
 final class AccesoGrupoRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idUsuario, int $idGrupo): ?AccesoGrupo
     {
         return $this->buscarUno(
@@ -27,7 +23,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /** @return AccesoGrupo[] Los grupos a los que accede un usuario. */
     public function listarPorUsuario(int $idUsuario): array
     {
         return $this->listar(
@@ -37,7 +32,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /** @return AccesoGrupo[] Los usuarios con acceso a un grupo. */
     public function listarPorGrupo(int $idGrupo): array
     {
         return $this->listar(
@@ -47,12 +41,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Los usuarios con acceso al grupo, con nombre, email y rol, para la pantalla
-     * de gestión. Primero los de mayor rol, después por nombre.
-     *
-     * @return UsuarioConAcceso[]
-     */
     public function listarUsuariosPorGrupo(int $idGrupo): array
     {
         return $this->listar(
@@ -67,7 +55,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /** Da acceso a un usuario. Si ya tenía acceso a ese grupo, la base lanza una excepción (PK duplicada). */
     public function insertar(AccesoGrupo $acceso): void
     {
         $this->ejecutar(
@@ -76,7 +63,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /** Cambia el rol de un usuario que ya tiene acceso. */
     public function actualizar(AccesoGrupo $acceso): void
     {
         $this->ejecutar(
@@ -85,7 +71,6 @@ final class AccesoGrupoRepository extends RepositorioBase
         );
     }
 
-    /** Quita el acceso. */
     public function eliminar(int $idUsuario, int $idGrupo): void
     {
         $this->ejecutar('DELETE FROM acceso_grupo WHERE id_usuario = ? AND id_grupo = ?', [$idUsuario, $idGrupo]);

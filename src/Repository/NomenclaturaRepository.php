@@ -1,22 +1,18 @@
-<?php
-// src/Repository/NomenclaturaRepository.php
-
+<?php // src/Repository/NomenclaturaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\Nomenclatura;
+use PDO;
 
-/**
- * Lectura de `nomenclatura`: términos que cambian según la rama.
- * Claves cargadas: 'areas', 'competencias', 'pequenio_equipo'.
- * Tabla estática: solo lectura.
- *
- *   $repo->buscar('areas', 1)?->texto;          // 'Senderos'
- *   $repo->listarPorRama(4)['areas']->texto;    // 'Áreas de crecimiento'
- */
 final class NomenclaturaRepository extends RepositorioEstatico
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(string $clave, int $idRama): ?Nomenclatura
     {
         return $this->buscarUno(
@@ -26,11 +22,6 @@ final class NomenclaturaRepository extends RepositorioEstatico
         );
     }
 
-    /**
-     * Todos los términos de una rama, indexados por clave.
-     *
-     * @return array<string, Nomenclatura>
-     */
     public function listarPorRama(int $idRama): array
     {
         $lista = $this->listar(
@@ -38,8 +29,6 @@ final class NomenclaturaRepository extends RepositorioEstatico
             [$idRama],
             Nomenclatura::class,
         );
-
-        // array_column con null devuelve el objeto entero, usando 'clave' como índice.
         return array_column($lista, null, 'clave');
     }
 }

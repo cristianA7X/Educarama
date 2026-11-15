@@ -1,30 +1,23 @@
-<?php
-// src/Repository/CompetenciaRepository.php
-
+<?php // src/Repository/CompetenciaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\Competencia;
+use PDO;
 
-/**
- * Lectura de `competencia`: el catálogo oficial (186 competencias).
- * Tabla estática: solo lectura. Lo que eligió o desarrolló cada protagonista
- * está en `competencia_protagonista` y va en otro repositorio.
- */
 final class CompetenciaRepository extends RepositorioEstatico
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscarPorId(int $id): ?Competencia
     {
         return $this->buscarUno('SELECT * FROM competencia WHERE id = ?', [$id], Competencia::class);
     }
 
-    /**
-     * Todas las competencias de una rama, ordenadas por área y número
-     * (Rovers numera desde 1 dentro de cada área, por eso el área va primero).
-     *
-     * @return Competencia[]
-     */
     public function listarPorRama(int $idRama): array
     {
         return $this->listar(
@@ -34,7 +27,6 @@ final class CompetenciaRepository extends RepositorioEstatico
         );
     }
 
-    /** @return Competencia[] Ordenadas por número. */
     public function listarPorRamaYArea(int $idRama, int $idArea): array
     {
         return $this->listar(

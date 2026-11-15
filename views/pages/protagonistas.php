@@ -8,18 +8,17 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProtagonistaController;
 use Educarama\Helper\Vista;
 
-$controller = new ProtagonistaController();
 $esNomina = !isset($_GET['id_seccion']);
 
 if ($esNomina) {
     // ── Modo nómina general ──
-    $datos = Pagina::cargar(fn () => $controller->paginaNomina());
+    $datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaNomina());
     $nomina = $datos['nomina'];
 
     // Valores únicos para los filtros.
@@ -235,7 +234,7 @@ if ($esNomina) {
 }
 
 // ── Modo sección (cards + nómina) ──
-$datos = Pagina::cargar(fn () => $controller->paginaListado($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaListado($_GET));
 $seccion = $datos['seccion'];
 $protagonistas = $datos['protagonistas'];
 $patrullas = $datos['patrullas'];
