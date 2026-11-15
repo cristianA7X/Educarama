@@ -1,76 +1,115 @@
 <?php
 // views/pages/patrullas.php
-require_once __DIR__ . '/../../src/Controladores/AuthMiddleware.php';
-require_once __DIR__ . '/../../src/Controladores/PatrullaController.php';
-require_once __DIR__ . '/../../src/Helpers/RamaHelper.php';
+//
+// Listado de patrullas (seisenas/equipos) de una sección (?id_seccion=), con
+// sus integrantes y los protagonistas sin patrulla. Crear patrulla desde acá;
+// renombrar y eliminar desde el perfil de cada una.
 
-$tituloPagina = "Patrullas";
+declare(strict_types=1);
 
-$controlador = new PatrullaController();
-$patrullas = $controlador->listar();
+require_once __DIR__ . '/../../config/bootstrap.php';
+
+use Educarama\Controller\Pagina;
+use Educarama\Controller\PatrullaController;
+use Educarama\Helper\Csrf;
+use Educarama\Helper\Vista;
+
+$datos = Pagina::cargar(fn () => (new PatrullaController())->paginaListado($_GET));
+$seccion = $datos['seccion'];
+$patrullas = $datos['patrullas'];
+$integrantes = $datos['integrantes'];
+$sinPatrulla = $datos['sinPatrulla'];
+$equipo = $seccion->pequenioEquipo() ?? 'Patrulla';
+$equipoMin = mb_strtolower($equipo);
+
+$tituloPagina = $equipo . 's · ' . Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id);
+$claseRama = Vista::claseRama($seccion->rama->id);
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educarama - Patrullas</title>
+<section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+        <h1 class="fw-bold mb-1"><?= e($equipo) ?>s</h1>
+        <p class="mb-0">
+            <a class="text-reset" href="<?= e(url('views/pages/perfil_seccion.php?id=' . $seccion->seccion->id)) ?>"><?= e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) ?></a>
+            · <?= e($seccion->rama->titulo) ?>
+        </p>
+    </div>
+    <?php if ($seccion->puedeEditar()): ?>
+        <button type="button" class="boton-primario px-3 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrear">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Crear <?= e($equipoMin) ?>
+        </button>
+    <?php endif; ?>
+</section>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/Educarama/public/css/styles.css?v=1.5">
-</head>
-<body>
-    <?php
-    include __DIR__ . '/includes/barra_superior.php';
-    include __DIR__ . '/includes/menu_lateral.php';
-    ?>
+<?php if ($patrullas === [] && $sinPatrulla === []): ?>
+    <section class="tarjeta-blanca-borde p-4">
+        <p class="text-muted mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>No hay <?= e($equipoMin) ?>s ni protagonistas en esta sección.</p>
+    </section>
+<?php endif; ?>
 
-    <div class="main-content-wrapper">
-        <div class="container contenedor-principal p-4">
-
-            <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="fw-bold mb-1">Patrullas</h1>
-                    <p class="mb-0">Administrá las patrullas o equipos del grupo.</p>
-                </div>
-            </section>
-
-            <section class="row g-4">
-                <?php if (!empty($patrullas)): ?>
-                    <?php foreach ($patrullas as $patrulla): ?>
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <a href="/Educarama/views/pages/perfil_patrulla.php?id=<?= $patrulla['id'] ?>" class="patrulla-card text-decoration-none <?= claseRama($patrulla['id_categoria_rama'] ?? null) ?>">
-                                <div class="patrulla-icono">
-                                    <i class="bi bi-shield-shaded"></i>
-                                </div>
-                                <div>
-                                    <h3><?= htmlspecialchars($patrulla['nombre']) ?></h3>
-                                    <p>
-                                        <i class="bi bi-diagram-3 me-1"></i>
-                                        Rama: <?= htmlspecialchars($patrulla['rama'] ?? 'Sin rama') ?>
-                                    </p>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No hay patrullas cargadas. Crea una nueva patrulla.</p>
-                <?php endif; ?>
-            </section>
-
-            <section class="col-12 col-md-4 mt-4">
-                <a href="alta_patrulla.php" class="boton-primario w-100 py-3 fw-bold text-decoration-none text-center d-block">
-                    <i class="bi bi-person-gear me-2"></i> Crear nueva patrulla
+<?php foreach ($patrullas as $p): ?>
+    <?php $miembros = $integrantes[(int) $p->id] ?? []; ?>
+    <section class="tarjeta-blanca-borde p-4 mb-3 <?= e($claseRama) ?>">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h2 class="h5 texto-violeta fw-bold mb-0">
+                <a class="text-reset text-decoration-none" href="<?= e(url('views/pages/perfil_patrulla.php?id=' . $p->id)) ?>">
+                    <?= e($p->nombre) ?>
                 </a>
-            </section>
+                <span class="badge text-bg-secondary ms-1"><?= count($miembros) ?></span>
+            </h2>
+            <a class="btn btn-outline-secondary btn-sm" href="<?= e(url('views/pages/perfil_patrulla.php?id=' . $p->id)) ?>">
+                Ver <?= e($equipoMin) ?> <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
 
+        <?php if ($miembros === []): ?>
+            <p class="text-muted mb-0">Sin integrantes.</p>
+        <?php else: ?>
+            <div class="list-group">
+                <?php foreach ($miembros as $ficha): ?>
+                    <a class="list-group-item list-group-item-action" href="<?= e(url('views/pages/perfil_protagonista.php?id=' . $ficha->protagonista->id)) ?>">
+                        <?= e($ficha->persona->nombre . ' ' . $ficha->persona->apellido) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+<?php endforeach; ?>
+
+<?php if ($sinPatrulla !== []): ?>
+    <section class="tarjeta-blanca-borde p-4 mb-3">
+        <h2 class="h5 fw-bold mb-3 text-muted">Sin <?= e($equipoMin) ?></h2>
+        <div class="list-group">
+            <?php foreach ($sinPatrulla as $ficha): ?>
+                <a class="list-group-item list-group-item-action" href="<?= e(url('views/pages/perfil_protagonista.php?id=' . $ficha->protagonista->id)) ?>">
+                    <?= e($ficha->persona->nombre . ' ' . $ficha->persona->apellido) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+<?php endif; ?>
+
+<?php if ($seccion->puedeEditar()): ?>
+    <!-- Crear patrulla -->
+    <div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="tituloCrear" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" data-accion="patrulla.crear">
+                <?= Csrf::campo() ?>
+                <input type="hidden" name="id_seccion" value="<?= (int) $seccion->seccion->id ?>">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="tituloCrear">Crear <?= e($equipoMin) ?></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="nombrePatrulla" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombrePatrulla" name="nombre" maxlength="100" required placeholder="Ej.: <?= e($equipo) ?> Gris">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="boton-primario px-3 py-2 fw-bold">Crear</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <?php include __DIR__ . '/includes/barra_inferior.php'; ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php endif; ?>
+<?php require __DIR__ . '/../includes/pie.php'; ?>

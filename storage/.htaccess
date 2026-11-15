@@ -1,0 +1,9 @@
+# storage/.htaccess
+#
+# Archivos subidos por los usuarios (documentos de los protagonistas).
+# Nunca se abren por URL: los manda AlmacenArchivos::enviar() desde un
+# Controller, después de chequear permisos.
+#
+# Esto solo funciona en Apache (XAMPP). En otro servidor, poner ALMACEN_RUTA
+# fuera de la carpeta pública (ver config/config.php).
+Require all denied
