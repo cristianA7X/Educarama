@@ -67,8 +67,13 @@ Educarama/
 │   │   └── catalogo_competencias.sql   186 competencias + 848 acciones
 │   └── datos_ejemplo.sql        Datos de desarrollo (usuarios, grupos, progresión)
 ├── docs/
-│   └── explicacion-de-cambios.md
+│   ├── descripcion-tecnica.md   Cómo está hecho: carpetas, capas, datos, roles, seguridad
+│   ├── fundamentos-y-decisiones.md  Por qué está hecho así: cada decisión justificada
+│   ├── explicacion-de-cambios.md    Registro de cada cambio de arquitectura
+│   └── prompt-imagen-de-marca.md    Plan de alineación con la marca (hecho)
 ├── src/
+│   ├── main.php                 Composition Root: arma todos los objetos (v2.1)
+│   ├── Contenedor.php           Contenedor de dependencias (registrar / obtener)
 │   ├── Almacen/                 Componente genérico de archivos (no depende del proyecto)
 │   ├── Model/                   31 clases (una por tabla) + 5 enums en Enum/
 │   ├── Repository/              Consultas a la base; devuelven Models
@@ -87,11 +92,11 @@ Educarama/
 │   │   ├── educarama.js         Fetch declarativo, CSRF, SweetAlert2, pestañas
 │   │   ├── competencias.js      Pantalla de competencias del protagonista
 │   │   └── solicitud_alta.js    Formulario dinámico de solicitud
-│   └── fonts/ubuntu/            Fuente Ubuntu local (woff2)
+│   └── fonts/                   Ubuntu (woff2) y Ubuntu Condensed (TTF), locales
 ├── storage/                     Archivos subidos (gitignored)
 ├── views/
 │   ├── includes/                cabecera.php, pie.php, menu.php, error.php
-│   ├── pages/                   Una vista por pantalla (21 archivos)
+│   ├── pages/                   Una vista por pantalla (20 archivos)
 │   └── assets/images/           Logos, insignias, banderas de rama, íconos scouts
 └── _legacy/                     Código viejo (solo lectura, referencia para portar)
 ```
@@ -112,30 +117,22 @@ Educarama/
    cd C:/xampp/htdocs
    git clone <url-del-repo> Educarama
    cd Educarama
-   git checkout refactor/v2
+   git checkout refactor/v2.1
    ```
 
-2. Crear la base de datos e importar el esquema (desde phpMyAdmin o la terminal):
-   ```sql
-   CREATE DATABASE educarama_v2 CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish_ci;
-   ```
-   Importar en orden:
+2. Importar la base desde phpMyAdmin o la terminal. No hace falta crearla antes: `educarama.sql` crea `educarama_v2`. Importar en orden:
    1. `database/educarama.sql`
    2. `database/seeds/catalogo_competencias.sql`
    3. `database/datos_ejemplo.sql` *(solo para desarrollo)*
 
-3. Copiar la configuración local:
-   ```bash
-   cp config/config.local.php.example config/config.local.php
+3. Configuración local (solo si hace falta): si tu MySQL no es el de XAMPP por defecto (`root` sin contraseña), crear `config/config.local.php` con lo distinto:
+   ```php
+   <?php
+   define('DB_PASS', 'mi_contraseña');
    ```
-   Editar `config/config.local.php` con los datos de tu MySQL si difieren de los de XAMPP por defecto (`root` sin contraseña).
+   Ese archivo no se sube a git.
 
-4. Crear la carpeta de almacenamiento:
-   ```bash
-   mkdir -p storage/documentos
-   ```
-
-5. Iniciar Apache y MySQL desde el panel de XAMPP y entrar a:
+4. Iniciar Apache y MySQL desde el panel de XAMPP y entrar a:
    ```
    http://localhost/Educarama/
    ```

@@ -2,14 +2,16 @@
 -- EDUCARAMA — Esquema v2
 -- database/educarama.sql
 --
--- Fuente de verdad: claude/prompt-refactor-educarama.md (proyecto).
+-- Reglas y datos oficiales: CLAUDE.md (raíz del proyecto).
 -- Contiene: estructura completa + datos de las tablas estáticas chicas.
 -- Las tablas `competencia` y `accion` se cargan aparte con
--- database/seeds/generar_catalogo.php (lee los CSV de la planilla).
+-- database/seeds/catalogo_competencias.sql (generado desde la planilla del
+-- programa; el generador queda fuera del repo).
 --
 -- Orden de importación en phpMyAdmin:
 --   1. educarama.sql            (este archivo)
 --   2. database/seeds/catalogo_competencias.sql
+--   3. database/datos_ejemplo.sql   (opcional, solo desarrollo)
 --
 -- Convenciones:
 --   rama    = categoría del programa (LyL, Scouts, Caminantes, Rovers). Estática.

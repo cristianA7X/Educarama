@@ -2,7 +2,7 @@
 
 Plataforma web para que educadores de Scouts de Argentina sigan la progresión personal de los protagonistas. Proyecto universitario en equipo.
 
-Estamos en la rama `refactor/v2`, rehaciendo el proyecto de adentro hacia afuera. El código viejo está en `_legacy/`: se consulta para portar funcionalidad, **nunca se edita ni se incluye desde el código nuevo**.
+Estamos en la rama `refactor/v2.1` (la v2 más la inyección de dependencias con Composition Root), rehaciendo el proyecto de adentro hacia afuera. El código viejo está en `_legacy/`: se consulta para portar funcionalidad, **nunca se edita ni se incluye desde el código nuevo**.
 
 ## Cómo trabajar conmigo
 
@@ -27,8 +27,11 @@ Educarama/
 │                  bootstrap.php (autoload propio + url()), Database.php
 ├── database/      educarama.sql (base educarama_v2), seeds/catalogo_competencias.sql,
 │                  datos_ejemplo.sql (solo desarrollo: usuarios de prueba y progresión variada)
-├── docs/          explicacion-de-cambios.md, prompt-imagen-de-marca.md (plan de marca T1–T7, hecho)
+├── docs/          descripcion-tecnica.md, fundamentos-y-decisiones.md, explicacion-de-cambios.md,
+│                  prompt-imagen-de-marca.md (plan de marca T1–T7, hecho)
 ├── src/
+│   ├── main.php   Composition Root: registra en el contenedor PDO, Repositories, Services y Controllers
+│   ├── Contenedor.php  contenedor de dependencias (registrar / obtener, una instancia por pedido)
 │   ├── Almacen/   componente genérico de archivos subidos (no depende de nada del proyecto)
 │   ├── Model/     una clase por tabla + Enum/
 │   ├── Repository/  + Vista/ (clases vista de consultas con JOIN)
@@ -58,7 +61,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 ### Controllers y pedidos
 
-- **Páginas** (`views/pages/*.php`): solo GET, para mostrar. Empiezan con `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`. Sin sesión → login con `?volver=`; 403/404/500 → `views/includes/error.php`.
+- **Páginas** (`views/pages/*.php`): solo GET, para mostrar. Empiezan con `$app = require_once __DIR__ . '/../../src/main.php';` y `$datos = Pagina::cargar(fn () => $app->obtener(XController::class)->paginaY($_GET));`. Sin sesión → login con `?volver=`; 403/404/500 → `views/includes/error.php`.
 - **Todo lo que guarda va por fetch** a `public/api.php?accion=tema.metodo`, que solo acepta las acciones de su lista fija (método HTTP, Controller y método). Respuesta siempre JSON: `{ok, datos, mensaje?, redireccion?}` o `{ok: false, mensaje}`; si faltan requisitos salteables, `{ok: false, confirmar: true, avisos}` (409) y el JS repite con `confirmarIgual=1`.
 - Códigos (`Respuesta::desdeExcepcion`): sesión 401, `AccesoDenegado` 403, CSRF 403, pedido más grande que `post_max_size` 413 (lo detecta `Api` antes del CSRF), `NoEncontrado` 404, `RequisitosPendientes` 409, `ReglaNegocio` 422, cualquier otra 500 con mensaje genérico y el detalle a `error_log`. (No usar códigos raros como 419: Apache los cambia por 500.)
 - Un Controller recibe arrays (`$get`, `$post`, `$files`) y devuelve una `Respuesta` (página, JSON, redirect o archivo): no lee superglobales, no manda headers, no aplica reglas de negocio. Lee los datos con `texto()`, `entero()`, `booleano()` de `Controlador`. Se prueba por CLI.
@@ -80,9 +83,10 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
 
 - Carpetas en inglés, clases en castellano (`ProtagonistaRepository`).
 - Cada archivo empieza con `declare(strict_types=1);` y su `namespace`. Namespace = carpeta (`Educarama\Model` → `src/Model/`, `Educarama\Config` → `config/`). Nombre de clase = nombre de archivo, mayúsculas incluidas.
-- Autoload propio con `spl_autoload_register` en `config/bootstrap.php`. Cada página o controlador incluye solo `config/bootstrap.php`; nunca `require_once` de clases.
+- Autoload propio con `spl_autoload_register` en `config/bootstrap.php`. Cada página y cada punto de entrada de `public/` incluye solo `src/main.php` (que incluye `bootstrap.php` y devuelve el contenedor); nunca `require_once` de clases.
+- **Inyección de dependencias (v2.1):** cada clase recibe sus dependencias por constructor, obligatorias (`private readonly`); nunca `new` de un colaborador ni `?? new`. Repositories reciben `PDO`; Services, `PDO` + Repositories + Services; Controllers, `UsuarioService` + Services. Toda clase nueva se registra en `src/main.php`. El contenedor (`$app->obtener()`) solo se usa en las puertas de entrada (páginas, `api.php`, `descargar.php`), nunca dentro de una clase.
 - Links siempre con `url('views/pages/x.php')`; nunca `/Educarama/` escrito a mano.
-- Conexión: `Educarama\Config\Database::getConexion()` (PDO singleton, excepciones, FETCH_ASSOC, sin emulación de prepares).
+- Conexión: `Educarama\Config\Database::getConexion()` (PDO singleton, excepciones, FETCH_ASSOC, sin emulación de prepares). Solo la llama `src/main.php`.
 - Base: `snake_case`, singular, `utf8mb4_spanish_ci`. PK `id` propia en entidades; PK compuesta en tablas N:N y de progresión.
 
 ### Models (ya hechos: 31 + 5 enums en `src/Model/`)
@@ -243,7 +247,7 @@ Nunca un link directo a un archivo: la descarga pasa por un Controller que llama
   - **Contraste:** texto 4,5:1 y foco 3:1 (`--foco` violeta; sobre el header violeta, amarillo).
 - **Marcas oficiales = dato, no marca de la app.** Sí: insignias, logos de rama como identidad de sección, pictogramas oficiales, atribución en el pie. No: favicon, header, login ni pantallas de carga (ahí va solo `LogoBaseV4.png` de Educarama). Nunca teñidas, en grises ni con filtros, y siempre sobre fondo claro: un estado (pendiente, inactivo) se dice con un badge, no alterando la imagen. El pie aclara que es un proyecto académico sin vinculación oficial.
 - **Tres formas de mostrar una rama:** `Vista::logoRama()` (logo circular oficial, en las tarjetas de sección), `Vista::pictogramaRama()` (huella, rosa de los vientos, sol, cayado: en tablas y líneas de texto) y `Vista::iconoRama()` (Bootstrap, último respaldo). Las áreas usan `Vista::iconoAreaOficial()` y los conceptos sueltos `Vista::iconoOficial($slug)` (clase `.icono-oficial`, `alt=""` si el texto de al lado ya lo dice). Todo método que devuelve null cae en el ícono de Bootstrap. El menú lateral sigue con íconos de Bootstrap.
-- **Cada página** hace: `require_once` de `config/bootstrap.php`, `$datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));`, define `$tituloPagina` (y opcionalmente `$claseRama`, `$sinMenu`, `$contenedorAngosto`, `$scriptsPagina`) y envuelve su contenido con `views/includes/cabecera.php` y `pie.php`. La cabecera pide el menú (`MenuController`) antes de imprimir nada y muestra los mensajes Flash. Login, registro y la página de error van con `$sinMenu = true`.
+- **Cada página** hace: `$app = require_once` de `src/main.php`, `$datos = Pagina::cargar(fn () => $app->obtener(XController::class)->paginaY($_GET));`, define `$tituloPagina` (y opcionalmente `$claseRama`, `$sinMenu`, `$contenedorAngosto`, `$scriptsPagina`) y envuelve su contenido con `views/includes/cabecera.php` y `pie.php`. La cabecera pide el menú (`MenuController`) antes de imprimir nada y muestra los mensajes Flash. Login, registro y la página de error van con `$sinMenu = true`.
 - **Todo dato impreso con `e()`** (escapa HTML; vive en `config/bootstrap.php`). Links con `url()`. Fechas con `Vista::fecha()` / `Vista::periodo()`. Fechas lejanas (nacimiento) se cargan con `Vista::campoFecha()`: tres listas día/mes/año, sin el calendario del navegador (su botón "Hoy" se confundía con enviar).
 - **Menú lateral = drawer** (un offcanvas de Bootstrap). Desde 992 px está a la vista, empuja el contenido y se oculta con el botón de la barra superior (se recuerda en `localStorage`); por debajo es un cajón que se abre encima del contenido, con fondo oscuro. Es **contextual**: por cada grupo del usuario, sus links y sus secciones con los links que su rol permite (un link que no puede usar no se muestra); al final Mi cuenta, Solicitar alta, Solicitudes (admin) y Cerrar sesión.
 - **JavaScript:** `public/js/educarama.js` hace los pedidos a `api.php` (token CSRF, flujo del 409 con `confirmarIgual`, redirecciones, error genérico) y conecta formularios y botones declarados con `data-accion`, `data-datos`, `data-confirmar`, `data-texto`, `data-boton`, `data-peligro`, `data-reiniciar`, `data-recargar`: la mayoría de las páginas no necesita JS propio. Las pantallas complejas tienen su archivo en `public/js/` (se declara con `$scriptsPagina`). Sin SweetAlert2 (sin internet) usa los cuadros nativos.
@@ -288,3 +292,4 @@ Hoy las dos tablas de `protagonistas.php` (nómina general `#tablaNomina` y de s
 4. ~~Controllers~~ ✅
 5. ~~Views~~ ✅ (todas las pantallas), con la alineación con la imagen de marca (T1–T7 de `docs/prompt-imagen-de-marca.md`) ✅
 6. Pruebas en el navegador y correcciones (en curso).
+7. ~~v2.1: inyección de dependencias con Composition Root (`src/main.php`)~~ ✅. Quedan los errores de la revisión del 15/11/2026: lista en `docs/explicacion-de-cambios.md` (sección "Revisión de la v2.1").

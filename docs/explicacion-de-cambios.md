@@ -1715,3 +1715,53 @@ Con imagen, el círculo (`.insignia-icono.con-imagen`) es solo un marco blanco, 
 - El JS deshabilita los días que no existen en el mes elegido y marca la lista como inválida con `setCustomValidity` si la fecha está incompleta, no existe (31 de febrero) o es futura. Mientras sea inválida, el navegador no deja enviar el formulario.
 - Los tres vacíos significa "sin fecha", porque el campo es opcional.
 - En pantallas muy angostas (320 px) el año pasa a una segunda línea.
+
+---
+
+## v2.1: Composition Root e inyección de dependencias
+
+Rama `refactor/v2.1` (commit `faed181`, "refactor del backend"). Esta sección reemplaza a `refactor-v2.1.txt`, la nota original del cambio, que se volcó acá y se borró.
+
+**Qué cambió.**
+
+- **`src/Contenedor.php`**, nuevo: un contenedor de dependencias con dos métodos. `registrar($clase, $fabrica)` guarda cómo se crea una clase, y `obtener($clase)` la crea la primera vez y después devuelve siempre la misma durante el pedido.
+- **`src/main.php`**, nuevo: el *Composition Root*. Incluye `config/bootstrap.php`, registra 55 fábricas (la conexión PDO, 31 repositorios, 11 servicios y 12 controladores) y devuelve el contenedor.
+- **Constructores:** se eliminaron todos los `?? new` y los parámetros opcionales.
+  - Los repositorios reciben el `PDO` (ya no llaman a `Database::getConexion()`).
+  - Los Services reciben el `PDO` y sus colaboradores como `private readonly`.
+  - Los Controllers reciben el `UsuarioService` (lo pide la base `Controlador`) y sus Services.
+  - `Api` recibe la lista de acciones, el contenedor y un `AlmacenArchivos`.
+- **Puntos de entrada:**
+  - Las páginas empiezan con `$app = require_once __DIR__ . '/../../src/main.php';` y piden el Controller con `$app->obtener(XController::class)`.
+  - `public/api.php` le pasa el contenedor a `Api`, que resuelve el Controller de cada acción con `obtener()`.
+  - `public/descargar.php` pide `DocumentoController` al contenedor y emite la respuesta directamente.
+  - La cabecera y el menú usan el mismo `$app` para pedir `MenuController`.
+
+**Por qué.** En la v2 cada clase podía crear sus dependencias, y así quedaban ocultas: un mismo pedido creaba varias copias de `PermisoService` y de los repositorios, y la conexión compartida dependía del *singleton* de `Database`. Ahora las dependencias se ven en el constructor, hay una sola instancia de cada clase por pedido y un solo lugar donde se arma todo. La justificación completa está en `docs/fundamentos-y-decisiones.md`, decisión 2.9.
+
+**Cómo funciona.** Cuando una página pide `$app->obtener(ProtagonistaController::class)`, el contenedor ejecuta la fábrica registrada. Esa fábrica pide a su vez `ProtagonistaService`, que pide `PermisoService`, los repositorios y el `PDO`. Cada uno se crea una sola vez y se reutiliza. Como todos reciben el mismo `PDO`, una transacción abierta por un Service sigue abarcando a todos los repositorios.
+
+**Para sumar una clase:** crear el archivo (el autoload la encuentra) y **registrarla en `src/main.php`**. Si no se registra, `obtener()` lanza "Dependencia no registrada".
+
+**Qué no cambió.** Se comparó el código de la v2 y de la v2.1 sin comentarios ni espacios (`php -w`). La lógica de los Repositories, los Services y los Controllers es la misma: solo cambiaron los constructores. Los Models, el almacén, los Helpers, el JavaScript, el CSS y la base de datos no se tocaron. `datos_ejemplo.sql` sigue sirviendo igual.
+
+### Revisión de la v2.1 (15/11/2026)
+
+Se probó por HTTP con los datos de ejemplo, como Jefe del grupo 1:
+- Todas las pantallas principales responden bien: inicio, grupo, sección, nóminas, perfil, competencias, etapas, eventos de grupo, patrullas, secciones y Mi cuenta.
+- La API responde bien: el login, el 403 sin token, el 404 de una acción inexistente y el 409 por cupo.
+
+Quedan estos problemas para corregir:
+
+1. **`views/pages/accesos.php` perdió su HTML.** Quedaron los comentarios `<!-- Resto de tu HTML se mantiene igual -->` y `<!-- ... -->` en lugar de la tabla de roles y el formulario para agregar. La página pasó de 186 a 38 líneas y muestra solo el título.
+2. **`views/pages/eventos.php` perdió el modo general** (sin parámetros): quedó `<!-- ... tu HTML de modo general ... -->`. El link "Eventos" del menú muestra una página vacía. Los modos por grupo y por sección funcionan.
+3. **Bloque de depuración activo en `Pagina::cargar()`** ("TRUCO DE DEPURACIÓN TEMPORAL"):
+   - Ante cualquier excepción, incluso un 403 o un 404 normales, imprime el mensaje, el archivo, la línea y la pila de llamadas.
+   - Como imprime antes de los headers, `headers_sent()` da verdadero y la página de error nunca se muestra.
+   - Revela rutas del disco, que CLAUDE.md prohíbe mostrar. Además usa el violeta viejo `#791fbf` escrito a mano.
+4. **`public/descargar.php` ya no pasa por `Pagina::cargar()`.** Las excepciones no se atrapan: sin sesión, sin permiso o con un id inexistente se ve un *Fatal error* de PHP con rutas y pila, en lugar de ir al login o mostrar el 404.
+5. **Menú lateral:**
+   - Se perdieron el link "Eventos grupales" y el nombre completo del grupo (`Vista::nombreCompletoGrupo`).
+   - El link activo ya no lleva `aria-current="page"`.
+   - `menu.php` vuelve a pedir `MenuController` aunque la cabecera ya lo hizo, así que hay dos consultas por página.
+6. **Comentarios.** Se borraron casi todos los docblocks de `src/`, que explicaban las reglas de cada clase y método. CLAUDE.md pide código bien comentado, en castellano. Además, 13 páginas más tienen el comentario sobrante `<!-- Resto de tu HTML se mantiene igual -->` (en ellas el HTML sí está).
