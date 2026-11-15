@@ -1,22 +1,18 @@
-<?php
-// src/Repository/EtapaLogradaRepository.php
-
+<?php // src/Repository/EtapaLogradaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\EtapaLograda;
+use PDO;
 
-/**
- * Lectura y escritura de `etapa_lograda`: las etapas que un protagonista logró.
- * La etapa actual es la última lograda (ver buscarActual).
- *
- * Tabla de progresión: sin fila = no lograda. La fila la crea un educador al confirmar
- * que la etapa se completó. No tiene relación con la insignia: esa se registra aparte.
- * Sin id propio: cada fila se identifica por id_protagonista + id_etapa.
- */
 final class EtapaLogradaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idEtapa): ?EtapaLograda
     {
         return $this->buscarUno(
@@ -26,15 +22,8 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Todas las etapas logradas, de todas las ramas por las que pasó el protagonista,
-     * ordenadas por rama y número (su historial).
-     *
-     * @return EtapaLograda[]
-     */
     public function listarPorProtagonista(int $idProtagonista): array
     {
-        // El JOIN es solo para ordenar: se devuelven únicamente las columnas de etapa_lograda.
         return $this->listar(
             'SELECT el.*
                FROM etapa_lograda el
@@ -46,14 +35,6 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * La etapa actual: la de mayor número lograda DENTRO de la rama indicada
-     * (la de la sección actual del protagonista). Null si todavía no logró ninguna.
-     *
-     * Se ordena por número de etapa y no por fecha, porque la fecha puede
-     * cargarse hacia atrás. Y se filtra por rama porque, si pasó de Scouts a
-     * Caminantes, sus etapas de Scouts siguen guardadas.
-     */
     public function buscarActual(int $idProtagonista, int $idRama): ?EtapaLograda
     {
         return $this->buscarUno(
@@ -68,7 +49,6 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /** Registra que el protagonista logró la etapa, en la fecha que trae el objeto. */
     public function insertar(EtapaLograda $etapaLograda): void
     {
         $this->ejecutar(
@@ -78,7 +58,6 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /** Cambia el elemento (solo Caminantes) y la fecha. */
     public function actualizar(EtapaLograda $etapaLograda): void
     {
         $this->ejecutar(
@@ -89,7 +68,6 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /** Borra la fila: la etapa vuelve a quedar como no lograda. La insignia otorgada NO se borra sola. */
     public function eliminar(int $idProtagonista, int $idEtapa): void
     {
         $this->ejecutar(
@@ -98,13 +76,12 @@ final class EtapaLogradaRepository extends RepositorioBase
         );
     }
 
-    /** @return array<string, mixed> */
     private function parametros(EtapaLograda $etapaLograda): array
     {
         return [
             'id_protagonista' => $etapaLograda->idProtagonista,
             'id_etapa'        => $etapaLograda->idEtapa,
-            'elemento'        => $etapaLograda->elemento?->value,  // enum → texto, o null
+            'elemento'        => $etapaLograda->elemento?->value,
             'fecha'           => $etapaLograda->fecha,
         ];
     }

@@ -13,11 +13,11 @@ use Educarama\Service\Excepcion\SesionRequeridaException;
  *
  * Cada página empieza así:
  *
- *   require_once __DIR__ . '/../../config/bootstrap.php';
+ *   $app = require_once __DIR__ . '/../../src/main.php';
  *   use Educarama\Controller\Pagina;
  *   use Educarama\Controller\UsuarioController;
  *
- *   $datos = Pagina::cargar(fn () => (new UsuarioController())->paginaMiCuenta($_GET));
+ *   $datos = Pagina::cargar(fn () => $app->obtener(UsuarioController::class)->paginaMiCuenta($_GET));
  *   // ... y el HTML usa $datos['usuario'], etc.
  *
  * Qué hace cargar():
@@ -55,6 +55,17 @@ final class Pagina
         } catch (SesionRequeridaException) {
             self::alLogin()->emitir();
         } catch (\Throwable $e) {
+            // ── TRUCO DE DEPUGRACIÓN TEMPORAL ──
+            // Esto imprime el error real en pantalla para saber qué falló.
+            echo '<div style="background:#791fbf; color:white; padding:20px; margin:20px; border-radius:10px; z-index:999999; position:relative; font-family:monospace; box-shadow:0 5px 20px rgba(0,0,0,0.5);">';
+            echo '<h3 style="color:#fdd617; margin-top:0;">⚠️ ERROR DETECTADO EN EL CONTROLADOR:</h3>';
+            echo '<p><b>Mensaje:</b> ' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '<p><b>Archivo:</b> ' . htmlspecialchars($e->getFile()) . ' en la línea <b>' . $e->getLine() . '</b></p>';
+            echo '<details><summary style="cursor:pointer; font-weight:bold; margin-bottom:10px;">Ver pila de llamadas (Trace)</summary>';
+            echo '<pre style="background:rgba(0,0,0,0.3); padding:10px; overflow:auto; max-height:200px;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+            echo '</details>';
+            echo '</div>';
+
             $error = Respuesta::desdeExcepcion($e);
             if (headers_sent()) {
                 // Ya salió parte de la respuesta (ej. un archivo a medias): no se puede mostrar otra página.

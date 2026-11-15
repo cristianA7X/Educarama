@@ -1,23 +1,20 @@
 <?php
 // views/pages/protagonista_form.php
-//
-// Alta de un protagonista (?id_seccion=) o edición de sus datos (?id=).
-// El DNI solo se edita en el alta; en edición se muestra como solo lectura.
-// La patrulla se ofrece en un select si la rama tiene pequeño equipo.
-
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProtagonistaController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new ProtagonistaController())->paginaFormulario($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaFormulario($_GET));
+
 $seccion = $datos['seccion'];
 $ficha = $datos['ficha'];
 $esEdicion = $ficha !== null;
+
 $persona = $ficha?->persona;
 $protagonista = $ficha?->protagonista;
 $equipo = $seccion->pequenioEquipo();
@@ -27,8 +24,10 @@ $tituloPagina = $esEdicion
     : 'Nuevo protagonista';
 $claseRama = Vista::claseRama($seccion->rama->id);
 $contenedorAngosto = true;
-require __DIR__ . '/../includes/cabecera.php';
+
+require_once __DIR__ . '/../includes/cabecera.php';
 ?>
+<!-- Resto de tu HTML se mantiene igual -->
 <div class="barra-superior-inst mb-4">
     <h1 class="h3 fw-bold mb-1"><?= $esEdicion ? 'Editar datos' : 'Nuevo protagonista' ?></h1>
     <p class="mb-0">

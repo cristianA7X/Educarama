@@ -1,31 +1,29 @@
 <?php
 // views/pages/patrullas.php
-//
-// Listado de patrullas (seisenas/equipos) de una sección (?id_seccion=), con
-// sus integrantes y los protagonistas sin patrulla. Crear patrulla desde acá;
-// renombrar y eliminar desde el perfil de cada una.
-
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\PatrullaController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new PatrullaController())->paginaListado($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(PatrullaController::class)->paginaListado($_GET));
+
 $seccion = $datos['seccion'];
 $patrullas = $datos['patrullas'];
 $integrantes = $datos['integrantes'];
 $sinPatrulla = $datos['sinPatrulla'];
+
 $equipo = $seccion->pequenioEquipo() ?? 'Patrulla';
 $equipoMin = mb_strtolower($equipo);
-
 $tituloPagina = $equipo . 's · ' . Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id);
 $claseRama = Vista::claseRama($seccion->rama->id);
-require __DIR__ . '/../includes/cabecera.php';
+
+require_once __DIR__ . '/../includes/cabecera.php';
 ?>
+<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start flex-wrap gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e($equipo) ?>s</h1>

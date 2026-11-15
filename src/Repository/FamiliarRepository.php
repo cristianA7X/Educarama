@@ -1,85 +1,14 @@
-<?php
-// src/Repository/FamiliarRepository.php
-
+<?php // src/Repository/FamiliarRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\Familiar;
 use Educarama\Repository\Vista\FichaFamiliar;
+use PDO;
 
-/**
- * Lectura y escritura de `familiar`: los adultos responsables de los protagonistas.
- * Sus datos personales están en `persona` (PersonaRepository, con $familiar->idPersona).
- * El vínculo con cada protagonista (madre, tío...) está en `es_familia` (EsFamiliaRepository).
- */
 final class FamiliarRepository extends RepositorioBase
 {
-    public function buscarPorId(int $id): ?Familiar
-    {
-        return $this->buscarUno('SELECT * FROM familiar WHERE id = ?', [$id], Familiar::class);
-    }
-
-    /**
-     * El familiar asociado a una persona, o null si esa persona no es familiar de nadie.
-     * Sirve al cargar un familiar cuyo DNI ya existe: se reutiliza en vez de duplicarlo.
-     */
-    public function buscarPorPersona(int $idPersona): ?Familiar
-    {
-        return $this->buscarUno('SELECT * FROM familiar WHERE id_persona = ?', [$idPersona], Familiar::class);
-    }
-
-    /**
-     * Los familiares de un protagonista. El vínculo y si es contacto de emergencia
-     * se piden a EsFamiliaRepository::listarPorProtagonista().
-     *
-     * @return Familiar[] Primero los contactos de emergencia.
-     */
-    public function listarPorProtagonista(int $idProtagonista): array
-    {
-        // El JOIN es solo para filtrar y ordenar: se devuelven únicamente las columnas de familiar.
-        return $this->listar(
-            'SELECT f.*
-               FROM familiar f
-               JOIN es_familia ef ON ef.id_familiar = f.id
-              WHERE ef.id_protagonista = ?
-              ORDER BY ef.es_contacto_de_emergencia DESC, f.id',
-            [$idProtagonista],
-            Familiar::class,
-        );
-    }
-
-    // -----------------------------------------------------------------
-    // Fichas (clase vista: familiar + persona + vínculo con un protagonista)
-    // -----------------------------------------------------------------
-
-    /**
-     * Los familiares de un protagonista con sus datos personales y su vínculo,
-     * en una sola consulta. Primero los contactos de emergencia, después por apellido.
-     *
-     * @return FichaFamiliar[]
-     */
-    public function listarFichasPorProtagonista(int $idProtagonista): array
-    {
-        return $this->listar(
-            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ?
-              ORDER BY ef.es_contacto_de_emergencia DESC, per.apellido, per.nombre',
-            [$idProtagonista],
-            FichaFamiliar::class,
-        );
-    }
-
-    /** La ficha de un familiar vinculado a ese protagonista, o null si no están vinculados. */
-    public function buscarFicha(int $idProtagonista, int $idFamiliar): ?FichaFamiliar
-    {
-        return $this->buscarUno(
-            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ? AND f.id = ?',
-            [$idProtagonista, $idFamiliar],
-            FichaFamiliar::class,
-        );
-    }
-
-    /** Parte común de las consultas de fichas (ver FichaFamiliar::desdeFila). */
     private const SELECT_FICHA =
         'SELECT f.*,
                 per.dni                       AS persona_dni,
@@ -93,7 +22,53 @@ final class FamiliarRepository extends RepositorioBase
            JOIN persona per    ON per.id = f.id_persona
            JOIN es_familia ef  ON ef.id_familiar = f.id';
 
-    /** Guarda un familiar nuevo, le completa el id y lo devuelve. La persona tiene que existir antes. */
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
+    public function buscarPorId(int $id): ?Familiar
+    {
+        return $this->buscarUno('SELECT * FROM familiar WHERE id = ?', [$id], Familiar::class);
+    }
+
+    public function buscarPorPersona(int $idPersona): ?Familiar
+    {
+        return $this->buscarUno('SELECT * FROM familiar WHERE id_persona = ?', [$idPersona], Familiar::class);
+    }
+
+    public function listarPorProtagonista(int $idProtagonista): array
+    {
+        return $this->listar(
+            'SELECT f.*
+               FROM familiar f
+               JOIN es_familia ef ON ef.id_familiar = f.id
+              WHERE ef.id_protagonista = ?
+              ORDER BY ef.es_contacto_de_emergencia DESC, f.id',
+            [$idProtagonista],
+            Familiar::class,
+        );
+    }
+
+    public function listarFichasPorProtagonista(int $idProtagonista): array
+    {
+        return $this->listar(
+            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ?
+              ORDER BY ef.es_contacto_de_emergencia DESC, per.apellido, per.nombre',
+            [$idProtagonista],
+            FichaFamiliar::class,
+        );
+    }
+
+    public function buscarFicha(int $idProtagonista, int $idFamiliar): ?FichaFamiliar
+    {
+        return $this->buscarUno(
+            self::SELECT_FICHA . ' WHERE ef.id_protagonista = ? AND f.id = ?',
+            [$idProtagonista, $idFamiliar],
+            FichaFamiliar::class,
+        );
+    }
+
     public function insertar(Familiar $familiar): int
     {
         $familiar->id = $this->insertarFila(
@@ -101,7 +76,6 @@ final class FamiliarRepository extends RepositorioBase
              VALUES (:id_persona, :telefono_contacto, :email_contacto)',
             $this->parametros($familiar),
         );
-
         return $familiar->id;
     }
 
@@ -115,16 +89,11 @@ final class FamiliarRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Borra el familiar y, en cascada (lo hace la base), sus vínculos en `es_familia`.
-     * Su fila en `persona` NO se borra: puede ser además protagonista.
-     */
     public function eliminar(int $id): void
     {
         $this->ejecutar('DELETE FROM familiar WHERE id = ?', [$id]);
     }
 
-    /** @return array<string, mixed> */
     private function parametros(Familiar $familiar): array
     {
         return [

@@ -1,0 +1,85 @@
+================================================================================
+
+EDUCARAMA v2 - DOCUMENTACIÓN DE REFACTORIZACIÓN DEL BACKEND
+
+Composition Root (`src/main.php`) e Inyección de Dependencias
+
+================================================================================
+
+
+
+1. ALCANCE DE LA REFACTORIZACIÓN REALIZADA
+
+--------------------------------------------------------------------------------
+
+Se llevó a cabo una reestructuración completa del backend del proyecto para transicionar 
+
+hacia una arquitectura limpia con un Composition Root centralizado (inspirado en el 
+
+patrón de `Program.cs` en .NET). 
+
+
+
+Los principales cambios implementados son:
+
+
+
+- **Centralización en `src/main.php`:** Se creó el Composition Root que centraliza la 
+
+  inicialización de la base de datos (`PDO`), el registro de todos los repositorios 
+
+  (capa de datos), servicios (casos de uso/reglas de negocio) y controladores en un 
+
+  contenedor de dependencias limpio.
+
+- **Limpieza de Constructores en Controladores (`src/Controller/`):** Se eliminaron 
+
+  todos los fallbacks y parámetros opcionales con `?? new`. Los controladores ahora 
+
+  exigen estrictamente sus dependencias por constructor y heredan de la clase base 
+
+  `Controlador.php` pasando el `UsuarioService`. El despachador `Api.php` fue adaptado 
+
+  para resolver las clases directamente a través del contenedor de inyección.
+
+- **Limpieza de Constructores en Servicios (`src/Service/`):** Se eliminaron los 
+
+  valores por defecto con `?? new` en los constructores de la capa de negocio. Todas 
+
+  las clases heredan de `ServicioBase.php` exigiendo de forma obligatoria la instancia 
+
+  de `PDO` y sus dependencias colaboradoras.
+
+- **Limpieza de Constructores en Repositorios (`src/Repository/`):** Se refactorizaron 
+
+  todos los repositorios (tanto dinámicos como estáticos) heredando de `RepositorioBase.php` 
+
+  y eliminando la llamada estática implícita a `Database::getConexion()`. Ahora reciben 
+
+  la conexión `PDO` inyectada desde el contenedor de forma explícita.
+
+
+  -----------------------------------------------------------------------------------------
+
+  Integración del Front-End y Vistas con el Contenedor DI (v2)
+Se completó la migración de la capa de presentación y puntos de entrada públicos para que consuman la Inyección de Dependencias centralizada (src/main.php), eliminando las instanciaciones manuales o implícitas de controladores.
+
+Puntos de Entrada Públicos (public/):
+
+public/index.php: Requerido limpio para inicializar el bootstrap y redirigir con un código 302 a views/pages/inicio.php.
+
+public/descargar.php: Actualizado para requerir src/main.php, obteniendo la instancia de DocumentoController mediante el contenedor e invocando la emisión del archivo binario de forma segura.
+
+public/api.php: Configurado para recibir el contenedor $contenedor desde main.php y pasarlo al constructor de la clase Api junto a una instancia de AlmacenArchivos.
+
+Adaptación de Vistas (views/pages/*.php):
+
+Se reemplazó en los bloques PHP superiores de los 23 archivos de vistas (como inicio.php, protagonistas.php, eventos.php, etc.) el viejo bootstrap.php por la llamada al Composition Root:$app = require_once __DIR__ . '/../../src/main.php';
+
+Se actualizó la función Pagina::cargar() para que resuelva los controladores de forma dinámica mediante la factoría del contenedor:$app->obtener(Controlador::class)->metodo(...)
+
+Los componentes reutilizables como el menú lateral (views/includes/menu.php) heredan y consumen el objeto $app ya disponible en el ámbito de la página principal que los incluye.
+
+Comunicación Asíncrona (AJAX / Fetch):
+
+El script global public/js/educarama.js mantiene el puente con public/api.php, empaquetando datos por FormData e inyectando las cabeceras CSRF y de sesión necesarias para procesar las acciones de negocio y recargar las interfaces de manera reactiva con data-recargar.
