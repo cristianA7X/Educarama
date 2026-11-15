@@ -8,3 +8,6 @@
 # Se versiona solo el .htaccess que bloquea el acceso por URL.
 /storage/*
 !/storage/.htaccess
+
+# Instrucciones locales para Claude Code: no van al repositorio.
+/CLAUDE.md
