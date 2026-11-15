@@ -1,5 +1,14 @@
 <?php
 // views/pages/progresion.php
+//
+// "Etapas e insignias" de un protagonista (el submenú propio que pide CLAUDE.md):
+//  - Etapas de la rama: las logradas (fecha y, en Caminantes, elemento; la
+//    última se puede quitar, solo Jefe), la en curso con sus tareas tildables y
+//    "Confirmar etapa" (con fecha y elemento), y las que vienen.
+//  - Insignias de la rama y generales: entregadas con su fecha, o para registrar la entrega.
+//  - Especialidades (solo LyL y Scouts): las suyas arriba y el resto para empezar.
+// Cada acción se guarda por fetch y recarga la página (data-recargar).
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -12,7 +21,6 @@ use Educarama\Model\Enum\Elemento;
 use Educarama\Model\Enum\EstadoProgresion;
 
 $datos = Pagina::cargar(fn () => $app->obtener(ProgresionController::class)->paginaEtapas($_GET));
-
 $ficha = $datos['ficha'];
 $pantalla = $datos['pantalla'];
 $resumen = $pantalla->resumen;
@@ -21,14 +29,13 @@ $nombre = $ficha->persona->nombre . ' ' . $ficha->persona->apellido;
 $hoy = date('Y-m-d');
 $editable = $pantalla->puedeEditar;
 
+/** data-datos de un botón: siempre con el protagonista. */
 $datosBoton = static fn (array $extra): string => e(json_encode(['id_protagonista' => $id] + $extra));
 
 $tituloPagina = 'Etapas e insignias de ' . $nombre;
 $claseRama = Vista::claseRama($resumen->rama->id);
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e($nombre) ?></h1>

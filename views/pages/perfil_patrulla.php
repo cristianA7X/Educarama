@@ -1,5 +1,10 @@
 <?php
 // views/pages/perfil_patrulla.php
+//
+// Perfil de una patrulla/seisena/equipo (?id=): nombre (renombrable), sus
+// integrantes (quitar desde acá), agregar integrantes de la sección y eliminar
+// la patrulla (solo Jefe).
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -10,22 +15,18 @@ use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => $app->obtener(PatrullaController::class)->paginaPerfil($_GET));
-
 $patrulla = $datos['patrulla'];
 $seccion = $datos['seccion'];
 $integrantes = $datos['integrantes'];
 $candidatos = $datos['candidatos'];
-
 $equipo = $seccion->pequenioEquipo() ?? 'Patrulla';
 $equipoMin = mb_strtolower($equipo);
 $idPatrulla = (int) $patrulla->id;
 
 $tituloPagina = $patrulla->nombre;
 $claseRama = Vista::claseRama($seccion->rama->id);
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start flex-wrap gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e($patrulla->nombre) ?></h1>

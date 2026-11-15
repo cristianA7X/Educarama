@@ -1,34 +1,38 @@
 <?php
-// views/pages/evento_form.php
+// views/pages/familiar_form.php
+//
+// Alta de un familiar (?id_protagonista=) o edición (?id_protagonista=&id_familiar=).
+// Siempre se accede desde el perfil de un protagonista.
+// Si el familiar está vinculado a más de un protagonista, se avisa que los cambios
+// de datos se ven en todos.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
 
+use Educarama\Controller\FamiliarController;
 use Educarama\Controller\Pagina;
-use Educarama\Controller\EventoController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
-use Educarama\Model\Enum\Prioridad;
 
-$datos = Pagina::cargar(fn () => $app->obtener(EventoController::class)->paginaFormulario($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(FamiliarController::class)->paginaFormulario($_GET));
+$seccion = $datos['seccion'];
+$prot = $datos['protagonista'];
+$ficha = $datos['familiar'];
+$esEdicion = $ficha !== null;
+$persona = $ficha?->persona;
+$familiar = $ficha?->familiar;
+$vinculo = $ficha?->vinculo;
+$idProtagonista = (int) $prot->protagonista->id;
+$nombreProt = $prot->persona->nombre . ' ' . $prot->persona->apellido;
 
-$opciones = $datos['opciones'];
-$eventoConSec = $datos['evento'];
-$esEdicion = $eventoConSec !== null;
-$evento = $eventoConSec?->evento;
-$idSecciones = $eventoConSec?->idSecciones ?? [];
-$grupo = $opciones->grupo;
-
-$alcanceActual = $esEdicion
-    ? ($eventoConSec->esDeTodoElGrupo() ? 'grupo' : 'secciones')
-    : ($opciones->puedeTodoElGrupo ? 'grupo' : 'secciones');
-
-$tituloPagina = $esEdicion ? 'Editar evento' : 'Nuevo evento';
+$tituloPagina = $esEdicion
+    ? 'Editar familiar de ' . $nombreProt
+    : 'Agregar familiar a ' . $nombreProt;
+$claseRama = Vista::claseRama($seccion->rama->id);
 $contenedorAngosto = true;
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <div class="barra-superior-inst mb-4">
     <h1 class="h3 fw-bold mb-1"><?= $esEdicion ? 'Editar familiar' : 'Agregar familiar' ?></h1>
     <p class="mb-0">

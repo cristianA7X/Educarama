@@ -1,5 +1,11 @@
 <?php
 // views/pages/solicitud_alta.php
+//
+// Pedir el alta de un grupo nuevo. Un administrador la revisa: si la aprueba se
+// crean el grupo y sus secciones, y quien la envió queda como Jefe del grupo.
+// Abajo, las solicitudes que ya envió (con el motivo si se rechazó alguna).
+// Con una pendiente no se puede enviar otra, así que el formulario se oculta.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -14,15 +20,14 @@ $datos = Pagina::cargar(fn () => $app->obtener(SolicitudAltaController::class)->
 
 $tituloPagina = 'Solicitar el alta de un grupo';
 $scriptsPagina = ['public/js/solicitud_alta.js'];
+require __DIR__ . '/../includes/cabecera.php';
 
-require_once __DIR__ . '/../includes/cabecera.php';
-
+/** Los <option> del select de ramas (se usa en la fila de ejemplo y en el template). */
 $opcionesRamas = '<option value="">Elegí la rama…</option>';
 foreach ($datos['ramas'] as $rama) {
     $opcionesRamas .= '<option value="' . (int) $rama->id . '">' . e($rama->titulo) . '</option>';
 }
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <div class="barra-superior-inst mb-4">
     <h1 class="h3 fw-bold mb-1">Solicitar el alta de un grupo</h1>
     <p class="mb-0">Un administrador la revisa. Si se aprueba, quedás como Jefe del grupo.</p>

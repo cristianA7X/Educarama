@@ -1,17 +1,20 @@
 <?php
 // views/pages/evento_form.php
+//
+// Alta de un evento (?id_grupo=) o edición (?id=). El alcance se elige
+// explícito: "Todo el grupo" o "Algunas secciones" con al menos una.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
 
-use Educarama\Controller\Pagina;
 use Educarama\Controller\EventoController;
+use Educarama\Controller\Pagina;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\Prioridad;
 
 $datos = Pagina::cargar(fn () => $app->obtener(EventoController::class)->paginaFormulario($_GET));
-
 $opciones = $datos['opciones'];
 $eventoConSec = $datos['evento'];
 $esEdicion = $eventoConSec !== null;
@@ -25,10 +28,8 @@ $alcanceActual = $esEdicion
 
 $tituloPagina = $esEdicion ? 'Editar evento' : 'Nuevo evento';
 $contenedorAngosto = true;
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <div class="barra-superior-inst mb-4">
     <h1 class="h3 fw-bold mb-1"><?= $esEdicion ? 'Editar evento' : 'Nuevo evento' ?></h1>
     <p class="mb-0"><?= e(Vista::nombreCompletoGrupo($grupo->nombre)) ?></p>

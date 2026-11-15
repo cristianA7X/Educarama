@@ -1,5 +1,10 @@
 <?php
 // views/pages/perfil_seccion.php
+//
+// Perfil de una sección (?id=): conteos (protagonistas, patrullas) sin datos
+// personales (lo ve también el Supervisor), los próximos eventos y los links
+// a protagonistas, patrullas y eventos.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -9,7 +14,6 @@ use Educarama\Controller\SeccionController;
 use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => $app->obtener(SeccionController::class)->paginaPerfil($_GET));
-
 $seccion = $datos['seccion'];
 $conteos = $datos['conteos'];
 $proximos = $datos['proximos'];
@@ -17,10 +21,8 @@ $equipo = $seccion->pequenioEquipo();
 
 $tituloPagina = Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id);
 $claseRama = Vista::claseRama($seccion->rama->id);
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4">
     <h1 class="fw-bold mb-1"><?= e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) ?></h1>
     <p class="mb-0">

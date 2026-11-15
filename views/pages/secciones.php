@@ -1,5 +1,9 @@
 <?php
 // views/pages/secciones.php
+//
+// Vista general de secciones: todas las secciones a las que el usuario tiene
+// acceso, agrupadas por grupo, con las tarjetas de rama.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -9,13 +13,11 @@ use Educarama\Controller\SeccionController;
 use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => $app->obtener(SeccionController::class)->paginaSecciones());
-
 $grupos = $datos['grupos'];
-$tituloPagina = 'Secciones';
 
-require_once __DIR__ . '/../includes/cabecera.php';
+$tituloPagina = 'Secciones';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4">
     <h1 class="fw-bold mb-1">Secciones</h1>
     <p class="mb-0">Todas las secciones a las que tenés acceso.</p>

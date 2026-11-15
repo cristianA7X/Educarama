@@ -1,21 +1,25 @@
 <?php
 // views/pages/inicio.php
+//
+// Página de inicio, adonde lleva el login. Con accesos: sus grupos, con las
+// secciones a las que entra y los próximos eventos. Sin ninguno (recién
+// registrado): el estado de su solicitud de alta, para que sepa qué sigue.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
 
-use Educarama\Controller\Pagina;
 use Educarama\Controller\InicioController;
+use Educarama\Controller\Pagina;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\EstadoSolicitud;
 
 $datos = Pagina::cargar(fn () => $app->obtener(InicioController::class)->paginaInicio());
 $usuario = $datos['usuario'];
-$grupos = $datos['grupos'];
 $solicitud = $datos['solicitud'];
-$tituloPagina = 'Inicio';
 
-require_once __DIR__ . '/../includes/cabecera.php';
+$tituloPagina = 'Inicio';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
 <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
@@ -32,12 +36,14 @@ require_once __DIR__ . '/../includes/cabecera.php';
 <?php if ($datos['grupos'] === []): ?>
     <section class="tarjeta-blanca-borde p-4">
         <h2 class="h4 texto-violeta fw-bold">Todavía no tenés acceso a ningún grupo</h2>
+
         <?php if ($solicitud === null): ?>
             <p>Podés pedir el alta de tu grupo: un administrador la revisa y, si se aprueba, quedás como Jefe del grupo.</p>
             <p>Si tu grupo ya está en Educarama, pedile a su Jefe que te sume con este correo: <strong><?= e($usuario->email) ?></strong>.</p>
             <a href="<?= e(url('views/pages/solicitud_alta.php')) ?>" class="boton-primario px-4 py-2 fw-bold text-decoration-none d-inline-block">
                 Pedir el alta de un grupo
             </a>
+
         <?php elseif ($solicitud->estado === EstadoSolicitud::Pendiente): ?>
             <div class="alert alert-warning">
                 <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
@@ -45,6 +51,7 @@ require_once __DIR__ . '/../includes/cabecera.php';
                 (enviada el <?= e(Vista::fechaDeFechaHora($solicitud->fecha)) ?>) está pendiente de revisión.
             </div>
             <a href="<?= e(url('views/pages/solicitud_alta.php')) ?>" class="btn btn-outline-secondary">Ver mi solicitud</a>
+
         <?php else: ?>
             <div class="alert alert-danger">
                 <p class="fw-bold mb-1"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Tu última solicitud fue rechazada</p>
@@ -73,13 +80,16 @@ require_once __DIR__ . '/../includes/cabecera.php';
                 Resumen del grupo <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
         </div>
+
         <div class="row g-3 mb-4">
             <?php foreach ($grupoPantalla->secciones as $seccion): ?>
                 <?php
+                // El logo oficial de la rama, o el ícono de Bootstrap si la rama no tiene uno.
                 $logoRama = Vista::logoRama($seccion->rama->id);
                 $marcaRama = $logoRama !== null
                     ? '<div class="rama-icono con-logo"><img src="' . e($logoRama) . '" alt=""></div>'
                     : '<div class="rama-icono"><i class="bi ' . e(Vista::iconoRama($seccion->rama->id)) . '" aria-hidden="true"></i></div>';
+
                 $contenido = $marcaRama
                     . '<div><h3>' . e(Vista::nombreCompletoSeccion($seccion->seccion->nombre, $seccion->rama->id)) . '</h3>'
                     . '<p>' . e($seccion->rama->titulo) . ($seccion->nivel !== null ? ' · ' . e($seccion->nivel->etiqueta()) : '') . '</p></div>';
@@ -91,6 +101,7 @@ require_once __DIR__ . '/../includes/cabecera.php';
                             <?= $contenido ?>
                         </a>
                     <?php else: ?>
+                        <?php /* Solo la ve por su rol de grupo: sin acceso al detalle de la sección. */ ?>
                         <div class="rama-card <?= e(Vista::claseRama($seccion->rama->id)) ?> opacity-75">
                             <?= $contenido ?>
                         </div>
@@ -121,5 +132,4 @@ require_once __DIR__ . '/../includes/cabecera.php';
         <?php endif; ?>
     </section>
 <?php endforeach; ?>
-
 <?php require __DIR__ . '/../includes/pie.php'; ?>

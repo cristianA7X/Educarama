@@ -1,5 +1,12 @@
 <?php
 // views/pages/perfil_protagonista.php
+//
+// La página central del protagonista, con dos pestañas:
+//  - Perfil: sus datos, el resumen de su progresión (con los links a
+//    Competencias y a Etapas e insignias) y sus familiares.
+//  - Documentos: ver, descargar, subir, editar y eliminar.
+// El menú ⋮ del encabezado tiene Editar, Cambiar de sección y Eliminar, según el rol.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -10,25 +17,20 @@ use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaPerfil($_GET));
-
 $ficha = $datos['ficha'];
 $seccion = $datos['seccion'];
 $resumen = $datos['resumen'];
-
 $persona = $ficha->persona;
 $protagonista = $ficha->protagonista;
 $id = (int) $protagonista->id;
-
 $edad = Vista::edad($persona->fechaNacimiento);
 $equipo = $seccion->pequenioEquipo();
 $nombre = $persona->nombre . ' ' . $persona->apellido;
 
 $tituloPagina = $nombre;
 $claseRama = Vista::claseRama($seccion->rama->id);
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-3 d-flex justify-content-between align-items-start gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e($nombre) ?><?= $edad !== null ? ', ' . $edad . ' años' : '' ?></h1>

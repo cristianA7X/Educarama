@@ -1,5 +1,9 @@
 <?php
 // views/pages/grupo.php
+//
+// Pantalla del grupo (?id=): las secciones que ve el usuario (tarjetas con el
+// color de la rama) y los próximos eventos del grupo.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -10,16 +14,13 @@ use Educarama\Helper\Vista;
 use Educarama\Model\Enum\NivelRol;
 
 $datos = Pagina::cargar(fn () => $app->obtener(SeccionController::class)->paginaGrupo($_GET));
-
 $grupoPantalla = $datos['grupo'];
 $proximos = $datos['proximos'];
 $grupo = $grupoPantalla->grupo;
 
 $tituloPagina = Vista::nombreCompletoGrupo($grupo->nombre);
-
-require_once __DIR__ . '/../includes/cabecera.php';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4 d-flex justify-content-between align-items-start flex-wrap gap-3">
     <div>
         <h1 class="fw-bold mb-1"><?= e(Vista::nombreCompletoGrupo($grupo->nombre)) ?></h1>

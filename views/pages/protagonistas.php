@@ -14,11 +14,12 @@ use Educarama\Controller\Pagina;
 use Educarama\Controller\ProtagonistaController;
 use Educarama\Helper\Vista;
 
+$controller = $app->obtener(ProtagonistaController::class);
 $esNomina = !isset($_GET['id_seccion']);
 
 if ($esNomina) {
     // ── Modo nómina general ──
-    $datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaNomina());
+    $datos = Pagina::cargar(fn () => $controller->paginaNomina());
     $nomina = $datos['nomina'];
 
     // Valores únicos para los filtros.
@@ -234,7 +235,7 @@ if ($esNomina) {
 }
 
 // ── Modo sección (cards + nómina) ──
-$datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaListado($_GET));
+$datos = Pagina::cargar(fn () => $controller->paginaListado($_GET));
 $seccion = $datos['seccion'];
 $protagonistas = $datos['protagonistas'];
 $patrullas = $datos['patrullas'];

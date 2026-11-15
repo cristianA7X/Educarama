@@ -1,5 +1,10 @@
 <?php
 // views/pages/solicitudes.php
+//
+// Revisión de solicitudes de alta (solo admin). Muestra las solicitudes
+// pendientes de la más vieja a la más nueva, con quién las envió, qué
+// grupo y secciones pidieron, y botones para aprobar o rechazar con motivo.
+
 declare(strict_types=1);
 
 $app = require_once __DIR__ . '/../../src/main.php';
@@ -10,13 +15,11 @@ use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
 $datos = Pagina::cargar(fn () => $app->obtener(SolicitudAltaController::class)->paginaRevision());
-
 $pendientes = $datos['pendientes'];
-$tituloPagina = 'Solicitudes de alta';
 
-require_once __DIR__ . '/../includes/cabecera.php';
+$tituloPagina = 'Solicitudes de alta';
+require __DIR__ . '/../includes/cabecera.php';
 ?>
-<!-- Resto de tu HTML se mantiene igual -->
 <section class="barra-superior-inst mb-4">
     <h1 class="fw-bold mb-1">Solicitudes de alta</h1>
     <p class="mb-0">Solicitudes pendientes de revisión</p>
