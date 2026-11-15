@@ -1751,7 +1751,7 @@ Se probó por HTTP con los datos de ejemplo, como Jefe del grupo 1:
 - Todas las pantallas principales responden bien: inicio, grupo, sección, nóminas, perfil, competencias, etapas, eventos de grupo, patrullas, secciones y Mi cuenta.
 - La API responde bien: el login, el 403 sin token, el 404 de una acción inexistente y el 409 por cupo.
 
-Quedan estos problemas para corregir:
+Se encontraron estos problemas (corregidos más abajo):
 
 1. **`views/pages/accesos.php` perdió su HTML.** Quedaron los comentarios `<!-- Resto de tu HTML se mantiene igual -->` y `<!-- ... -->` en lugar de la tabla de roles y el formulario para agregar. La página pasó de 186 a 38 líneas y muestra solo el título.
 2. **`views/pages/eventos.php` perdió el modo general** (sin parámetros): quedó `<!-- ... tu HTML de modo general ... -->`. El link "Eventos" del menú muestra una página vacía. Los modos por grupo y por sección funcionan.
@@ -1765,3 +1765,28 @@ Quedan estos problemas para corregir:
    - El link activo ya no lleva `aria-current="page"`.
    - `menu.php` vuelve a pedir `MenuController` aunque la cabecera ya lo hizo, así que hay dos consultas por página.
 6. **Comentarios.** Se borraron casi todos los docblocks de `src/`, que explicaban las reglas de cada clase y método. CLAUDE.md pide código bien comentado, en castellano. Además, 13 páginas más tienen el comentario sobrante `<!-- Resto de tu HTML se mantiene igual -->` (en ellas el HTML sí está).
+### Correcciones de la revisión (15/11/2026)
+
+Los seis problemas de arriba están corregidos, en commits separados sobre `refactor/v2.1`:
+
+| Commit | Qué arregla |
+| --- | --- |
+| `9f358aa` | **Punto 3.** Se borró el bloque de depuración de `Pagina::cargar()`. Los 403 y 404 vuelven a la página de error; los 500 siguen yendo al `error_log` con archivo y línea. |
+| `47f8a3e` | **Punto 4.** `descargar.php` vuelve a pasar por `Pagina::cargar()`, pidiendo el Controller al contenedor. |
+| `7e33c54` | **Puntos 1, 2, 5 y el sobrante del 6.** Las 20 páginas, la cabecera y el menú se reconstruyeron desde `c146382`, con dos cambios: `$app = require_once` de `src/main.php` y `$app->obtener(XController::class)` en lugar de `new`. |
+| `16d0a8a` | **Punto 6, clases clave.** Se recuperaron los comentarios de los 11 Services, `ServicioBase`, `Api` y `Controlador`. Cada archivo es el de `c146382` con el constructor nuevo. |
+
+**Otros problemas que aparecieron al reconstruir.** Al comparar cada vista con su versión de `c146382` aparecieron tres cosas más:
+- **`familiar_form.php`** tenía la parte de arriba de `evento_form.php`: cargaba `EventoController`, así que el formulario de familiares no funcionaba.
+- **`login.php`** había perdido `$contenedorAngosto`, así que el formulario se estiraba a todo el ancho.
+- **`cabecera.php`** leía los mensajes Flash antes de pedir el menú, así que se perdían si el menú redirigía al login.
+
+Las tres quedaron arregladas con la reconstrucción.
+
+**Cómo se verificó.**
+- **Vistas:** se montó `c146382` en otra carpeta y se pidieron las mismas 36 páginas a las dos versiones, con 7 usuarios de ejemplo (Jefe de grupo, Responsable, Ayudante, Supervisor, Jefe de otro grupo, admin y recién registrado). Las 252 respuestas coinciden en el código HTTP y en el texto visible, y ninguna tiene errores de PHP.
+- **Pantallas arregladas, por la API:** dar, cambiar y quitar un rol, y editar un familiar.
+- **Descarga:** archivo real, sin sesión, id inexistente, archivo que falta en el disco y usuario de otra sección.
+- **Comentarios:** el código sin comentarios (`php -w`) de las 15 clases es idéntico al de antes, y los `use` coinciden.
+
+**Queda pendiente:** recuperar los comentarios de los Repositories y de los Controllers de cada tema. Se hace igual: el archivo de `c146382` con el constructor nuevo.

@@ -292,4 +292,4 @@ Hoy las dos tablas de `protagonistas.php` (nómina general `#tablaNomina` y de s
 4. ~~Controllers~~ ✅
 5. ~~Views~~ ✅ (todas las pantallas), con la alineación con la imagen de marca (T1–T7 de `docs/prompt-imagen-de-marca.md`) ✅
 6. Pruebas en el navegador y correcciones (en curso).
-7. ~~v2.1: inyección de dependencias con Composition Root (`src/main.php`)~~ ✅. Quedan los errores de la revisión del 15/11/2026: lista en `docs/explicacion-de-cambios.md` (sección "Revisión de la v2.1").
+7. ~~v2.1: inyección de dependencias con Composition Root (`src/main.php`)~~ ✅. Revisión del 15/11/2026 corregida (ver `docs/explicacion-de-cambios.md`); falta recuperar los comentarios de los Repositories y de los Controllers de cada tema.

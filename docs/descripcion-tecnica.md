@@ -326,9 +326,7 @@ El JavaScript común (`public/js/educarama.js`) resuelve esto para cualquier bot
 
 ### 6.4 Descargar un documento
 
-`public/descargar.php?id=` le pide `DocumentoController` al contenedor. El Controller pide permiso a `DocumentoService` y después le pasa el archivo a `AlmacenArchivos::enviar()`. Nunca hay un link directo al archivo: `storage/` tiene un `.htaccess` con `Require all denied`.
-
-> ⚠️ En la v2.1, `descargar.php` dejó de pasar por `Pagina::cargar()`. Sin sesión, sin permiso o con un documento inexistente, muestra un error fatal de PHP en lugar de mandar al login o a la página de error (ver la sección 12).
+`public/descargar.php?id=` pasa por `Pagina::cargar()` y le pide `DocumentoController` al contenedor. El Controller pide permiso a `DocumentoService` y después le pasa el archivo a `AlmacenArchivos::enviar()`. Sin sesión va al login; sin acceso o con un id inexistente, 404; si el archivo falta en el disco, 404 "El archivo no está disponible.". Nunca hay un link directo al archivo: `storage/` tiene un `.htaccess` con `Require all denied`.
 
 > **En pocas palabras:** las páginas solo muestran (GET); todo lo que guarda pasa por `api.php`, que controla la lista de acciones y el CSRF, y responde JSON. Lo que se puede saltear vuelve con un 409 y se repite con `confirmarIgual=1`.
 
@@ -522,7 +520,7 @@ PDF, JPG y PNG de hasta 5 MB. Al subir, primero va el archivo y después la fila
 | Llamar métodos no previstos | `api.php` acepta solo su lista fija de acciones |
 | Redirecciones abiertas | `volver` solo acepta rutas `views/pages/*.php` |
 | Archivos subidos | Tipo real con `finfo`, nombre aleatorio, `storage/` bloqueado, descarga solo por controller con permisos |
-| Filtrar información interna | Al usuario solo le llegan los mensajes de los Services; el resto es "Ocurrió un error inesperado" y el detalle va al log (⚠️ hoy lo rompe el bloque de depuración de `Pagina.php`, ver la sección 12) |
+| Filtrar información interna | Al usuario solo le llegan los mensajes de los Services; el resto es "Ocurrió un error inesperado" y el detalle va al log |
 | Enumerar datos ajenos | 404 si no tiene acceso: no se revela que el dato existe |
 | Datos sensibles en vistas | El Model `Usuario` (con el hash) nunca llega entero a una vista |
 
@@ -551,19 +549,12 @@ PDF, JPG y PNG de hasta 5 MB. Al subir, primero va el archivo y después la fila
 
 **En curso:** pruebas en el navegador y correcciones.
 
-### Problemas conocidos de la v2.1 (a corregir)
+### Revisión de la v2.1 (15/11/2026)
 
-Detectados al revisar la rama el 15/11/2026, probando por HTTP con los datos de ejemplo. La lógica de los Services, los Repositories y los Controllers no cambió (solo los constructores) y las pantallas principales funcionan. Lo que falla está en las vistas y en los puntos de entrada:
+Los errores que dejó el paso al contenedor ya están corregidos: el bloque de depuración en `Pagina.php`, la descarga sin manejo de errores, las vistas con HTML perdido (roles, eventos generales, formulario de familiar, login), el menú y los comentarios de las clases clave. El detalle está en `explicacion-de-cambios.md`.
 
-| Problema | Dónde | Efecto |
-|---|---|---|
-| Se borró el HTML de la pantalla de roles | `views/pages/accesos.php` | La página muestra solo el título: no se pueden ver, dar, cambiar ni quitar roles |
-| Se borró el HTML del modo general de eventos | `views/pages/eventos.php` (sin parámetros) | El link "Eventos" del menú muestra una página vacía |
-| Quedó activo un bloque de depuración | `src/Controller/Pagina.php` | Todo 403 y 404 muestra un recuadro con el archivo, la línea y la pila de llamadas, en lugar de la página de error. Revela rutas del disco |
-| La descarga no pasa por `Pagina::cargar()` | `public/descargar.php` | Sin sesión, sin permiso o con un id inexistente: *Fatal error* de PHP con rutas del disco, en lugar del login o de un 404 |
-| Menú más pobre | `views/includes/menu.php` | Se perdieron el link "Eventos grupales", el nombre completo del grupo ("Grupo Los Aromos") y `aria-current` en el link activo |
-| Comentarios borrados | casi todo `src/` | Se quitaron los docblocks que explicaban las reglas de cada clase; CLAUDE.md pide código bien comentado |
-| Comentarios sobrantes | otras 13 páginas de `views/pages/` | Quedó el texto `<!-- Resto de tu HTML se mantiene igual -->` (en esas páginas el HTML sí está) |
+**Queda pendiente:** recuperar los comentarios de los Repositories y de los Controllers de cada tema, que la v2.1 también borró.
+
 **Pendiente, a propósito, para más adelante:**
 - Validación con Cruz del Sur, envío de emails y recuperación de contraseña.
 - Bloqueo por intentos fallidos de login.
