@@ -1,20 +1,18 @@
-<?php
-// src/Repository/AccionCumplidaRepository.php
-
+<?php // src/Repository/AccionCumplidaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\AccionCumplida;
+use PDO;
 
-/**
- * Lectura y escritura de `accion_cumplida`: las acciones que un protagonista cumplió.
- *
- * Tabla de progresión: sin fila = pendiente. La fila la crea un educador al confirmar.
- * Sin id propio: cada fila se identifica por id_protagonista + id_accion.
- */
 final class AccionCumplidaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idAccion): ?AccionCumplida
     {
         return $this->buscarUno(
@@ -24,15 +22,8 @@ final class AccionCumplidaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Todas las acciones cumplidas por el protagonista, en el orden del catálogo
-     * (área, competencia, acción), igual que AccionRepository::listarPorRama.
-     *
-     * @return AccionCumplida[]
-     */
     public function listarPorProtagonista(int $idProtagonista): array
     {
-        // El JOIN es solo para ordenar: se devuelven únicamente las columnas de accion_cumplida.
         return $this->listar(
             'SELECT ac.*
                FROM accion_cumplida ac
@@ -45,13 +36,6 @@ final class AccionCumplidaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Las acciones cumplidas de UNA competencia. Comparándolas con
-     * AccionRepository::listarPorCompetencia, el Service sabe si las cumplió todas.
-     * (El legacy contaba las acciones de todas las competencias: este filtro corrige ese bug.)
-     *
-     * @return AccionCumplida[]
-     */
     public function listarPorProtagonistaYCompetencia(int $idProtagonista, int $idCompetencia): array
     {
         return $this->listar(
@@ -65,7 +49,6 @@ final class AccionCumplidaRepository extends RepositorioBase
         );
     }
 
-    /** Registra que el protagonista cumplió la acción, en la fecha que trae el objeto. */
     public function insertar(AccionCumplida $accionCumplida): void
     {
         $this->ejecutar(
@@ -74,7 +57,6 @@ final class AccionCumplidaRepository extends RepositorioBase
         );
     }
 
-    /** Borra la fila: la acción vuelve a quedar pendiente. */
     public function eliminar(int $idProtagonista, int $idAccion): void
     {
         $this->ejecutar(

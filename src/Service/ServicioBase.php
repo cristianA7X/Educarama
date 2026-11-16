@@ -5,7 +5,6 @@ declare(strict_types=1);
 
 namespace Educarama\Service;
 
-use Educarama\Config\Database;
 use PDO;
 use Throwable;
 
@@ -17,27 +16,27 @@ use Throwable;
  * actual) y devuelve Models, o lanza una excepción de Educarama\Service\Excepcion.
  * La única excepción es UsuarioService, que maneja la sesión (login y logout).
  *
- * Cada Service recibe sus repositorios en el constructor como parámetros
- * opcionales; si no se pasan, crea los de siempre:
+ * Cada Service recibe todas sus dependencias en el constructor, obligatorias,
+ * y las arma src/main.php (el Composition Root). Nunca hace `new` de un
+ * repositorio ni de otro Service:
  *
- *   public function __construct(?PatrullaRepository $patrullas = null, ...)
- *   {
- *       parent::__construct();
- *       $this->patrullas = $patrullas ?? new PatrullaRepository();
+ *   public function __construct(
+ *       PDO $conexion,
+ *       private readonly PatrullaRepository $patrullas,
+ *       ...
+ *   ) {
+ *       parent::__construct($conexion);
  *   }
  */
 abstract class ServicioBase
 {
-    protected PDO $conexion;
-
     /**
      * La conexión tiene que ser la misma que usan los repositorios: si no, la
-     * transacción no los abarca. Por defecto todos usan Database::getConexion().
+     * transacción no los abarca. El contenedor le da a todos el mismo PDO.
      */
-    public function __construct(?PDO $conexion = null)
-    {
-        $this->conexion = $conexion ?? Database::getConexion();
-    }
+    public function __construct(
+        protected readonly PDO $conexion
+    ) {}
 
     /**
      * Ejecuta $operacion dentro de una transacción: si termina bien hace commit,

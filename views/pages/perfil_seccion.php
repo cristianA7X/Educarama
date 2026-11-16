@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\SeccionController;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new SeccionController())->paginaPerfil($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(SeccionController::class)->paginaPerfil($_GET));
 $seccion = $datos['seccion'];
 $conteos = $datos['conteos'];
 $proximos = $datos['proximos'];

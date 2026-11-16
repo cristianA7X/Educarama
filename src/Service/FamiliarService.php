@@ -20,6 +20,7 @@ use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Excepcion\RequisitosPendientesException;
 use Educarama\Service\Vista\Aviso;
 use Educarama\Service\Vista\TipoAviso;
+use PDO;
 
 /**
  * Familiares de los protagonistas: sus datos (`persona` + `familiar`) y el
@@ -42,25 +43,15 @@ use Educarama\Service\Vista\TipoAviso;
  */
 final class FamiliarService extends ServicioBase
 {
-    private PermisoService $permisos;
-    private ProtagonistaRepository $protagonistas;
-    private PersonaRepository $personas;
-    private FamiliarRepository $familiares;
-    private EsFamiliaRepository $vinculos;
-
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?PersonaRepository $personas = null,
-        ?FamiliarRepository $familiares = null,
-        ?EsFamiliaRepository $vinculos = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly PersonaRepository $personas,
+        private readonly FamiliarRepository $familiares,
+        private readonly EsFamiliaRepository $vinculos
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->personas = $personas ?? new PersonaRepository();
-        $this->familiares = $familiares ?? new FamiliarRepository();
-        $this->vinculos = $vinculos ?? new EsFamiliaRepository();
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

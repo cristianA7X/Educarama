@@ -26,7 +26,7 @@ namespace Educarama\Helper;
  *       exit('La sesión expiró. Volvé a cargar la página e intentá de nuevo.');
  *   }
  *
- * Regla del proyecto (CLAUDE.md): todo formulario POST lo usa.
+ * Regla del proyecto: todo formulario POST lo usa.
  */
 final class Csrf
 {

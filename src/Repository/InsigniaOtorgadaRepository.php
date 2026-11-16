@@ -1,21 +1,18 @@
-<?php
-// src/Repository/InsigniaOtorgadaRepository.php
-
+<?php // src/Repository/InsigniaOtorgadaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\InsigniaOtorgada;
+use PDO;
 
-/**
- * Lectura y escritura de `insignia_otorgada`: toda insignia entregada a un
- * protagonista, incluidas las de etapa.
- *
- * Tabla de progresión: sin fila = no otorgada. La fila la crea un educador al confirmar.
- * Sin id propio: cada fila se identifica por id_protagonista + id_insignia.
- */
 final class InsigniaOtorgadaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idInsignia): ?InsigniaOtorgada
     {
         return $this->buscarUno(
@@ -25,7 +22,6 @@ final class InsigniaOtorgadaRepository extends RepositorioBase
         );
     }
 
-    /** @return InsigniaOtorgada[] En el orden en que se entregaron. */
     public function listarPorProtagonista(int $idProtagonista): array
     {
         return $this->listar(
@@ -35,7 +31,6 @@ final class InsigniaOtorgadaRepository extends RepositorioBase
         );
     }
 
-    /** Registra la entrega, en la fecha que trae el objeto. */
     public function insertar(InsigniaOtorgada $insigniaOtorgada): void
     {
         $this->ejecutar(
@@ -44,7 +39,6 @@ final class InsigniaOtorgadaRepository extends RepositorioBase
         );
     }
 
-    /** Borra la fila: la insignia vuelve a quedar como no otorgada. */
     public function eliminar(int $idProtagonista, int $idInsignia): void
     {
         $this->ejecutar(

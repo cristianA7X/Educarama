@@ -12,12 +12,13 @@ use Educarama\Repository\UsuarioRepository;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Excepcion\SesionRequeridaException;
 use Educarama\Service\Vista\UsuarioSesion;
+use PDO;
 
 /**
  * Cuentas de usuario: registro, inicio y cierre de sesión, usuario actual y
  * cambio de contraseña.
  *
- * ⚠️ Es el ÚNICO Service que toca $_SESSION (CLAUDE.md, "Sesión"). Los demás
+ * ⚠️ Es el ÚNICO Service que toca $_SESSION (reglas del proyecto, "Sesión"). Los demás
  * reciben el id del usuario como parámetro: el Controller lo saca de acá con
  * exigirSesion()->id y se lo pasa.
  *
@@ -43,12 +44,12 @@ final class UsuarioService extends ServicioBase
     /** El mismo mensaje para email inexistente y contraseña incorrecta (no revela cuál falló). */
     private const ERROR_LOGIN = 'Email o contraseña incorrectos.';
 
-    private UsuarioRepository $usuarios;
 
-    public function __construct(?UsuarioRepository $usuarios = null)
-    {
-        parent::__construct();
-        $this->usuarios = $usuarios ?? new UsuarioRepository();
+    public function __construct(
+        PDO $conexion,
+        private readonly UsuarioRepository $usuarios
+    ) {
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\PatrullaController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new PatrullaController())->paginaListado($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(PatrullaController::class)->paginaListado($_GET));
 $seccion = $datos['seccion'];
 $patrullas = $datos['patrullas'];
 $integrantes = $datos['integrantes'];

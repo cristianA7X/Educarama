@@ -1,7 +1,7 @@
 <?php
 // views/pages/gestionar_competencias.php
 //
-// Las competencias de un protagonista (CLAUDE.md, "Pantalla de competencias"):
+// Las competencias de un protagonista (reglas del proyecto, "Pantalla de competencias"):
 //  - Una pestaña por área, con TODAS las competencias de la rama (sin fila = pendiente).
 //  - El botón de cada una solo avanza: Pendiente → En proceso → Desarrollada.
 //  - ⋮ → "Corregir" activa los botones para volver atrás (Responsable en adelante).
@@ -12,14 +12,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProgresionController;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\EstadoProgresion;
 
-$datos = Pagina::cargar(fn () => (new ProgresionController())->paginaCompetencias($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProgresionController::class)->paginaCompetencias($_GET));
 $ficha = $datos['ficha'];
 $pantalla = $datos['pantalla'];
 $resumen = $pantalla->resumen;

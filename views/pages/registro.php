@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\UsuarioController;
 use Educarama\Helper\Csrf;
 
-Pagina::cargar(fn () => (new UsuarioController())->paginaRegistro());
+Pagina::cargar(fn () => $app->obtener(UsuarioController::class)->paginaRegistro());
 
 $tituloPagina = 'Crear una cuenta';
 $sinMenu = true;

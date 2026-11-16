@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\SolicitudAltaController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new SolicitudAltaController())->paginaRevision());
+$datos = Pagina::cargar(fn () => $app->obtener(SolicitudAltaController::class)->paginaRevision());
 $pendientes = $datos['pendientes'];
 
 $tituloPagina = 'Solicitudes de alta';

@@ -23,9 +23,10 @@ use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Vista\SolicitudEnPantalla;
+use PDO;
 
 /**
- * Alta de un grupo nuevo (CLAUDE.md, "Reglas de negocio"):
+ * Alta de un grupo nuevo (reglas del proyecto, "Reglas de negocio"):
  *
  *   el usuario se registra sin accesos → envía una solicitud → un admin la
  *   aprueba → se crean el grupo y sus secciones, y el usuario queda como Jefe del grupo.
@@ -48,34 +49,19 @@ final class SolicitudAltaService extends ServicioBase
     /** Lo que entra en la columna `motivo_rechazo` (TEXT, utf8mb4). No es una regla de negocio. */
     private const LARGO_MOTIVO = 16383;
 
-    private PermisoService $permisos;
-    private SolicitudAltaRepository $solicitudes;
-    private GrupoRepository $grupos;
-    private SeccionRepository $secciones;
-    private AccesoGrupoRepository $accesosGrupo;
-    private RolRepository $roles;
-    private RamaRepository $ramas;
-    private UsuarioRepository $usuarios;
 
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?SolicitudAltaRepository $solicitudes = null,
-        ?GrupoRepository $grupos = null,
-        ?SeccionRepository $secciones = null,
-        ?AccesoGrupoRepository $accesosGrupo = null,
-        ?RolRepository $roles = null,
-        ?RamaRepository $ramas = null,
-        ?UsuarioRepository $usuarios = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly SolicitudAltaRepository $solicitudes,
+        private readonly GrupoRepository $grupos,
+        private readonly SeccionRepository $secciones,
+        private readonly AccesoGrupoRepository $accesosGrupo,
+        private readonly RolRepository $roles,
+        private readonly RamaRepository $ramas,
+        private readonly UsuarioRepository $usuarios
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->solicitudes = $solicitudes ?? new SolicitudAltaRepository();
-        $this->grupos = $grupos ?? new GrupoRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->accesosGrupo = $accesosGrupo ?? new AccesoGrupoRepository();
-        $this->roles = $roles ?? new RolRepository();
-        $this->ramas = $ramas ?? new RamaRepository();
-        $this->usuarios = $usuarios ?? new UsuarioRepository();
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

@@ -13,12 +13,13 @@ use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\UsuarioRepository;
 use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
+use PDO;
 
 /**
  * Calcula qué rol tiene un usuario sobre un grupo o una sección, y corta la
  * operación si no le alcanza.
  *
- * Reglas (ver CLAUDE.md, "Reglas de negocio"):
+ * Reglas (ver reglas del proyecto, "Reglas de negocio"):
  *  - En una sección:
  *      1. El Jefe de grupo es Jefe de todas las secciones de su grupo (por
  *         derivación: no tiene filas en acceso_seccion).
@@ -36,25 +37,15 @@ use Educarama\Service\Excepcion\NoEncontradoException;
  */
 final class PermisoService extends ServicioBase
 {
-    private AccesoGrupoRepository $accesosGrupo;
-    private AccesoSeccionRepository $accesosSeccion;
-    private RolRepository $roles;
-    private SeccionRepository $secciones;
-    private UsuarioRepository $usuarios;
-
     public function __construct(
-        ?AccesoGrupoRepository $accesosGrupo = null,
-        ?AccesoSeccionRepository $accesosSeccion = null,
-        ?RolRepository $roles = null,
-        ?SeccionRepository $secciones = null,
-        ?UsuarioRepository $usuarios = null,
+        PDO $conexion,
+        private readonly AccesoGrupoRepository $accesosGrupo,
+        private readonly AccesoSeccionRepository $accesosSeccion,
+        private readonly RolRepository $roles,
+        private readonly SeccionRepository $secciones,
+        private readonly UsuarioRepository $usuarios
     ) {
-        parent::__construct();
-        $this->accesosGrupo = $accesosGrupo ?? new AccesoGrupoRepository();
-        $this->accesosSeccion = $accesosSeccion ?? new AccesoSeccionRepository();
-        $this->roles = $roles ?? new RolRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->usuarios = $usuarios ?? new UsuarioRepository();
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

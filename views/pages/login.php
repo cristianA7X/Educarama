@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\UsuarioController;
 use Educarama\Helper\Csrf;
 
-$datos = Pagina::cargar(fn () => (new UsuarioController())->paginaLogin($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(UsuarioController::class)->paginaLogin($_GET));
 
 $tituloPagina = 'Iniciar sesión';
 $sinMenu = true;

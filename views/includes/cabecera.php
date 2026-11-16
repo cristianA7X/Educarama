@@ -5,11 +5,11 @@
 // el contenedor del contenido. views/includes/pie.php lo cierra. Cada página
 // los pone alrededor de su contenido:
 //
-//   require_once __DIR__ . '/../../config/bootstrap.php';
+//   $app = require_once __DIR__ . '/../../src/main.php';   // el contenedor
 //   use Educarama\Controller\Pagina;
 //   use Educarama\Controller\XController;
 //
-//   $datos = Pagina::cargar(fn () => (new XController())->paginaY($_GET));
+//   $datos = Pagina::cargar(fn () => $app->obtener(XController::class)->paginaY($_GET));
 //
 //   $tituloPagina = 'Perfil de protagonista';             // Obligatorio
 //   $claseRama    = Vista::claseRama($idRama);             // Opcional: colores de la rama
@@ -34,7 +34,7 @@ $sinMenu = $sinMenu ?? false;
 $contenedorAngosto = $contenedorAngosto ?? false;
 
 // El menú se pide ANTES de mostrar nada: sin sesión, redirige al login.
-$datosMenu = $sinMenu ? null : Pagina::cargar(fn () => (new MenuController())->datosMenu());
+$datosMenu = $sinMenu ? null : Pagina::cargar(fn () => $app->obtener(MenuController::class)->datosMenu());
 $mensajesFlash = Flash::tomar();
 
 // Agregar la fecha del archivo a la URL hace que el navegador recargue el CSS y el JS cuando cambian.

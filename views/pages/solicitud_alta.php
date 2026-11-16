@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\SolicitudAltaController;
@@ -16,7 +16,7 @@ use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\EstadoSolicitud;
 
-$datos = Pagina::cargar(fn () => (new SolicitudAltaController())->paginaSolicitud());
+$datos = Pagina::cargar(fn () => $app->obtener(SolicitudAltaController::class)->paginaSolicitud());
 
 $tituloPagina = 'Solicitar el alta de un grupo';
 $scriptsPagina = ['public/js/solicitud_alta.js'];

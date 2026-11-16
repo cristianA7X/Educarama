@@ -8,13 +8,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProtagonistaController;
 use Educarama\Helper\Vista;
 
-$controller = new ProtagonistaController();
+$controller = $app->obtener(ProtagonistaController::class);
 $esNomina = !isset($_GET['id_seccion']);
 
 if ($esNomina) {

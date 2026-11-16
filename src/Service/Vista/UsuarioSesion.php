@@ -9,7 +9,7 @@ use Educarama\Model\Usuario;
 
 /**
  * El usuario logueado, tal como lo pueden ver las vistas: sin el hash de la
- * contraseña ni el token de recuperación (CLAUDE.md: "Usuario nunca se pasa
+ * contraseña ni el token de recuperación (reglas del proyecto: "Usuario nunca se pasa
  * entero a una vista").
  */
 final class UsuarioSesion

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\EventoController;
 use Educarama\Controller\Pagina;
@@ -14,7 +14,7 @@ use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\Prioridad;
 
-$datos = Pagina::cargar(fn () => (new EventoController())->paginaFormulario($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(EventoController::class)->paginaFormulario($_GET));
 $opciones = $datos['opciones'];
 $eventoConSec = $datos['evento'];
 $esEdicion = $eventoConSec !== null;

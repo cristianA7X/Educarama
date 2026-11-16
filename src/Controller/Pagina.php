@@ -13,11 +13,11 @@ use Educarama\Service\Excepcion\SesionRequeridaException;
  *
  * Cada página empieza así:
  *
- *   require_once __DIR__ . '/../../config/bootstrap.php';
+ *   $app = require_once __DIR__ . '/../../src/main.php';
  *   use Educarama\Controller\Pagina;
  *   use Educarama\Controller\UsuarioController;
  *
- *   $datos = Pagina::cargar(fn () => (new UsuarioController())->paginaMiCuenta($_GET));
+ *   $datos = Pagina::cargar(fn () => $app->obtener(UsuarioController::class)->paginaMiCuenta($_GET));
  *   // ... y el HTML usa $datos['usuario'], etc.
  *
  * Qué hace cargar():
@@ -55,6 +55,10 @@ final class Pagina
         } catch (SesionRequeridaException) {
             self::alLogin()->emitir();
         } catch (\Throwable $e) {
+            // Nunca se imprime el detalle de la excepción: solo el mensaje de
+            // una ServicioException llega al usuario. Los errores inesperados
+            // (500) los manda al error_log Respuesta::desdeExcepcion(), con
+            // archivo y línea, para depurar.
             $error = Respuesta::desdeExcepcion($e);
             if (headers_sent()) {
                 // Ya salió parte de la respuesta (ej. un archivo a medias): no se puede mostrar otra página.

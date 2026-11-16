@@ -9,14 +9,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProtagonistaController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new ProtagonistaController())->paginaPerfil($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProtagonistaController::class)->paginaPerfil($_GET));
 $ficha = $datos['ficha'];
 $seccion = $datos['seccion'];
 $resumen = $datos['resumen'];

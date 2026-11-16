@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\UsuarioController;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new UsuarioController())->paginaMiCuenta());
+$datos = Pagina::cargar(fn () => $app->obtener(UsuarioController::class)->paginaMiCuenta());
 $usuario = $datos['usuario'];
 $grupos = $datos['grupos'];
 

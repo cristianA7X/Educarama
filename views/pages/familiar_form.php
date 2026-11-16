@@ -8,14 +8,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\FamiliarController;
 use Educarama\Controller\Pagina;
 use Educarama\Helper\Csrf;
 use Educarama\Helper\Vista;
 
-$datos = Pagina::cargar(fn () => (new FamiliarController())->paginaFormulario($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(FamiliarController::class)->paginaFormulario($_GET));
 $seccion = $datos['seccion'];
 $prot = $datos['protagonista'];
 $ficha = $datos['familiar'];

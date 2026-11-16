@@ -17,6 +17,7 @@ use Educarama\Repository\Vista\ProtagonistaEnNomina;
 use Educarama\Service\Vista\SeccionEnPantalla;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use PDO;
 
 /**
  * Alta, edición, pase de sección y baja de protagonistas, con sus datos
@@ -37,31 +38,17 @@ use Educarama\Service\Excepcion\ReglaNegocioException;
  */
 final class ProtagonistaService extends ServicioBase
 {
-    private PermisoService $permisos;
-    private PatrullaService $patrullaService;
-    private ProtagonistaRepository $protagonistas;
-    private PersonaRepository $personas;
-    private SeccionRepository $secciones;
-    private AlmacenArchivos $almacen;
-    private SeccionService $seccionService;
-
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?PatrullaService $patrullaService = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?PersonaRepository $personas = null,
-        ?SeccionRepository $secciones = null,
-        ?AlmacenArchivos $almacen = null,
-        ?SeccionService $seccionService = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly PatrullaService $patrullaService,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly PersonaRepository $personas,
+        private readonly SeccionRepository $secciones,
+        private readonly AlmacenArchivos $almacen,
+        private readonly SeccionService $seccionService
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->patrullaService = $patrullaService ?? new PatrullaService($this->permisos);
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->personas = $personas ?? new PersonaRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->almacen = $almacen ?? new AlmacenArchivos();
-        $this->seccionService = $seccionService ?? new SeccionService($this->permisos);
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

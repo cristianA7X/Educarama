@@ -1,23 +1,19 @@
-<?php
-// src/Repository/AccesoSeccionRepository.php
-
+<?php // src/Repository/AccesoSeccionRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\AccesoSeccion;
 use Educarama\Repository\Vista\UsuarioConAcceso;
+use PDO;
 
-/**
- * Lectura y escritura de `acceso_seccion`: qué rol tiene un usuario sobre una sección.
- * No tiene id propio: cada fila se identifica por id_usuario + id_seccion.
- *
- * ⚠️ El Jefe de grupo NO tiene filas acá: es Jefe de todas las secciones de su
- * grupo por derivación, y eso lo resuelve el Service mirando acceso_grupo.
- * Por eso listarPorSeccion() no devuelve a los Jefes de grupo.
- */
 final class AccesoSeccionRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idUsuario, int $idSeccion): ?AccesoSeccion
     {
         return $this->buscarUno(
@@ -27,7 +23,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /** @return AccesoSeccion[] Las secciones a las que accede un usuario (sin las derivadas de ser Jefe de grupo). */
     public function listarPorUsuario(int $idUsuario): array
     {
         return $this->listar(
@@ -37,7 +32,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /** @return AccesoSeccion[] Los usuarios asignados a una sección (sin los Jefes de grupo). */
     public function listarPorSeccion(int $idSeccion): array
     {
         return $this->listar(
@@ -47,13 +41,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Los usuarios asignados a la sección, con nombre, email y rol, para la
-     * pantalla de gestión. Primero los de mayor rol, después por nombre.
-     * No incluye a los Jefes de grupo (no tienen filas acá).
-     *
-     * @return UsuarioConAcceso[]
-     */
     public function listarUsuariosPorSeccion(int $idSeccion): array
     {
         return $this->listar(
@@ -68,7 +55,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /** Asigna un usuario a la sección. Si ya estaba asignado, la base lanza una excepción (PK duplicada). */
     public function insertar(AccesoSeccion $acceso): void
     {
         $this->ejecutar(
@@ -77,7 +63,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /** Cambia el rol de un usuario ya asignado (lo único que puede hacer el Jefe de sección). */
     public function actualizar(AccesoSeccion $acceso): void
     {
         $this->ejecutar(
@@ -86,7 +71,6 @@ final class AccesoSeccionRepository extends RepositorioBase
         );
     }
 
-    /** Quita el acceso. */
     public function eliminar(int $idUsuario, int $idSeccion): void
     {
         $this->ejecutar(

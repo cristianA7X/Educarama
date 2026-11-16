@@ -8,3 +8,7 @@
 # Se versiona solo el .htaccess que bloquea el acceso por URL.
 /storage/*
 !/storage/.htaccess
+
+
+# Documentación interna: no va al repositorio final.
+/docs/

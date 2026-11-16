@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\SeccionController;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\NivelRol;
 
-$datos = Pagina::cargar(fn () => (new SeccionController())->paginaGrupo($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(SeccionController::class)->paginaGrupo($_GET));
 $grupoPantalla = $datos['grupo'];
 $proximos = $datos['proximos'];
 $grupo = $grupoPantalla->grupo;

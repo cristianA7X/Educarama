@@ -1,25 +1,23 @@
-<?php
-// src/Repository/SeccionRepository.php
-
+<?php // src/Repository/SeccionRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\Seccion;
+use PDO;
 
-/**
- * Lectura y escritura de `seccion`: la Manada, Unidad, etc. de un grupo concreto.
- * (En el legacy esto era la tabla `rama`.)
- * No tiene eliminar: se resuelve cuando exista la baja lógica.
- */
 final class SeccionRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscarPorId(int $id): ?Seccion
     {
         return $this->buscarUno('SELECT * FROM seccion WHERE id = ?', [$id], Seccion::class);
     }
 
-    /** @return Seccion[] Ordenadas por rama (LyL → Rovers) y nombre. */
     public function listarPorGrupo(int $idGrupo): array
     {
         return $this->listar(
@@ -29,14 +27,12 @@ final class SeccionRepository extends RepositorioBase
         );
     }
 
-    /** Guarda una sección nueva, le completa el id y lo devuelve. */
     public function insertar(Seccion $seccion): int
     {
         $seccion->id = $this->insertarFila(
             'INSERT INTO seccion (nombre, id_grupo, id_rama) VALUES (:nombre, :id_grupo, :id_rama)',
             ['nombre' => $seccion->nombre, 'id_grupo' => $seccion->idGrupo, 'id_rama' => $seccion->idRama],
         );
-
         return $seccion->id;
     }
 

@@ -1,20 +1,18 @@
-<?php
-// src/Repository/TareaEtapaCumplidaRepository.php
-
+<?php // src/Repository/TareaEtapaCumplidaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\TareaEtapaCumplida;
+use PDO;
 
-/**
- * Lectura y escritura de `tarea_etapa_cumplida`: las tareas de etapa que un protagonista cumplió.
- *
- * Tabla de progresión: sin fila = pendiente. La fila la crea un educador al confirmar.
- * Sin id propio: cada fila se identifica por id_protagonista + id_tarea_etapa.
- */
 final class TareaEtapaCumplidaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idTareaEtapa): ?TareaEtapaCumplida
     {
         return $this->buscarUno(
@@ -24,14 +22,8 @@ final class TareaEtapaCumplidaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Todas las tareas cumplidas por el protagonista, ordenadas por etapa y número.
-     *
-     * @return TareaEtapaCumplida[]
-     */
     public function listarPorProtagonista(int $idProtagonista): array
     {
-        // El JOIN es solo para ordenar: se devuelven únicamente las columnas de tarea_etapa_cumplida.
         return $this->listar(
             'SELECT tc.*
                FROM tarea_etapa_cumplida tc
@@ -43,12 +35,6 @@ final class TareaEtapaCumplidaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Las tareas cumplidas de UNA etapa. Comparándolas con
-     * TareaEtapaRepository::listarPorEtapa, el Service sabe cuáles adeuda.
-     *
-     * @return TareaEtapaCumplida[]
-     */
     public function listarPorProtagonistaYEtapa(int $idProtagonista, int $idEtapa): array
     {
         return $this->listar(
@@ -62,7 +48,6 @@ final class TareaEtapaCumplidaRepository extends RepositorioBase
         );
     }
 
-    /** Registra que el protagonista cumplió la tarea, en la fecha que trae el objeto. */
     public function insertar(TareaEtapaCumplida $tareaCumplida): void
     {
         $this->ejecutar(
@@ -71,7 +56,6 @@ final class TareaEtapaCumplidaRepository extends RepositorioBase
         );
     }
 
-    /** Borra la fila: la tarea vuelve a quedar pendiente. */
     public function eliminar(int $idProtagonista, int $idTareaEtapa): void
     {
         $this->ejecutar(

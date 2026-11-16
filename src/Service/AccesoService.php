@@ -22,11 +22,12 @@ use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
 use Educarama\Service\Vista\AccesoEnPantalla;
 use Educarama\Service\Vista\AccesosEnPantalla;
+use PDO;
 
 /**
  * Gestión de roles: quién tiene acceso a un grupo o a una sección, y con qué rol.
  *
- * Reglas (CLAUDE.md, "Accesos"):
+ * Reglas (reglas del proyecto, "Accesos"):
  *  - Se suma a alguien buscando su cuenta YA registrada por email. Si no hay
  *    cuenta, se le pide que se registre (las invitaciones por email, más adelante).
  *  - Jefe de grupo: agrega, cambia y quita accesos del grupo y de cualquier
@@ -41,31 +42,17 @@ use Educarama\Service\Vista\AccesosEnPantalla;
  */
 final class AccesoService extends ServicioBase
 {
-    private PermisoService $permisos;
-    private AccesoGrupoRepository $accesosGrupo;
-    private AccesoSeccionRepository $accesosSeccion;
-    private UsuarioRepository $usuarios;
-    private GrupoRepository $grupos;
-    private SeccionRepository $secciones;
-    private RolRepository $roles;
-
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?AccesoGrupoRepository $accesosGrupo = null,
-        ?AccesoSeccionRepository $accesosSeccion = null,
-        ?UsuarioRepository $usuarios = null,
-        ?GrupoRepository $grupos = null,
-        ?SeccionRepository $secciones = null,
-        ?RolRepository $roles = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly AccesoGrupoRepository $accesosGrupo,
+        private readonly AccesoSeccionRepository $accesosSeccion,
+        private readonly UsuarioRepository $usuarios,
+        private readonly GrupoRepository $grupos,
+        private readonly SeccionRepository $secciones,
+        private readonly RolRepository $roles
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->accesosGrupo = $accesosGrupo ?? new AccesoGrupoRepository();
-        $this->accesosSeccion = $accesosSeccion ?? new AccesoSeccionRepository();
-        $this->usuarios = $usuarios ?? new UsuarioRepository();
-        $this->grupos = $grupos ?? new GrupoRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->roles = $roles ?? new RolRepository();
+        parent::__construct($conexion);
     }
 
     // =================================================================

@@ -1,7 +1,7 @@
 <?php
 // views/pages/progresion.php
 //
-// "Etapas e insignias" de un protagonista (el submenú propio que pide CLAUDE.md):
+// "Etapas e insignias" de un protagonista (el submenú propio que piden las reglas del proyecto):
 //  - Etapas de la rama: las logradas (fecha y, en Caminantes, elemento; la
 //    última se puede quitar, solo Jefe), la en curso con sus tareas tildables y
 //    "Confirmar etapa" (con fecha y elemento), y las que vienen.
@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\Pagina;
 use Educarama\Controller\ProgresionController;
@@ -20,7 +20,7 @@ use Educarama\Helper\Vista;
 use Educarama\Model\Enum\Elemento;
 use Educarama\Model\Enum\EstadoProgresion;
 
-$datos = Pagina::cargar(fn () => (new ProgresionController())->paginaEtapas($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(ProgresionController::class)->paginaEtapas($_GET));
 $ficha = $datos['ficha'];
 $pantalla = $datos['pantalla'];
 $resumen = $pantalla->resumen;

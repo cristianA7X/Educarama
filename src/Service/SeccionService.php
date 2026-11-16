@@ -20,6 +20,7 @@ use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Vista\ConteoSeccion;
 use Educarama\Service\Vista\GrupoEnPantalla;
 use Educarama\Service\Vista\SeccionEnPantalla;
+use PDO;
 
 /**
  * Las secciones como tema propio: el encabezado de sus páginas, el perfil de
@@ -29,7 +30,7 @@ use Educarama\Service\Vista\SeccionEnPantalla;
  * Las secciones no se crean ni se renombran acá: hoy solo nacen al aprobar una
  * solicitud de alta (SolicitudAltaService).
  *
- * Permisos (CLAUDE.md, "Reglas de negocio"):
+ * Permisos (reglas del proyecto, "Reglas de negocio"):
  *  - Encabezado de una sección: cualquier acceso a ESA sección (el Jefe de
  *    grupo lo tiene por derivación). Sin acceso, 404.
  *  - Listado de un grupo: cualquier rol de grupo ve todas sus secciones (los
@@ -40,37 +41,19 @@ use Educarama\Service\Vista\SeccionEnPantalla;
  */
 final class SeccionService extends ServicioBase
 {
-    private PermisoService $permisos;
-    private SeccionRepository $secciones;
-    private GrupoRepository $grupos;
-    private RamaRepository $ramas;
-    private NomenclaturaRepository $nomenclaturas;
-    private AccesoGrupoRepository $accesosGrupo;
-    private AccesoSeccionRepository $accesosSeccion;
-    private ProtagonistaRepository $protagonistas;
-    private PatrullaRepository $patrullas;
-
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?SeccionRepository $secciones = null,
-        ?GrupoRepository $grupos = null,
-        ?RamaRepository $ramas = null,
-        ?NomenclaturaRepository $nomenclaturas = null,
-        ?AccesoGrupoRepository $accesosGrupo = null,
-        ?AccesoSeccionRepository $accesosSeccion = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?PatrullaRepository $patrullas = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly SeccionRepository $secciones,
+        private readonly GrupoRepository $grupos,
+        private readonly RamaRepository $ramas,
+        private readonly NomenclaturaRepository $nomenclaturas,
+        private readonly AccesoGrupoRepository $accesosGrupo,
+        private readonly AccesoSeccionRepository $accesosSeccion,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly PatrullaRepository $patrullas
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->grupos = $grupos ?? new GrupoRepository();
-        $this->ramas = $ramas ?? new RamaRepository();
-        $this->nomenclaturas = $nomenclaturas ?? new NomenclaturaRepository();
-        $this->accesosGrupo = $accesosGrupo ?? new AccesoGrupoRepository();
-        $this->accesosSeccion = $accesosSeccion ?? new AccesoSeccionRepository();
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->patrullas = $patrullas ?? new PatrullaRepository();
+        parent::__construct($conexion);
     }
 
     /**

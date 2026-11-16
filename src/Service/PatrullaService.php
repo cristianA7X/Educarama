@@ -14,6 +14,7 @@ use Educarama\Repository\SeccionRepository;
 use Educarama\Repository\Vista\FichaProtagonista;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use PDO;
 
 /**
  * Pequeños equipos de una sección (Seisena, Patrulla o Equipo según la rama;
@@ -32,25 +33,15 @@ use Educarama\Service\Excepcion\ReglaNegocioException;
  */
 final class PatrullaService extends ServicioBase
 {
-    private PermisoService $permisos;
-    private PatrullaRepository $patrullas;
-    private ProtagonistaRepository $protagonistas;
-    private SeccionRepository $secciones;
-    private NomenclaturaRepository $nomenclaturas;
-
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?PatrullaRepository $patrullas = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?SeccionRepository $secciones = null,
-        ?NomenclaturaRepository $nomenclaturas = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly PatrullaRepository $patrullas,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly SeccionRepository $secciones,
+        private readonly NomenclaturaRepository $nomenclaturas
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->patrullas = $patrullas ?? new PatrullaRepository();
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->nomenclaturas = $nomenclaturas ?? new NomenclaturaRepository();
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\InicioController;
 use Educarama\Controller\Pagina;
 use Educarama\Helper\Vista;
 use Educarama\Model\Enum\EstadoSolicitud;
 
-$datos = Pagina::cargar(fn () => (new InicioController())->paginaInicio());
+$datos = Pagina::cargar(fn () => $app->obtener(InicioController::class)->paginaInicio());
 $usuario = $datos['usuario'];
 $solicitud = $datos['solicitud'];
 

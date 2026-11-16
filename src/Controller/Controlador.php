@@ -26,12 +26,9 @@ use Educarama\Service\Vista\UsuarioSesion;
  */
 abstract class Controlador
 {
-    protected UsuarioService $usuarioService;
-
-    public function __construct(?UsuarioService $usuarioService = null)
-    {
-        $this->usuarioService = $usuarioService ?? new UsuarioService();
-    }
+    public function __construct(
+        protected readonly UsuarioService $usuarioService
+    ) {}
 
     /** El usuario logueado; si no hay, SesionRequeridaException (Api: 401, Pagina: al login). */
     protected function usuario(): UsuarioSesion

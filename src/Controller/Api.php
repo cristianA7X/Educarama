@@ -7,8 +7,8 @@ namespace Educarama\Controller;
 
 use Educarama\Almacen\AlmacenArchivos;
 use Educarama\Almacen\ArchivoInvalidoException;
+use Educarama\Contenedor;
 use Educarama\Helper\Csrf;
-use Educarama\Helper\Sesion;
 
 /**
  * Atiende los pedidos por fetch de public/api.php?accion=...
@@ -24,17 +24,24 @@ use Educarama\Helper\Sesion;
  *  2. Controla el método HTTP; si no coincide, 405.
  *  3. Si es POST y llegó vacío porque superó post_max_size, 413 con el mensaje de tamaño máximo.
  *  4. Si es POST, controla el token CSRF (campo csrf_token del FormData); si no sirve, 403 (Apache cambia los códigos que no conoce, como 419, por 500).
- *  4. Llama al Controller: los GET reciben ($get), los POST reciben ($post, $files).
- *  5. Traduce cualquier excepción con Respuesta::desdeExcepcion().
+ *  5. Le pide el Controller al contenedor y lo llama: los GET reciben ($get), los POST reciben ($post, $files).
+ *  6. Traduce cualquier excepción con Respuesta::desdeExcepcion().
  *
- * Todas las respuestas son JSON (ver el formato en Respuesta).
+ * Todas las respuestas son JSON (ver el formato en Respuesta). La sesión la
+ * arrancan Csrf y UsuarioService cuando la necesitan (Sesion::iniciar()).
  */
 final class Api
 {
     /**
-     * @param array<string, array{0: string, 1: class-string<Controlador>, 2: string}> $acciones
+     * @param array<string, array{0: string, 1: class-string<Controlador>, 2: string}> $acciones La lista de public/api.php.
+     * @param Contenedor      $contenedor De donde salen los Controllers, ya armados (src/main.php).
+     * @param AlmacenArchivos $almacen    Para detectar un pedido más grande que post_max_size.
      */
-    public function __construct(private readonly array $acciones) {}
+    public function __construct(
+        private readonly array $acciones,
+        private readonly Contenedor $contenedor,
+        private readonly AlmacenArchivos $almacen
+    ) {}
 
     /**
      * Arma la respuesta sin emitirla (así se puede probar por CLI).
@@ -61,7 +68,7 @@ final class Api
             // vacío: sin esto, se vería como CSRF faltante ("La sesión expiró").
             if ($metodoEsperado === 'POST' && $post === [] && $files === []) {
                 try {
-                    (new AlmacenArchivos())->verificarLimiteDelServidor();
+                    $this->almacen->verificarLimiteDelServidor();
                 } catch (ArchivoInvalidoException $e) {
                     return Respuesta::error($e->getMessage(), 413);
                 }
@@ -71,7 +78,7 @@ final class Api
                 return Respuesta::error('La sesión expiró. Volvé a cargar la página e intentá de nuevo.', 403);
             }
 
-            $controlador = new $clase();
+            $controlador = $this->contenedor->obtener($clase);
             return $metodoEsperado === 'POST'
                 ? $controlador->$metodo($post, $files)
                 : $controlador->$metodo($get);
@@ -83,7 +90,6 @@ final class Api
     /** Lo que llama public/api.php: atiende el pedido real y emite la respuesta. */
     public function ejecutar(): never
     {
-        Sesion::iniciar();
         $this->atender($_SERVER['REQUEST_METHOD'] ?? 'GET', $_GET, $_POST, $_FILES)->emitir();
     }
 }

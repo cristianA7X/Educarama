@@ -1,18 +1,18 @@
-<?php
-// src/Repository/EsFamiliaRepository.php
-
+<?php // src/Repository/EsFamiliaRepository.php
 declare(strict_types=1);
 
 namespace Educarama\Repository;
 
 use Educarama\Model\EsFamilia;
+use PDO;
 
-/**
- * Lectura y escritura de `es_familia`: el vínculo entre un protagonista y un familiar.
- * No tiene id propio: cada fila se identifica por id_protagonista + id_familiar.
- */
 final class EsFamiliaRepository extends RepositorioBase
 {
+    public function __construct(PDO $conexion)
+    {
+        parent::__construct($conexion);
+    }
+
     public function buscar(int $idProtagonista, int $idFamiliar): ?EsFamilia
     {
         return $this->buscarUno(
@@ -22,12 +22,6 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Los vínculos de un protagonista, en el mismo orden que
-     * FamiliarRepository::listarPorProtagonista (primero los contactos de emergencia).
-     *
-     * @return EsFamilia[]
-     */
     public function listarPorProtagonista(int $idProtagonista): array
     {
         return $this->listar(
@@ -39,11 +33,6 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /**
-     * Los vínculos de un familiar (por ejemplo, una madre con dos hijos en el grupo).
-     *
-     * @return EsFamilia[]
-     */
     public function listarPorFamiliar(int $idFamiliar): array
     {
         return $this->listar(
@@ -53,7 +42,6 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /** Vincula un familiar con un protagonista. Si el vínculo ya existe, la base lanza una excepción (PK duplicada). */
     public function insertar(EsFamilia $esFamilia): void
     {
         $this->ejecutar(
@@ -63,7 +51,6 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /** Cambia el vínculo o el contacto de emergencia. Los dos ids identifican la fila: no se modifican. */
     public function actualizar(EsFamilia $esFamilia): void
     {
         $this->ejecutar(
@@ -74,7 +61,6 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /** Desvincula: el protagonista y el familiar siguen existiendo. */
     public function eliminar(int $idProtagonista, int $idFamiliar): void
     {
         $this->ejecutar(
@@ -83,14 +69,13 @@ final class EsFamiliaRepository extends RepositorioBase
         );
     }
 
-    /** @return array<string, mixed> */
     private function parametros(EsFamilia $esFamilia): array
     {
         return [
             'id_protagonista'           => $esFamilia->idProtagonista,
             'id_familiar'               => $esFamilia->idFamiliar,
             'vinculo'                   => $esFamilia->vinculo,
-            'es_contacto_de_emergencia' => (int) $esFamilia->esContactoDeEmergencia,  // bool → TINYINT
+            'es_contacto_de_emergencia' => (int) $esFamilia->esContactoDeEmergencia,
         ];
     }
 }

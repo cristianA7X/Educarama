@@ -22,12 +22,13 @@ use Educarama\Service\Vista\EventoEnPantalla;
 use Educarama\Service\Vista\EventosEnPantalla;
 use Educarama\Service\Vista\EventosGenerales;
 use Educarama\Service\Vista\OpcionesEvento;
+use PDO;
 
 /**
  * Eventos de un grupo: de todo el grupo (sin filas en evento_seccion) o de
  * algunas de sus secciones.
  *
- * Reglas (CLAUDE.md, "Eventos"):
+ * Reglas (reglas del proyecto, "Eventos"):
  *  - Escribir: un evento de todo el grupo lo crea, edita, desactiva y reactiva
  *    un Responsable de grupo (o el Jefe de grupo); uno de algunas secciones,
  *    quien es Responsable en CADA una de ellas. Eliminar: lo mismo, con Jefe.
@@ -51,28 +52,17 @@ final class EventoService extends ServicioBase
     // utf8mb4. Es un límite técnico de la columna, no una regla de negocio.
     private const LARGO_DESCRIPCION = 16383;
 
-    private PermisoService $permisos;
-    private EventoRepository $eventos;
-    private EventoSeccionRepository $eventoSecciones;
-    private GrupoRepository $grupos;
-    private SeccionRepository $secciones;
-    private SeccionService $seccionService;
 
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?EventoRepository $eventos = null,
-        ?EventoSeccionRepository $eventoSecciones = null,
-        ?GrupoRepository $grupos = null,
-        ?SeccionRepository $secciones = null,
-        ?SeccionService $seccionService = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly EventoRepository $eventos,
+        private readonly EventoSeccionRepository $eventoSecciones,
+        private readonly GrupoRepository $grupos,
+        private readonly SeccionRepository $secciones,
+        private readonly SeccionService $seccionService
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->eventos = $eventos ?? new EventoRepository();
-        $this->eventoSecciones = $eventoSecciones ?? new EventoSeccionRepository();
-        $this->grupos = $grupos ?? new GrupoRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->seccionService = $seccionService ?? new SeccionService();
+        parent::__construct($conexion);
     }
 
     // -----------------------------------------------------------------

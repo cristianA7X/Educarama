@@ -15,6 +15,7 @@ use Educarama\Repository\ProtagonistaRepository;
 use Educarama\Service\Excepcion\AccesoDenegadoException;
 use Educarama\Service\Excepcion\NoEncontradoException;
 use Educarama\Service\Excepcion\ReglaNegocioException;
+use PDO;
 
 /**
  * Documentos de los protagonistas (fichas médicas, autorizaciones...).
@@ -49,22 +50,15 @@ final class DocumentoService extends ServicioBase
      */
     private const LARGO_DESCRIPCION = 16383;
 
-    private PermisoService $permisos;
-    private ProtagonistaRepository $protagonistas;
-    private DocumentoRepository $documentos;
-    private AlmacenArchivos $almacen;
 
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?DocumentoRepository $documentos = null,
-        ?AlmacenArchivos $almacen = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly DocumentoRepository $documentos,
+        private readonly AlmacenArchivos $almacen
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->documentos = $documentos ?? new DocumentoRepository();
-        $this->almacen = $almacen ?? new AlmacenArchivos();
+        parent::__construct($conexion);
     }
 
     /**

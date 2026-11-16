@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/bootstrap.php';
+$app = require_once __DIR__ . '/../../src/main.php';
 
 use Educarama\Controller\EventoController;
 use Educarama\Controller\Pagina;
@@ -19,7 +19,7 @@ use Educarama\Helper\Vista;
 
 // ─── Modo general (sin parámetros) ─────────────────────────────────────
 if (!isset($_GET['id_grupo']) && !isset($_GET['id_seccion'])) {
-    $datos = Pagina::cargar(fn () => (new EventoController())->paginaGeneral());
+    $datos = Pagina::cargar(fn () => $app->obtener(EventoController::class)->paginaGeneral());
     $generales = $datos['generales'];
     $soloGrupales = isset($_GET['grupales']);
 
@@ -165,7 +165,7 @@ if (!isset($_GET['id_grupo']) && !isset($_GET['id_seccion'])) {
 }
 
 // ─── Modo grupo / sección (con parámetros) ─────────────────────────────
-$datos = Pagina::cargar(fn () => (new EventoController())->paginaListado($_GET));
+$datos = Pagina::cargar(fn () => $app->obtener(EventoController::class)->paginaListado($_GET));
 $modo = $datos['modo'];
 $pantalla = $datos['pantalla'];
 $eventos = $pantalla->eventos;

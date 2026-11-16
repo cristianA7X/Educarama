@@ -55,12 +55,13 @@ use Educarama\Service\Vista\ResultadoProgresion;
 use Educarama\Service\Vista\ResumenProgresion;
 use Educarama\Service\Vista\TareaEnPantalla;
 use Educarama\Service\Vista\TipoAviso;
+use PDO;
 
 /**
  * Progresión personal de un protagonista: competencias, acciones, tareas de
  * etapa, etapas logradas, especialidades e insignias.
  *
- * Reglas (ver CLAUDE.md, "Progresión"):
+ * Reglas (ver reglas del proyecto, "Progresión"):
  *  - Etapa actual = la última lograda. Etapa en curso = la siguiente (o la primera).
  *  - Cada etapa tiene un cupo fijo de competencias (etapa.competencias_etapa),
  *    contado por competencia_protagonista.id_etapa.
@@ -81,72 +82,35 @@ final class ProgresionService extends ServicioBase
 {
     /**
      * Caminantes es la única rama que elige elemento al lograr una etapa
-     * (ver "Datos oficiales" en CLAUDE.md). La tabla rama no tiene una columna
+     * (ver "Datos oficiales" en las reglas del proyecto). La tabla rama no tiene una columna
      * para esto, por eso va el id.
      */
     private const ID_RAMA_CAMINANTES = 3;
 
-    private PermisoService $permisos;
-    private ProtagonistaRepository $protagonistas;
-    private SeccionRepository $secciones;
-    private RamaRepository $ramas;
-    private EtapaRepository $etapas;
-    private CompetenciaRepository $competencias;
-    private AccionRepository $acciones;
-    private TareaEtapaRepository $tareas;
-    private InsigniaRepository $insignias;
-    private EspecialidadRepository $especialidades;
-    private AreaRamaRepository $areasRama;
-    private CompetenciaProtagonistaRepository $competenciasProtagonista;
-    private AccionCumplidaRepository $accionesCumplidas;
-    private TareaEtapaCumplidaRepository $tareasCumplidas;
-    private EtapaLogradaRepository $etapasLogradas;
-    private EspecialidadProtagonistaRepository $especialidadesProtagonista;
-    private InsigniaOtorgadaRepository $insigniasOtorgadas;
-    private NomenclaturaRepository $nomenclaturas;
-    private AreaRepository $areas;
 
     public function __construct(
-        ?PermisoService $permisos = null,
-        ?ProtagonistaRepository $protagonistas = null,
-        ?SeccionRepository $secciones = null,
-        ?RamaRepository $ramas = null,
-        ?EtapaRepository $etapas = null,
-        ?CompetenciaRepository $competencias = null,
-        ?AccionRepository $acciones = null,
-        ?TareaEtapaRepository $tareas = null,
-        ?InsigniaRepository $insignias = null,
-        ?EspecialidadRepository $especialidades = null,
-        ?AreaRamaRepository $areasRama = null,
-        ?CompetenciaProtagonistaRepository $competenciasProtagonista = null,
-        ?AccionCumplidaRepository $accionesCumplidas = null,
-        ?TareaEtapaCumplidaRepository $tareasCumplidas = null,
-        ?EtapaLogradaRepository $etapasLogradas = null,
-        ?EspecialidadProtagonistaRepository $especialidadesProtagonista = null,
-        ?InsigniaOtorgadaRepository $insigniasOtorgadas = null,
-        ?NomenclaturaRepository $nomenclaturas = null,
-        ?AreaRepository $areas = null,
+        PDO $conexion,
+        private readonly PermisoService $permisos,
+        private readonly ProtagonistaRepository $protagonistas,
+        private readonly SeccionRepository $secciones,
+        private readonly RamaRepository $ramas,
+        private readonly EtapaRepository $etapas,
+        private readonly CompetenciaRepository $competencias,
+        private readonly AccionRepository $acciones,
+        private readonly TareaEtapaRepository $tareas,
+        private readonly InsigniaRepository $insignias,
+        private readonly EspecialidadRepository $especialidades,
+        private readonly AreaRamaRepository $areasRama,
+        private readonly CompetenciaProtagonistaRepository $competenciasProtagonista,
+        private readonly AccionCumplidaRepository $accionesCumplidas,
+        private readonly TareaEtapaCumplidaRepository $tareasCumplidas,
+        private readonly EtapaLogradaRepository $etapasLogradas,
+        private readonly EspecialidadProtagonistaRepository $especialidadesProtagonista,
+        private readonly InsigniaOtorgadaRepository $insigniasOtorgadas,
+        private readonly NomenclaturaRepository $nomenclaturas,
+        private readonly AreaRepository $areas
     ) {
-        parent::__construct();
-        $this->permisos = $permisos ?? new PermisoService();
-        $this->protagonistas = $protagonistas ?? new ProtagonistaRepository();
-        $this->secciones = $secciones ?? new SeccionRepository();
-        $this->ramas = $ramas ?? new RamaRepository();
-        $this->etapas = $etapas ?? new EtapaRepository();
-        $this->competencias = $competencias ?? new CompetenciaRepository();
-        $this->acciones = $acciones ?? new AccionRepository();
-        $this->tareas = $tareas ?? new TareaEtapaRepository();
-        $this->insignias = $insignias ?? new InsigniaRepository();
-        $this->especialidades = $especialidades ?? new EspecialidadRepository();
-        $this->areasRama = $areasRama ?? new AreaRamaRepository();
-        $this->competenciasProtagonista = $competenciasProtagonista ?? new CompetenciaProtagonistaRepository();
-        $this->accionesCumplidas = $accionesCumplidas ?? new AccionCumplidaRepository();
-        $this->tareasCumplidas = $tareasCumplidas ?? new TareaEtapaCumplidaRepository();
-        $this->etapasLogradas = $etapasLogradas ?? new EtapaLogradaRepository();
-        $this->especialidadesProtagonista = $especialidadesProtagonista ?? new EspecialidadProtagonistaRepository();
-        $this->insigniasOtorgadas = $insigniasOtorgadas ?? new InsigniaOtorgadaRepository();
-        $this->nomenclaturas = $nomenclaturas ?? new NomenclaturaRepository();
-        $this->areas = $areas ?? new AreaRepository();
+        parent::__construct($conexion);
     }
 
     // =================================================================
