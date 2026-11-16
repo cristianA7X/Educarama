@@ -61,7 +61,7 @@ use PDO;
  * Progresión personal de un protagonista: competencias, acciones, tareas de
  * etapa, etapas logradas, especialidades e insignias.
  *
- * Reglas (ver CLAUDE.md, "Progresión"):
+ * Reglas (ver reglas del proyecto, "Progresión"):
  *  - Etapa actual = la última lograda. Etapa en curso = la siguiente (o la primera).
  *  - Cada etapa tiene un cupo fijo de competencias (etapa.competencias_etapa),
  *    contado por competencia_protagonista.id_etapa.
@@ -82,7 +82,7 @@ final class ProgresionService extends ServicioBase
 {
     /**
      * Caminantes es la única rama que elige elemento al lograr una etapa
-     * (ver "Datos oficiales" en CLAUDE.md). La tabla rama no tiene una columna
+     * (ver "Datos oficiales" en las reglas del proyecto). La tabla rama no tiene una columna
      * para esto, por eso va el id.
      */
     private const ID_RAMA_CAMINANTES = 3;

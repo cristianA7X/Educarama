@@ -2,7 +2,7 @@
 -- EDUCARAMA — Esquema v2
 -- database/educarama.sql
 --
--- Reglas y datos oficiales: CLAUDE.md (raíz del proyecto).
+-- Reglas y datos oficiales: documentación del proyecto.
 -- Contiene: estructura completa + datos de las tablas estáticas chicas.
 -- Las tablas `competencia` y `accion` se cargan aparte con
 -- database/seeds/catalogo_competencias.sql (generado desde la planilla del

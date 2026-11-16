@@ -18,7 +18,7 @@ use PDO;
  * Cuentas de usuario: registro, inicio y cierre de sesión, usuario actual y
  * cambio de contraseña.
  *
- * ⚠️ Es el ÚNICO Service que toca $_SESSION (CLAUDE.md, "Sesión"). Los demás
+ * ⚠️ Es el ÚNICO Service que toca $_SESSION (reglas del proyecto, "Sesión"). Los demás
  * reciben el id del usuario como parámetro: el Controller lo saca de acá con
  * exigirSesion()->id y se lo pasa.
  *

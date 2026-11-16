@@ -27,7 +27,7 @@ use PDO;
 /**
  * Gestión de roles: quién tiene acceso a un grupo o a una sección, y con qué rol.
  *
- * Reglas (CLAUDE.md, "Accesos"):
+ * Reglas (reglas del proyecto, "Accesos"):
  *  - Se suma a alguien buscando su cuenta YA registrada por email. Si no hay
  *    cuenta, se le pide que se registre (las invitaciones por email, más adelante).
  *  - Jefe de grupo: agrega, cambia y quita accesos del grupo y de cualquier

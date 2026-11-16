@@ -9,5 +9,6 @@
 /storage/*
 !/storage/.htaccess
 
-# Instrucciones locales para Claude Code: no van al repositorio.
-/CLAUDE.md
+
+# Documentación interna: no va al repositorio final.
+/docs/

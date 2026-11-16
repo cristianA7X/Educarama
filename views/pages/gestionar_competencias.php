@@ -1,7 +1,7 @@
 <?php
 // views/pages/gestionar_competencias.php
 //
-// Las competencias de un protagonista (CLAUDE.md, "Pantalla de competencias"):
+// Las competencias de un protagonista (reglas del proyecto, "Pantalla de competencias"):
 //  - Una pestaña por área, con TODAS las competencias de la rama (sin fila = pendiente).
 //  - El botón de cada una solo avanza: Pendiente → En proceso → Desarrollada.
 //  - ⋮ → "Corregir" activa los botones para volver atrás (Responsable en adelante).

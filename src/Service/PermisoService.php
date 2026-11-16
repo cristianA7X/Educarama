@@ -19,7 +19,7 @@ use PDO;
  * Calcula qué rol tiene un usuario sobre un grupo o una sección, y corta la
  * operación si no le alcanza.
  *
- * Reglas (ver CLAUDE.md, "Reglas de negocio"):
+ * Reglas (ver reglas del proyecto, "Reglas de negocio"):
  *  - En una sección:
  *      1. El Jefe de grupo es Jefe de todas las secciones de su grupo (por
  *         derivación: no tiene filas en acceso_seccion).

@@ -7,7 +7,7 @@ namespace Educarama\Service\Vista;
 
 /**
  * Todo lo que necesita la pantalla de competencias de un protagonista
- * (CLAUDE.md, "Pantalla de competencias del protagonista"). La arma
+ * (reglas del proyecto, "Pantalla de competencias del protagonista"). La arma
  * ProgresionService::pantallaCompetencias().
  */
 final class PantallaCompetencias

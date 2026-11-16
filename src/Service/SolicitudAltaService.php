@@ -26,7 +26,7 @@ use Educarama\Service\Vista\SolicitudEnPantalla;
 use PDO;
 
 /**
- * Alta de un grupo nuevo (CLAUDE.md, "Reglas de negocio"):
+ * Alta de un grupo nuevo (reglas del proyecto, "Reglas de negocio"):
  *
  *   el usuario se registra sin accesos → envía una solicitud → un admin la
  *   aprueba → se crean el grupo y sus secciones, y el usuario queda como Jefe del grupo.

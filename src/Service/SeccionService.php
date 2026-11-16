@@ -30,7 +30,7 @@ use PDO;
  * Las secciones no se crean ni se renombran acá: hoy solo nacen al aprobar una
  * solicitud de alta (SolicitudAltaService).
  *
- * Permisos (CLAUDE.md, "Reglas de negocio"):
+ * Permisos (reglas del proyecto, "Reglas de negocio"):
  *  - Encabezado de una sección: cualquier acceso a ESA sección (el Jefe de
  *    grupo lo tiene por derivación). Sin acceso, 404.
  *  - Listado de un grupo: cualquier rol de grupo ve todas sus secciones (los

@@ -28,7 +28,7 @@ use PDO;
  * Eventos de un grupo: de todo el grupo (sin filas en evento_seccion) o de
  * algunas de sus secciones.
  *
- * Reglas (CLAUDE.md, "Eventos"):
+ * Reglas (reglas del proyecto, "Eventos"):
  *  - Escribir: un evento de todo el grupo lo crea, edita, desactiva y reactiva
  *    un Responsable de grupo (o el Jefe de grupo); uno de algunas secciones,
  *    quien es Responsable en CADA una de ellas. Eliminar: lo mismo, con Jefe.

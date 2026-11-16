@@ -1,7 +1,7 @@
 <?php
 // views/pages/progresion.php
 //
-// "Etapas e insignias" de un protagonista (el submenú propio que pide CLAUDE.md):
+// "Etapas e insignias" de un protagonista (el submenú propio que piden las reglas del proyecto):
 //  - Etapas de la rama: las logradas (fecha y, en Caminantes, elemento; la
 //    última se puede quitar, solo Jefe), la en curso con sus tareas tildables y
 //    "Confirmar etapa" (con fecha y elemento), y las que vienen.
