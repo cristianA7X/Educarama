@@ -1,49 +1,66 @@
-Documentación para el Desarrollo Mobile (React Native)
-Proyecto: Educarama Mobile
-Backend: PHP (API RESTful)
-Entorno actual: Localhost / Servidor Web
+# Documentación para el Desarrollo Mobile (React Native)
 
-1. Introducción
+**Proyecto:** Educarama Mobile
+**Backend:** PHP (API RESTful)
+**Entorno actual:** Localhost / Servidor Web
+
+---
+
+## 1. Introducción
+
 El backend de Educarama ha sido adaptado para funcionar como una API dual. Esto significa que el mismo backend atiende:
 
-A la versión Web (usando cookies/sesiones tradicionales de PHP).
+- A la versión Web (usando cookies/sesiones tradicionales de PHP).
+- A la App Mobile en React Native (usando tokens JWT - JSON Web Tokens).
 
-A la App Mobile en React Native (usando tokens JWT - JSON Web Tokens).
+El punto de entrada único para todas las peticiones desde la app móvil es:
 
-El punto de entrada único para todas las peticiones desde la app móvil es:[URL_DEL_SERVIDOR]/public/api.php?accion=[NOMBRE_DE_LA_ACCION]
+```
+[URL_DEL_SERVIDOR]/public/api.php?accion=[NOMBRE_DE_LA_ACCION]
+```
 
-2. Autenticación (Login)
+---
+
+## 2. Autenticación (Login)
+
 Para iniciar sesión desde la app móvil, no se usan cookies.
 
-Endpoint: POST /public/api.php?accion=usuario.iniciarSesion
+**Endpoint:** `POST /public/api.php?accion=usuario.iniciarSesion`
 
-Body (FormData o JSON según configuración de tu fetch):
+**Body** (FormData o JSON según configuración de tu fetch):
 
-email: (string)
+- `email`: (string)
+- `contrasenia`: (string)
 
-contrasenia: (string)
+**Respuesta exitosa (HTTP 200):** el backend devolverá un JSON con la propiedad `token` dentro de `datos`. Este token debe guardarse en el dispositivo (ej. usando `AsyncStorage` o `SecureStore`).
 
-Respuesta Exitosa (HTTP 200):
-El backend devolverá un JSON con la propiedad token dentro de datos. Este token debe guardarse en el dispositivo (ej. usando AsyncStorage o SecureStore).
-
-JSON
+```json
 {
   "ok": true,
   "datos": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   },
-  "redireccion": "/Educarama/views/pages/inicio.php" 
+  "redireccion": "/Educarama/views/pages/inicio.php"
 }
-(Nota: la app mobile puede ignorar la propiedad redireccion y simplemente navegar al Home de la app).
+```
 
-3. Peticiones Autenticadas (Cualquier otro endpoint)
-Para cualquier acción que requiera que el usuario esté logueado (ej: listar protagonistas, ver un perfil, cargar una acción de progresión), es obligatorio enviar el token JWT en las cabeceras de la petición (Headers).
+> **Nota:** la app mobile puede ignorar la propiedad `redireccion` y simplemente navegar al Home de la app.
 
-Cabecera requerida:Authorization: Bearer [TU_TOKEN_GUARDADO]
+---
 
-Ejemplo de llamada Fetch en React Native:
+## 3. Peticiones Autenticadas (Cualquier otro endpoint)
 
-JavaScript
+Para cualquier acción que requiera que el usuario esté logueado (ej: listar protagonistas, ver un perfil, cargar una acción de progresión), es obligatorio enviar el token JWT en las cabeceras (Headers) de la petición.
+
+**Cabecera requerida:**
+
+```
+Authorization: Bearer [TU_TOKEN_GUARDADO]
+```
+
+**Ejemplo de llamada Fetch en React Native:**
+
+```javascript
 const token = await AsyncStorage.getItem('userToken');
 
 fetch('https://tu-servidor.com/public/api.php?accion=protagonista.guardar', {
@@ -57,25 +74,31 @@ fetch('https://tu-servidor.com/public/api.php?accion=protagonista.guardar', {
     // ... tus datos ...
   })
 })
-4. Manejo de Errores Comunes
+```
+
+---
+
+## 4. Manejo de Errores Comunes
+
 La API está estandarizada para devolver JSON y códigos HTTP específicos. Tu app debe manejar estas respuestas:
 
-HTTP 200 (OK): Todo salió bien. Revisa response.json().ok (será true).
+- **HTTP 200 (OK):** todo salió bien. Revisa `response.json().ok` (será `true`).
+- **HTTP 401 (No Autorizado) o 403 (Prohibido):** el token no fue enviado, expiró o es inválido. **Acción en la app:** borrar el token local y redirigir al usuario a la pantalla de Login.
+- **HTTP 422 (Unprocessable Entity / Regla de Negocio):** ocurrió un error esperado (ej. "Contraseña incorrecta", "Faltan datos"). El mensaje de error estará en la propiedad `mensaje` del JSON de respuesta. **Acción en la app:** mostrar ese mensaje al usuario en un Alert o Toast.
+- **HTTP 500 (Error de Servidor):** algo falló en el backend.
 
-HTTP 401 (No Autorizado) o 403 (Prohibido): El token no fue enviado, expiró o es inválido. Acción en la app: Borrar el token local y redirigir al usuario a la pantalla de Login.
+**Ejemplo de respuesta de error (ej. HTTP 422):**
 
-HTTP 422 (Unprocessable Entity / Regla de Negocio): Ocurrió un error esperado (ej. "Contraseña incorrecta", "Faltan datos"). El mensaje de error estará en la propiedad mensaje del JSON de respuesta. Acción en la app: Mostrar ese mensaje al usuario en un Alert o Toast.
-
-HTTP 500 (Error de Servidor): Algo falló en el backend.
-
-Ejemplo de respuesta de Error (ej. HTTP 422):
-
-JSON
+```json
 {
   "ok": false,
   "mensaje": "El DNI ingresado ya existe en el sistema."
 }
-5. Notas sobre CORS y CSRF
-CORS: Ya está habilitado en el backend (Access-Control-Allow-Origin: *). No deberías tener problemas de políticas cruzadas en Expo/React Native.
+```
 
-CSRF (Tokens de Seguridad): El sistema exige un campo csrf_token para la web, pero está configurado para ignorarlo automáticamente si detecta un JWT válido en las cabeceras. No es necesario que la app mobile gestione o envíe tokens CSRF, solo el JWT.
+---
+
+## 5. Notas sobre CORS y CSRF
+
+- **CORS:** ya está habilitado en el backend (`Access-Control-Allow-Origin: *`). No deberías tener problemas de políticas cruzadas en Expo/React Native.
+- **CSRF (Tokens de Seguridad):** el sistema exige un campo `csrf_token` para la web, pero está configurado para ignorarlo automáticamente si detecta un JWT válido en las cabeceras. No es necesario que la app mobile gestione o envíe tokens CSRF, solo el JWT.
