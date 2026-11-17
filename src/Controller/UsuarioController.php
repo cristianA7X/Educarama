@@ -52,10 +52,16 @@ final class UsuarioController extends Controlador
 
     public function iniciarSesion(array $post): Respuesta
     {
-        $this->usuarioService->iniciarSesion(self::texto($post, 'email'), self::texto($post, 'contrasenia'));
+        // 1. Ahora iniciarSesion devuelve un array con [usuario, token]
+        $resultado = $this->usuarioService->iniciarSesion(self::texto($post, 'email'), self::texto($post, 'contrasenia'));
 
         $volver = self::rutaInterna(self::texto($post, 'volver'));
-        return Respuesta::exito(redireccion: url($volver ?? self::INICIO));
+        
+        // 2. Devolvemos el Token en los datos de Respuesta::exito para que la App Mobile lo tome.
+        return Respuesta::exito(
+            datos: ['token' => $resultado['token']], 
+            redireccion: url($volver ?? self::INICIO)
+        );
     }
 
     public function registrar(array $post): Respuesta
